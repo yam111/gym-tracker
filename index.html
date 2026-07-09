@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>推拉腿訓練日誌</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #2e2e2e;
+    --accent: #e8ff47;
+    --accent2: #47b8ff;
+    --accent3: #ff6b6b;
+    --text: #f0f0f0;
+    --text2: #999;
+    --radius: 12px;
+    --push: #ff8c42;
+    --pull: #47b8ff;
+    --legs: #b47eff;
+    --rest: #555;
+    --deload: #ffcc44;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, 'Helvetica Neue', sans-serif; font-size: 16px; min-height: 100vh; }
+
+  /* NAV */
+  .nav { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+  .nav-btn { flex: 1; padding: 14px 4px 12px; text-align: center; font-size: 10px; color: var(--text2); border: none; background: none; cursor: pointer; transition: color 0.2s; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .nav-btn .icon { font-size: 19px; }
+  .nav-btn.active { color: var(--accent); }
+
+  /* PAGES */
+  .page { display: none; padding: 16px; max-width: 480px; margin: 0 auto; padding-bottom: 32px; }
+  .page.active { display: block; }
+  .page-title { font-size: 22px; font-weight: 700; margin-bottom: 16px; }
+
+  /* TODAY BANNER */
+  .today-banner { border-radius: var(--radius); padding: 16px; margin-bottom: 20px; border: 1.5px solid; }
+  .today-banner.push { border-color: var(--push); background: rgba(255,140,66,0.08); }
+  .today-banner.pull { border-color: var(--pull); background: rgba(71,184,255,0.08); }
+  .today-banner.legs { border-color: var(--legs); background: rgba(180,126,255,0.08); }
+  .today-banner.rest { border-color: var(--rest); background: rgba(85,85,85,0.08); }
+  .today-banner.deload { border-color: var(--deload); background: rgba(255,204,68,0.08); }
+  .banner-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text2); margin-bottom: 4px; }
+  .banner-title { font-size: 20px; font-weight: 700; }
+  .banner-sub { font-size: 13px; color: var(--text2); margin-top: 6px; }
+  .banner-week { font-size: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); color: var(--text2); }
+  .banner-week strong { color: var(--text); }
+
+  /* DAY SELECTOR */
+  .day-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .day-tab { flex: 1; padding: 10px 4px; text-align: center; border-radius: var(--radius); border: 1.5px solid var(--border); background: var(--surface); color: var(--text2); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .day-tab[data-day="1"].active { border-color: var(--push); color: var(--push); background: rgba(255,140,66,0.1); }
+  .day-tab[data-day="2"].active { border-color: var(--pull); color: var(--pull); background: rgba(71,184,255,0.1); }
+  .day-tab[data-day="3"].active { border-color: var(--legs); color: var(--legs); background: rgba(180,126,255,0.1); }
+
+  /* DATE PICKER */
+  .date-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .date-row label { font-size: 13px; color: var(--text2); white-space: nowrap; }
+  .date-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 8px 12px; font-size: 15px; }
+
+  /* EXERCISE BLOCK */
+  .exercise-block { background: var(--surface); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; border: 1px solid var(--border); }
+  .exercise-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .exercise-name { font-size: 15px; font-weight: 600; }
+  .add-set-btn { background: none; border: 1px solid var(--border); color: var(--text2); border-radius: 8px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
+  .add-set-btn:active { background: var(--surface2); }
+
+  /* SET ROW */
+  .set-row { display: grid; grid-template-columns: 28px 1fr 1fr 1fr 28px; gap: 6px; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .set-row:last-child { border-bottom: none; }
+  .set-num { font-size: 12px; color: var(--text2); text-align: center; }
+  .set-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 8px 6px; font-size: 15px; text-align: center; width: 100%; -moz-appearance: textfield; }
+  .set-input::-webkit-outer-spin-button, .set-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .set-input:focus { outline: none; border-color: var(--accent2); }
+  .set-input.rpe-input { font-size: 13px; }
+  .col-headers { display: grid; grid-template-columns: 28px 1fr 1fr 1fr 28px; gap: 6px; padding: 4px 10px 0; }
+  .col-headers span { font-size: 10px; color: var(--text2); text-align: center; }
+  .delete-set-btn { background: none; border: none; color: #555; font-size: 16px; cursor: pointer; text-align: center; padding: 4px; }
+  .delete-set-btn:active { color: var(--accent3); }
+  .prev-hint { font-size: 11px; color: var(--text2); padding: 6px 14px 8px; }
+  .prev-hint strong { color: var(--accent2); }
+
+  /* SAVE BUTTON */
+  .save-btn { width: 100%; padding: 16px; background: var(--accent); color: #000; font-size: 16px; font-weight: 700; border: none; border-radius: var(--radius); cursor: pointer; margin-top: 8px; }
+  .save-btn:active { opacity: 0.85; }
+  .section-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; margin-top: 16px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .notes-area { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); padding: 12px; font-size: 14px; resize: none; min-height: 80px; margin-top: 4px; }
+  .notes-area:focus { outline: none; border-color: var(--accent2); }
+
+  /* HISTORY PAGE */
+  .history-filter { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text2); font-size: 13px; cursor: pointer; }
+  .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(232,255,71,0.08); }
+  .history-card { background: var(--surface); border-radius: var(--radius); margin-bottom: 12px; border: 1px solid var(--border); overflow: hidden; }
+  .history-card-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; }
+  .history-date { font-size: 14px; font-weight: 700; }
+  .history-day-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .badge-push { background: rgba(255,140,66,0.2); color: var(--push); }
+  .badge-pull { background: rgba(71,184,255,0.2); color: var(--pull); }
+  .badge-legs { background: rgba(180,126,255,0.2); color: var(--legs); }
+  .history-exercise { padding: 8px 14px; border-top: 1px solid var(--border); }
+  .history-exercise-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .history-sets { display: flex; flex-wrap: wrap; gap: 6px; }
+  .history-set-chip { background: var(--surface2); border-radius: 6px; padding: 3px 8px; font-size: 12px; color: var(--text2); }
+  .history-set-chip strong { color: var(--text); }
+  .delete-session-btn { background: none; border: none; color: #444; font-size: 18px; cursor: pointer; padding: 4px; }
+  .delete-session-btn:active { color: var(--accent3); }
+  .empty-state { text-align: center; color: var(--text2); padding: 60px 20px; font-size: 15px; }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* STATS PAGE */
+  .stats-exercise-select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); padding: 10px 14px; font-size: 15px; margin-bottom: 20px; }
+  .stats-card { background: var(--surface); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); }
+  .stats-card-title { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .stats-big { font-size: 32px; font-weight: 700; color: var(--accent); }
+  .stats-sub { font-size: 13px; color: var(--text2); margin-top: 4px; }
+  .stats-row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .stats-row .stats-card { flex: 1; margin-bottom: 0; }
+  .chart-wrap { background: var(--surface); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); }
+  .chart-title { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 80px; }
+  .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+  .chart-bar { width: 100%; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 2px; transition: height 0.3s; }
+  .chart-bar-label { font-size: 9px; color: var(--text2); }
+  .chart-bar-val { font-size: 9px; color: var(--accent); font-weight: 600; }
+
+  /* PLAN PAGE */
+  .plan-setup { background: var(--surface); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; border: 1px solid var(--border); }
+  .plan-setup-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+  .plan-setup label { font-size: 13px; color: var(--text2); display: block; margin-bottom: 6px; }
+  .plan-setup input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 10px 12px; font-size: 15px; margin-bottom: 12px; }
+  .plan-setup-btn { width: 100%; padding: 12px; background: var(--surface2); color: var(--text); font-size: 14px; font-weight: 600; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; }
+  .plan-setup-btn:active { background: var(--border); }
+
+  .phase-block { background: var(--surface); border-radius: var(--radius); margin-bottom: 10px; border: 1px solid var(--border); overflow: hidden; }
+  .phase-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; cursor: pointer; }
+  .phase-label { font-size: 13px; font-weight: 700; }
+  .phase-weeks { font-size: 12px; color: var(--text2); }
+  .phase-tag { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .tag-adapt { background: rgba(71,184,255,0.15); color: var(--accent2); }
+  .tag-build { background: rgba(232,255,71,0.15); color: var(--accent); }
+  .tag-deload { background: rgba(255,204,68,0.2); color: var(--deload); }
+  .tag-peak { background: rgba(255,107,107,0.2); color: var(--accent3); }
+  .tag-test { background: rgba(180,126,255,0.2); color: var(--legs); }
+
+  .phase-detail { display: none; padding: 0 14px 14px; border-top: 1px solid var(--border); }
+  .phase-detail.open { display: block; }
+  .phase-detail ul { margin-top: 10px; padding-left: 16px; }
+  .phase-detail li { font-size: 13px; color: var(--text2); margin-bottom: 4px; line-height: 1.5; }
+  .phase-detail li strong { color: var(--text); }
+
+  .week-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .week-row:last-child { border-bottom: none; }
+  .week-num { font-size: 12px; color: var(--text2); width: 48px; flex-shrink: 0; }
+  .week-dates { font-size: 12px; color: var(--text2); flex: 1; }
+  .week-tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px; }
+
+  .week-schedule { display: flex; gap: 3px; margin-top: 6px; flex-wrap: wrap; }
+  .day-chip { font-size: 10px; padding: 2px 6px; border-radius: 6px; font-weight: 600; }
+  .chip-push { background: rgba(255,140,66,0.2); color: var(--push); }
+  .chip-pull { background: rgba(71,184,255,0.2); color: var(--pull); }
+  .chip-legs { background: rgba(180,126,255,0.2); color: var(--legs); }
+  .chip-rest { background: rgba(85,85,85,0.15); color: var(--rest); }
+  .chip-deload { background: rgba(255,204,68,0.15); color: var(--deload); }
+
+  .progress-bar-wrap { background: var(--surface2); border-radius: 4px; height: 6px; margin: 12px 0; overflow: hidden; }
+  .progress-bar { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.5s; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e1e1e; border: 1px solid var(--accent); color: var(--accent); padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 600; z-index: 999; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); pointer-events: none; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: flex-end; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; padding: 24px 20px 40px; }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+  .modal-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); padding: 12px 14px; font-size: 16px; margin-bottom: 12px; }
+  .modal-input:focus { outline: none; border-color: var(--accent2); }
+  .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
+  .modal-btn { flex: 1; padding: 14px; border-radius: var(--radius); border: none; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .modal-btn.confirm { background: var(--accent); color: #000; }
+  .modal-btn.cancel { background: var(--surface2); color: var(--text2); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('record')" id="nav-record">
+    <span class="icon">✏️</span>記錄
+  </button>
+  <button class="nav-btn" onclick="showPage('history')" id="nav-history">
+    <span class="icon">📋</span>歷史
+  </button>
+  <button class="nav-btn" onclick="showPage('stats')" id="nav-stats">
+    <span class="icon">📊</span>統計
+  </button>
+  <button class="nav-btn" onclick="showPage('plan')" id="nav-plan">
+    <span class="icon">🗓</span>計畫
+  </button>
+</nav>
+
+<!-- ========== RECORD PAGE ========== -->
+<div class="page active" id="page-record">
+  <div class="page-title">記錄訓練</div>
+  <div id="today-banner"></div>
+
+  <div class="day-tabs">
+    <div class="day-tab active" data-day="1" onclick="selectDay(1)">Day 1<br><small style="font-size:10px;font-weight:400">推</small></div>
+    <div class="day-tab" data-day="2" onclick="selectDay(2)">Day 2<br><small style="font-size:10px;font-weight:400">拉</small></div>
+    <div class="day-tab" data-day="3" onclick="selectDay(3)">Day 3<br><small style="font-size:10px;font-weight:400">腿</small></div>
+  </div>
+
+  <div class="date-row">
+    <label>日期</label>
+    <input type="date" class="date-input" id="session-date">
+  </div>
+
+  <div id="exercises-container"></div>
+
+  <div class="section-label">備註</div>
+  <textarea class="notes-area" id="session-notes" placeholder="今天感覺、特別狀況..."></textarea>
+  <button class="save-btn" onclick="saveSession()">💾 儲存本次訓練</button>
+</div>
+
+<!-- ========== HISTORY PAGE ========== -->
+<div class="page" id="page-history">
+  <div class="page-title">訓練歷史</div>
+  <div class="history-filter">
+    <button class="filter-btn active" onclick="filterHistory('all', this)">全部</button>
+    <button class="filter-btn" onclick="filterHistory('1', this)">推</button>
+    <button class="filter-btn" onclick="filterHistory('2', this)">拉</button>
+    <button class="filter-btn" onclick="filterHistory('3', this)">腿</button>
+  </div>
+  <div id="history-list"></div>
+</div>
+
+<!-- ========== STATS PAGE ========== -->
+<div class="page" id="page-stats">
+  <div class="page-title">進步追蹤</div>
+  <select class="stats-exercise-select" id="stats-exercise-select" onchange="renderStats()"></select>
+  <div id="stats-content"></div>
+</div>
+
+<!-- ========== PLAN PAGE ========== -->
+<div class="page" id="page-plan">
+  <div class="page-title">1年訓練計畫</div>
+  <div id="plan-setup-area"></div>
+  <div id="plan-content"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ADD EXERCISE MODAL -->
+<div class="modal-overlay" id="add-exercise-modal">
+  <div class="modal">
+    <div class="modal-title">新增動作</div>
+    <input class="modal-input" id="new-exercise-name" placeholder="動作名稱（如：臥推）">
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeAddExerciseModal()">取消</button>
+      <button class="modal-btn confirm" onclick="confirmAddExercise()">新增</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA LAYER
+// ============================================================
+const STORAGE_KEY = 'gym_tracker_v1';
+const TEMPLATE_KEY = 'gym_tracker_templates_v1';
+const PLAN_START_KEY = 'gym_tracker_plan_start';
+
+// 7-day cycle: Mon=推, Tue=拉, Wed=腿, Thu=休, Fri=推, Sat=拉, Sun=腿
+// Index 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
+const WEEK_CYCLE = [
+  { type: 'push', label: 'Day1 推', color: 'push' },
+  { type: 'pull', label: 'Day2 拉', color: 'pull' },
+  { type: 'legs', label: 'Day3 腿', color: 'legs' },
+  { type: 'rest', label: '休息日',  color: 'rest' },
+  { type: 'push', label: 'Day1 推', color: 'push' },
+  { type: 'pull', label: 'Day2 拉', color: 'pull' },
+  { type: 'legs', label: 'Day3 腿', color: 'legs' },
+];
+
+const DAY_NAMES = { 1: '推', 2: '拉', 3: '腿' };
+const DAY_BADGES = { 1: 'badge-push', 2: 'badge-pull', 3: 'badge-legs' };
+
+// 1-YEAR PLAN PHASES (52 weeks)
+const YEAR_PLAN = [
+  // === BLOCK 1: Foundation (Weeks 1-8) ===
+  { weeks: [1,2,3,4],    phase: 'adapt',  name: '適應期',   tag: 'tag-adapt',
+    sets: '3組', rpe: '≤ 8', note: '熟悉動作，不追重量，每組留1-2下餘裕', detail: [
+      '所有主項目維持現有重量',
+      '目標：全組都能在 RPE ≤ 8 完成',
+      '若某動作已連續2週 RPE ≤ 7，下週可嘗試加重',
+      '注意動作模式，不要有代償',
+    ]},
+  { weeks: [5,6,7,8],    phase: 'build',  name: '增量期 I',  tag: 'tag-build',
+    sets: '3-4組', rpe: '8-9', note: '每週進步動作加重 2.5kg 或加次數', detail: [
+      '主項目（臥推、滑輪下拉、腿推）優先加重',
+      '輔助動作（側平舉、彎舉）先把次數做滿再加重',
+      '若掉組超過2下，維持重量不進階',
+      '每週記錄最重一組，追蹤進步',
+    ]},
+  { weeks: [9],          phase: 'deload', name: '減量週 #1', tag: 'tag-deload',
+    sets: '2組', rpe: '6-7', note: '重量降20%，每動作只做2組，充分恢復', detail: [
+      '所有動作重量降 20%',
+      '每個動作只做 2 組，不追次數',
+      '不要覺得「浪費」——減量週讓下個循環更強',
+      '可多做伸展和有氧恢復',
+    ]},
+  // === BLOCK 2: Accumulation (Weeks 10-18) ===
+  { weeks: [10,11,12,13], phase: 'build', name: '增量期 II', tag: 'tag-build',
+    sets: '4組', rpe: '8-9', note: '組數升到4組，繼續線性加重', detail: [
+      '主項目組數從3升到4',
+      '確認每組都能完成目標次數',
+      '腿日加入腿彎舉（膕繩肌補強）',
+      '推日加入三頭下壓（三頭補強）',
+    ]},
+  { weeks: [14,15,16,17], phase: 'build', name: '強化期 I',  tag: 'tag-build',
+    sets: '4組', rpe: '9', note: '開始接觸高強度組，每動作1組衝到 RPE9', detail: [
+      '前3組維持 RPE8，最後1組推到 RPE9',
+      '記錄每次的最重組',
+      '若連續2週最後組 RPE 只有 8，下週加重',
+      '睡眠和飲食蛋白質攝取要跟上',
+    ]},
+  { weeks: [18],         phase: 'deload', name: '減量週 #2', tag: 'tag-deload',
+    sets: '2組', rpe: '6-7', note: '重量降20%，充分恢復準備下一大塊', detail: [
+      '重量降 20%，組數降到 2 組',
+      '可以做一些新動作探索，保持新鮮感',
+      '回顧前18週的進步，評估哪個部位最弱',
+    ]},
+  // === BLOCK 3: Intensification (Weeks 19-27) ===
+  { weeks: [19,20,21,22], phase: 'build', name: '增量期 III', tag: 'tag-build',
+    sets: '4組', rpe: '8-9', note: '帶著更好的基礎重新加重，突破前一循環的重量', detail: [
+      '目標超越第8週的最重重量',
+      '用漸進式加重：每2週加一次，不要每週都加',
+      '若某動作停滯，嘗試換相近動作刺激（如 臥推→上斜臥推）',
+    ]},
+  { weeks: [23,24,25,26], phase: 'build', name: '強化期 II', tag: 'tag-build',
+    sets: '4-5組', rpe: '9', note: '高強度期，準備測試最大重量', detail: [
+      '主項目組數可升到5組',
+      '最後1-2組 RPE9-10',
+      '每週記錄最重組，為第27週測試做準備',
+      '輔助動作可以減組以節省恢復資源',
+    ]},
+  { weeks: [27],         phase: 'deload', name: '減量週 #3', tag: 'tag-deload',
+    sets: '2組', rpe: '6', note: '最輕鬆的一週，讓神經系統完全恢復', detail: [
+      '重量降 30%，組數 2 組',
+      '這週不要追求感覺「練到」',
+      '準備好下週的測試重量目標',
+    ]},
+  // === BLOCK 4: Peak & Test (Weeks 28-34) ===
+  { weeks: [28,29,30,31], phase: 'peak', name: '高峰期',    tag: 'tag-peak',
+    sets: '3-4組', rpe: '9-10', note: '每個主項目挑戰個人最佳重量', detail: [
+      '臥推目標：突破之前最重記錄',
+      '滑輪下拉、啞鈴划船：同樣挑戰最重',
+      '腿推舉：測試穩定的高重量',
+      '輔助動作大幅減少，資源集中在主項目',
+    ]},
+  { weeks: [32,33,34],   phase: 'test',  name: '測試期',    tag: 'tag-test',
+    sets: '2-3組', rpe: '10', note: '正式測試最大重量（估算1RM）', detail: [
+      '每天只測一個動作，不要同一天測多個',
+      '臥推測試日：只做臥推，其他動作2組輕重量',
+      '測試後充分休息',
+      'App統計頁可以看到歷史最重記錄',
+    ]},
+  // === BLOCK 5: Second Half (Weeks 35-44) ===
+  { weeks: [35],         phase: 'deload', name: '主動恢復週', tag: 'tag-deload',
+    sets: '2組', rpe: '6', note: '讓身心完全充電，為下半年備戰', detail: [
+      '可以做輕量全身訓練取代分化',
+      '多做有氧、伸展、按摩',
+      '設定下半年目標',
+    ]},
+  { weeks: [36,37,38,39,40], phase: 'build', name: '重建期', tag: 'tag-build',
+    sets: '4組', rpe: '8', note: '帶著新的1RM知識重建訓練強度', detail: [
+      '以測試得到的最大重量為基礎，設新的訓練重量',
+      '通常用 1RM 的 70-80% 作為訓練重量',
+      '重新線性漸進',
+    ]},
+  { weeks: [41],         phase: 'deload', name: '減量週 #4', tag: 'tag-deload',
+    sets: '2組', rpe: '6-7', note: '常規減量', detail: [
+      '重量降 20%，組數 2 組',
+    ]},
+  { weeks: [42,43,44,45], phase: 'build', name: '強化期 III', tag: 'tag-build',
+    sets: '4-5組', rpe: '9', note: '衝刺第二次個人最佳', detail: [
+      '目標超越第一輪（第28-34週）的成績',
+      '睡眠、飲食、壓力管理是這個階段的關鍵',
+    ]},
+  { weeks: [46],         phase: 'deload', name: '減量週 #5', tag: 'tag-deload',
+    sets: '2組', rpe: '6', note: '年度倒數前最後一次大減量', detail: [
+      '重量降 30%，讓身體完全恢復',
+    ]},
+  // === BLOCK 6: Year End (Weeks 47-52) ===
+  { weeks: [47,48,49,50], phase: 'peak', name: '年末高峰期', tag: 'tag-peak',
+    sets: '4組', rpe: '9-10', note: '全力衝刺年度最佳', detail: [
+      '挑戰全年最重記錄',
+      '所有資源投入主項目',
+    ]},
+  { weeks: [51,52],      phase: 'test',  name: '年末測試',  tag: 'tag-test',
+    sets: '2-3組', rpe: '10', note: '年度收尾，測試1年成果', detail: [
+      '正式記錄年度最佳重量',
+      '對比一年前的起點，看見進步',
+      '規劃明年計畫',
+    ]},
+];
+
+const DEFAULT_TEMPLATES = {
+  1: [
+    { name: '臥推', sets: [{w:50,r:6,rpe:7},{w:50,r:6,rpe:7},{w:50,r:6,rpe:7}] },
+    { name: '上斜啞鈴臥推', sets: [{w:24,r:10,rpe:8},{w:24,r:10,rpe:8},{w:24,r:10,rpe:8}] },
+    { name: '啞鈴側平舉', sets: [{w:6,r:12,rpe:8},{w:6,r:12,rpe:8},{w:6,r:12,rpe:8},{w:6,r:12,rpe:8}] },
+    { name: '三頭下壓', sets: [{w:15,r:12,rpe:8},{w:15,r:12,rpe:8},{w:15,r:12,rpe:8}] },
+  ],
+  2: [
+    { name: '滑輪下拉', sets: [{w:36,r:10,rpe:8},{w:36,r:10,rpe:8},{w:36,r:10,rpe:8},{w:36,r:10,rpe:8}] },
+    { name: '啞鈴划船', sets: [{w:40,r:8,rpe:8},{w:40,r:8,rpe:8},{w:40,r:8,rpe:8},{w:40,r:8,rpe:8}] },
+    { name: '器械划船', sets: [{w:25,r:12,rpe:8},{w:25,r:12,rpe:8},{w:25,r:12,rpe:8}] },
+    { name: 'W槓彎舉', sets: [{w:15,r:10,rpe:8},{w:15,r:10,rpe:8},{w:15,r:10,rpe:8}] },
+    { name: '臉拉', sets: [{w:10,r:15,rpe:8},{w:10,r:15,rpe:8},{w:10,r:15,rpe:8}] },
+  ],
+  3: [
+    { name: '腿推舉', sets: [{w:25,r:10,rpe:8},{w:25,r:10,rpe:8},{w:25,r:10,rpe:8},{w:25,r:10,rpe:8},{w:25,r:10,rpe:8}] },
+    { name: 'V Squat', sets: [{w:20,r:12,rpe:8},{w:20,r:12,rpe:8},{w:20,r:12,rpe:8},{w:20,r:12,rpe:8}] },
+    { name: '腿伸屈', sets: [{w:18,r:12,rpe:8},{w:18,r:12,rpe:8},{w:18,r:12,rpe:8}] },
+    { name: '腿彎舉', sets: [{w:15,r:12,rpe:8},{w:15,r:12,rpe:8},{w:15,r:12,rpe:8}] },
+    { name: '腿外展', sets: [{w:32,r:12,rpe:8},{w:32,r:12,rpe:8},{w:32,r:12,rpe:8},{w:32,r:12,rpe:8}] },
+  ],
+};
+
+let currentDay = 1;
+let currentExercises = [];
+
+function getSessions() { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+function saveSessions(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+function getTemplates() {
+  const s = localStorage.getItem(TEMPLATE_KEY);
+  return s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+}
+function saveTemplates(t) { localStorage.setItem(TEMPLATE_KEY, JSON.stringify(t)); }
+function getPlanStart() { return localStorage.getItem(PLAN_START_KEY) || ''; }
+function setPlanStart(d) { localStorage.setItem(PLAN_START_KEY, d); }
+
+// ============================================================
+// TODAY BANNER
+// ============================================================
+function getTodaySchedule() {
+  const planStart = getPlanStart();
+  if (!planStart) return null;
+  const start = new Date(planStart + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diffDays = Math.floor((today - start) / 86400000);
+  if (diffDays < 0 || diffDays >= 364) return null;
+
+  const weekNum = Math.floor(diffDays / 7) + 1;
+  const dayOfCycle = diffDays % 7; // 0=Mon-equivalent
+  const schedule = WEEK_CYCLE[dayOfCycle];
+  const phase = getPhaseForWeek(weekNum);
+  const isDeload = phase && phase.phase === 'deload';
+
+  return { weekNum, dayOfCycle, schedule, phase, isDeload };
+}
+
+function getPhaseForWeek(weekNum) {
+  return YEAR_PLAN.find(p => p.weeks.includes(weekNum)) || null;
+}
+
+function renderTodayBanner() {
+  const banner = document.getElementById('today-banner');
+  const info = getTodaySchedule();
+  if (!info) { banner.innerHTML = ''; return; }
+
+  const { weekNum, schedule, phase, isDeload } = info;
+  const colorClass = isDeload ? 'deload' : schedule.color;
+  const icon = { push:'💪', pull:'🔵', legs:'🦵', rest:'😴' }[schedule.type] || '📅';
+
+  let phaseHtml = '';
+  if (phase) {
+    phaseHtml = `<div class="banner-week">第 <strong>${weekNum}</strong> 週 ｜ ${phase.name}（${phase.sets}，RPE ${phase.rpe}）</div>`;
+  }
+
+  banner.innerHTML = `<div class="today-banner ${colorClass}">
+    <div class="banner-label">今天該練</div>
+    <div class="banner-title">${icon} ${isDeload ? '⚡ 減量－' : ''}${schedule.label}</div>
+    ${isDeload ? '<div class="banner-sub" style="color:var(--deload)">減量週：重量降20%，每動作只做2組</div>' : ''}
+    ${phaseHtml}
+  </div>`;
+
+  // Auto-select the right day tab
+  if (schedule.type === 'push') selectDay(1, true);
+  else if (schedule.type === 'pull') selectDay(2, true);
+  else if (schedule.type === 'legs') selectDay(3, true);
+}
+
+// ============================================================
+// RECORD PAGE
+// ============================================================
+function initDate() {
+  const d = new Date();
+  document.getElementById('session-date').value = d.toISOString().split('T')[0];
+}
+
+function selectDay(day, silent) {
+  currentDay = day;
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.day-tab[data-day="${day}"]`).classList.add('active');
+  if (!silent) loadTemplate(day);
+  else { const templates = getTemplates(); currentExercises = JSON.parse(JSON.stringify(templates[day])); renderExercises(); }
+}
+
+function loadTemplate(day) {
+  const templates = getTemplates();
+  currentExercises = JSON.parse(JSON.stringify(templates[day]));
+  renderExercises();
+}
+
+function getPrevSession(day) {
+  const sessions = getSessions().filter(s => s.day == day);
+  return sessions.length ? sessions[sessions.length - 1] : null;
+}
+
+function renderExercises() {
+  const container = document.getElementById('exercises-container');
+  const prev = getPrevSession(currentDay);
+  container.innerHTML = '';
+
+  currentExercises.forEach((ex, ei) => {
+    const prevEx = prev ? prev.exercises.find(e => e.name === ex.name) : null;
+    let prevHint = '';
+    if (prevEx) {
+      const best = prevEx.sets.reduce((a,b) => ((+a.w||0) >= (+b.w||0) ? a : b), prevEx.sets[0]);
+      const date = new Date(prev.date + 'T00:00:00').toLocaleDateString('zh-TW', {month:'numeric',day:'numeric'});
+      prevHint = `<div class="prev-hint">上次 ${date}：最重 <strong>${best.w}kg × ${best.r}下</strong>（RPE ${best.rpe}）</div>`;
+    }
+
+    const setsHtml = ex.sets.map((set, si) => `
+      <div class="set-row" id="set-${ei}-${si}">
+        <span class="set-num">${si+1}</span>
+        <input class="set-input" type="number" inputmode="decimal" placeholder="kg" value="${set.w||''}" onchange="updateSet(${ei},${si},'w',this.value)">
+        <input class="set-input" type="number" inputmode="numeric" placeholder="下" value="${set.r||''}" onchange="updateSet(${ei},${si},'r',this.value)">
+        <input class="set-input rpe-input" type="number" inputmode="decimal" placeholder="RPE" min="1" max="10" step="0.5" value="${set.rpe||''}" onchange="updateSet(${ei},${si},'rpe',this.value)">
+        <button class="delete-set-btn" onclick="deleteSet(${ei},${si})">✕</button>
+      </div>`).join('');
+
+    container.innerHTML += `<div class="exercise-block">
+      <div class="exercise-header">
+        <span class="exercise-name">${ex.name}</span>
+        <button class="add-set-btn" onclick="addSet(${ei})">+ 組</button>
+      </div>
+      ${prevHint}
+      <div class="col-headers"><span></span><span>重量(kg)</span><span>次數</span><span>RPE</span><span></span></div>
+      <div id="sets-${ei}">${setsHtml}</div>
+    </div>`;
+  });
+
+  container.innerHTML += `<button class="add-set-btn" style="width:100%;padding:14px;border-radius:12px;margin-top:4px;font-size:14px;" onclick="openAddExerciseModal()">＋ 新增動作</button>`;
+}
+
+function updateSet(ei, si, field, value) {
+  currentExercises[ei].sets[si][field] = value === '' ? '' : +value;
+}
+function addSet(ei) {
+  const last = currentExercises[ei].sets.slice(-1)[0] || {w:'',r:'',rpe:''};
+  currentExercises[ei].sets.push({w: last.w, r: last.r, rpe: ''});
+  renderExercises();
+}
+function deleteSet(ei, si) {
+  if (currentExercises[ei].sets.length <= 1) return;
+  currentExercises[ei].sets.splice(si, 1);
+  renderExercises();
+}
+
+function openAddExerciseModal() {
+  document.getElementById('new-exercise-name').value = '';
+  document.getElementById('add-exercise-modal').classList.add('open');
+  setTimeout(() => document.getElementById('new-exercise-name').focus(), 100);
+}
+function closeAddExerciseModal() { document.getElementById('add-exercise-modal').classList.remove('open'); }
+function confirmAddExercise() {
+  const name = document.getElementById('new-exercise-name').value.trim();
+  if (!name) return;
+  currentExercises.push({ name, sets: [{w:'',r:'',rpe:''},{w:'',r:'',rpe:''},{w:'',r:'',rpe:''}] });
+  closeAddExerciseModal();
+  renderExercises();
+}
+
+function saveSession() {
+  const date = document.getElementById('session-date').value;
+  const notes = document.getElementById('session-notes').value;
+  if (!date) { showToast('請選擇日期'); return; }
+
+  currentExercises.forEach((ex, ei) => {
+    ex.sets.forEach((set, si) => {
+      const row = document.getElementById(`set-${ei}-${si}`);
+      if (!row) return;
+      const inputs = row.querySelectorAll('.set-input');
+      set.w = inputs[0].value === '' ? '' : +inputs[0].value;
+      set.r = inputs[1].value === '' ? '' : +inputs[1].value;
+      set.rpe = inputs[2].value === '' ? '' : +inputs[2].value;
+    });
+  });
+
+  const session = { id: Date.now(), date, day: currentDay, exercises: JSON.parse(JSON.stringify(currentExercises)), notes };
+  const sessions = getSessions(); sessions.push(session); saveSessions(sessions);
+
+  const templates = getTemplates();
+  templates[currentDay] = JSON.parse(JSON.stringify(currentExercises));
+  saveTemplates(templates);
+
+  showToast('✅ 訓練已儲存！');
+  document.getElementById('session-notes').value = '';
+}
+
+// ============================================================
+// HISTORY PAGE
+// ============================================================
+let historyFilter = 'all';
+
+function filterHistory(filter, btn) {
+  historyFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistory();
+}
+
+function renderHistory() {
+  const sessions = getSessions().slice().reverse();
+  const filtered = historyFilter === 'all' ? sessions : sessions.filter(s => String(s.day) === historyFilter);
+  const container = document.getElementById('history-list');
+  if (!filtered.length) { container.innerHTML = `<div class="empty-state"><div class="icon">🏋️</div>還沒有訓練紀錄<br>去記錄第一次訓練吧！</div>`; return; }
+
+  container.innerHTML = filtered.map(s => {
+    const dateStr = new Date(s.date + 'T00:00:00').toLocaleDateString('zh-TW', {year:'numeric',month:'long',day:'numeric'});
+    const exercisesHtml = s.exercises.map(ex => {
+      const setsHtml = ex.sets.map((set,i) =>
+        `<span class="history-set-chip">${i+1}. <strong>${set.w||'?'}kg</strong> × ${set.r||'?'} <span style="color:#666">R${set.rpe||'?'}</span></span>`
+      ).join('');
+      return `<div class="history-exercise"><div class="history-exercise-name">${ex.name}</div><div class="history-sets">${setsHtml}</div></div>`;
+    }).join('');
+    const notesHtml = s.notes ? `<div style="padding:8px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--text2)">💬 ${s.notes}</div>` : '';
+    return `<div class="history-card">
+      <div class="history-card-header">
+        <span class="history-date">📅 ${dateStr}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="history-day-badge ${DAY_BADGES[s.day]}">Day${s.day} ${DAY_NAMES[s.day]}</span>
+          <button class="delete-session-btn" onclick="deleteSession(${s.id})">🗑</button>
+        </div>
+      </div>
+      ${exercisesHtml}${notesHtml}
+    </div>`;
+  }).join('');
+}
+
+function deleteSession(id) {
+  if (!confirm('確定要刪除這筆訓練記錄？')) return;
+  saveSessions(getSessions().filter(s => s.id !== id));
+  renderHistory();
+  showToast('已刪除');
+}
+
+// ============================================================
+// STATS PAGE
+// ============================================================
+function populateExerciseSelect() {
+  const sessions = getSessions();
+  const exerciseSet = new Set();
+  sessions.forEach(s => s.exercises.forEach(e => exerciseSet.add(e.name)));
+  const select = document.getElementById('stats-exercise-select');
+  const current = select.value;
+  select.innerHTML = exerciseSet.size
+    ? [...exerciseSet].map(n => `<option value="${n}" ${n===current?'selected':''}>${n}</option>`).join('')
+    : '<option value="">無資料</option>';
+}
+
+function renderStats() {
+  const name = document.getElementById('stats-exercise-select').value;
+  const container = document.getElementById('stats-content');
+  if (!name) { container.innerHTML = '<div class="empty-state"><div class="icon">📊</div>先記錄訓練才能看統計！</div>'; return; }
+
+  const history = [];
+  getSessions().forEach(s => {
+    const ex = s.exercises.find(e => e.name === name);
+    if (!ex) return;
+    const valid = ex.sets.filter(set => set.w && set.r);
+    if (!valid.length) return;
+    const bestW = Math.max(...valid.map(set => +set.w));
+    const totalVol = valid.reduce((sum, set) => sum + (+set.w * +set.r), 0);
+    const rpeSets = valid.filter(set => set.rpe);
+    const avgRpe = rpeSets.length ? (rpeSets.reduce((s,set) => s + +set.rpe, 0) / rpeSets.length).toFixed(1) : '-';
+    history.push({ date: s.date, bestW, totalVol, avgRpe });
+  });
+
+  if (!history.length) { container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div>找不到「${name}」的資料</div>`; return; }
+
+  const latest = history[history.length-1];
+  const maxEver = Math.max(...history.map(h => h.bestW));
+  const maxVol = Math.max(...history.map(h => h.totalVol));
+  const recent = history.slice(-8);
+  const barMax = Math.max(...recent.map(h => h.bestW));
+
+  const barsHtml = recent.map(h => {
+    const pct = barMax ? Math.round((h.bestW / barMax) * 100) : 0;
+    const label = new Date(h.date+'T00:00:00').toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'});
+    return `<div class="chart-bar-wrap">
+      <div class="chart-bar-val">${h.bestW}</div>
+      <div class="chart-bar" style="height:${Math.max(pct*0.6,2)}px"></div>
+      <div class="chart-bar-label">${label}</div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="stats-row">
+      <div class="stats-card"><div class="stats-card-title">本次最重</div><div class="stats-big">${latest.bestW}<span style="font-size:16px;font-weight:400"> kg</span></div><div class="stats-sub">RPE ${latest.avgRpe}</div></div>
+      <div class="stats-card"><div class="stats-card-title">歷史最重</div><div class="stats-big" style="color:var(--accent3)">${maxEver}<span style="font-size:16px;font-weight:400"> kg</span></div><div class="stats-sub">共 ${history.length} 次訓練</div></div>
+    </div>
+    <div class="stats-card"><div class="stats-card-title">本次訓練量</div><div class="stats-big" style="color:var(--accent2)">${latest.totalVol.toLocaleString()}<span style="font-size:16px;font-weight:400"> kg</span></div><div class="stats-sub">歷史最高 ${maxVol.toLocaleString()} kg</div></div>
+    <div class="chart-wrap"><div class="chart-title">最近 ${recent.length} 次最重重量</div><div class="chart-bars">${barsHtml}</div></div>`;
+}
+
+// ============================================================
+// PLAN PAGE
+// ============================================================
+function renderPlanPage() {
+  const planStart = getPlanStart();
+  const setupArea = document.getElementById('plan-setup-area');
+  const contentArea = document.getElementById('plan-content');
+
+  if (!planStart) {
+    setupArea.innerHTML = `<div class="plan-setup">
+      <div class="plan-setup-title">🗓 設定計畫開始日期</div>
+      <label>你的計畫從哪天開始？</label>
+      <input type="date" id="plan-start-input" value="${new Date().toISOString().split('T')[0]}">
+      <button class="plan-setup-btn" onclick="savePlanStart()">✅ 開始我的1年計畫</button>
+    </div>`;
+    contentArea.innerHTML = '';
+    return;
+  }
+
+  const start = new Date(planStart + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const elapsed = Math.floor((today - start) / 86400000);
+  const currentWeek = Math.max(1, Math.floor(elapsed / 7) + 1);
+  const progressPct = Math.min(100, Math.round((currentWeek / 52) * 100));
+
+  setupArea.innerHTML = `<div class="plan-setup" style="padding:12px 14px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="font-size:13px;color:var(--text2)">計畫進度</span>
+      <span style="font-size:13px;font-weight:700">第 ${currentWeek} / 52 週</span>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar" style="width:${progressPct}%"></div></div>
+    <div style="display:flex;justify-content:space-between;">
+      <span style="font-size:11px;color:var(--text2)">開始：${new Date(planStart+'T00:00:00').toLocaleDateString('zh-TW')}</span>
+      <button onclick="resetPlan()" style="background:none;border:none;color:var(--text2);font-size:11px;cursor:pointer;text-decoration:underline;">重設日期</button>
+    </div>
+  </div>`;
+
+  // Weekly schedule preview (current + next 2 weeks)
+  let weekPreviewHtml = '';
+  for (let w = Math.max(1, currentWeek - 1); w <= Math.min(52, currentWeek + 2); w++) {
+    const weekStart = new Date(start); weekStart.setDate(start.getDate() + (w-1)*7);
+    const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6);
+    const dateRange = `${weekStart.toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'})} – ${weekEnd.toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'})}`;
+    const phase = getPhaseForWeek(w);
+    const isCurrentWeek = w === currentWeek;
+    const tagClass = phase ? phase.tag : 'tag-adapt';
+    const tagName = phase ? phase.name : '';
+
+    const dayChips = WEEK_CYCLE.map((d,i) => {
+      const isDeload = phase && phase.phase === 'deload';
+      const chipType = isDeload ? 'chip-deload' : `chip-${d.type}`;
+      const dayNames = ['一','二','三','四','五','六','日'];
+      const shortLabel = d.type === 'rest' ? '休' : (isDeload ? '減' : {push:'推',pull:'拉',legs:'腿'}[d.type]);
+      return `<span class="day-chip ${chipType}">${dayNames[i]}${shortLabel}</span>`;
+    }).join('');
+
+    weekPreviewHtml += `<div class="week-row" style="${isCurrentWeek ? 'background:rgba(232,255,71,0.04);' : ''}">
+      <span class="week-num" style="${isCurrentWeek ? 'color:var(--accent);font-weight:700;' : ''}">第${w}週${isCurrentWeek ? ' 👈' : ''}</span>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+          <span style="font-size:12px;color:var(--text2)">${dateRange}</span>
+          <span class="phase-tag ${tagClass}">${tagName}</span>
+        </div>
+        <div class="week-schedule">${dayChips}</div>
+      </div>
+    </div>`;
+  }
+
+  // All phases accordion
+  const phasesHtml = YEAR_PLAN.map((p, idx) => {
+    const startWeek = p.weeks[0], endWeek = p.weeks[p.weeks.length-1];
+    const weeksLabel = startWeek === endWeek ? `第 ${startWeek} 週` : `第 ${startWeek}–${endWeek} 週`;
+    const isCurrent = p.weeks.includes(currentWeek);
+    const detailItems = p.detail.map(d => `<li>${d}</li>`).join('');
+    return `<div class="phase-block" style="${isCurrent ? 'border-color:var(--accent);' : ''}">
+      <div class="phase-header" onclick="togglePhase(${idx})">
+        <div>
+          <div class="phase-label" style="${isCurrent ? 'color:var(--accent);' : ''}">${isCurrent ? '▶ ' : ''}${p.name}</div>
+          <div class="phase-weeks">${weeksLabel}　${p.sets}，RPE ${p.rpe}</div>
+        </div>
+        <span class="phase-tag ${p.tag}">${p.name}</span>
+      </div>
+      <div class="phase-detail" id="phase-detail-${idx}">
+        <div style="font-size:12px;color:var(--text2);margin-top:8px;">${p.note}</div>
+        <ul>${detailItems}</ul>
+      </div>
+    </div>`;
+  }).join('');
+
+  contentArea.innerHTML = `
+    <div style="margin:16px 0 8px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">本週 & 近期</div>
+      <div class="phase-block">${weekPreviewHtml}</div>
+    </div>
+    <div style="margin:20px 0 8px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;">完整52週計畫</div>
+      ${phasesHtml}
+    </div>`;
+
+  // Auto-expand current phase
+  const currentPhaseIdx = YEAR_PLAN.findIndex(p => p.weeks.includes(currentWeek));
+  if (currentPhaseIdx >= 0) {
+    const el = document.getElementById(`phase-detail-${currentPhaseIdx}`);
+    if (el) el.classList.add('open');
+  }
+}
+
+function togglePhase(idx) {
+  const el = document.getElementById(`phase-detail-${idx}`);
+  el.classList.toggle('open');
+}
+
+function savePlanStart() {
+  const val = document.getElementById('plan-start-input').value;
+  if (!val) return;
+  setPlanStart(val);
+  renderPlanPage();
+  renderTodayBanner();
+  showToast('✅ 計畫已設定！');
+}
+
+function resetPlan() {
+  if (!confirm('重設計畫開始日期？')) return;
+  localStorage.removeItem(PLAN_START_KEY);
+  renderPlanPage();
+  renderTodayBanner();
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`page-${page}`).classList.add('active');
+  document.getElementById(`nav-${page}`).classList.add('active');
+  if (page === 'history') renderHistory();
+  if (page === 'stats') { populateExerciseSelect(); renderStats(); }
+  if (page === 'plan') renderPlanPage();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+initDate();
+selectDay(1);
+renderTodayBanner();
+</script>
+</body>
+</html>
