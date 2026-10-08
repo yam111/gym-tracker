@@ -1637,13 +1637,12 @@ function completeWorkout(){
   const dayInfo = WEEK_CYCLE.find(w=>w.day===currentDay) || WEEK_CYCLE[0];
   const filled = s=>s.w!==''&&s.w!==undefined&&s.r!==''&&s.r!==undefined;
   const entered = ei=>(currentSession[currentDay]&&currentSession[currentDay][ei]||[]);
-  const doneUpTo = confirmedSets[currentDay] || {};
-  // History keeps only the sets actually confirmed (✓) — pre-filled but untouched sets are dropped
+  // The workout screen has no per-set ✓: sets still on screen count as done (skipped ones get deleted)
   const sessionData = {
     date:today, day:currentDay, type:dayInfo.type,
     exercises: exList.map((ex,ei)=>({
       name:ex.name,
-      sets:entered(ei).filter((s,si)=>doneUpTo[ei]!==undefined && si<=doneUpTo[ei] && filled(s))
+      sets:entered(ei).filter(filled)
     }))
   };
   sessions.push(sessionData);
