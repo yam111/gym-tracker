@@ -42,3 +42,62 @@ body{background:#9bbc0f;color:#0f380f;}
 .save-btn,.day-modal-close{background:#0f380f;color:#9bbc0f;border-radius:0;}
 .danger-btn{border-radius:0;border-color:#0f380f;color:#0f380f;}
 #toast{background:#0f380f;color:#9bbc0f;border-radius:0;}
+
+/* ── Other tabs (map / diet / achievements / progress): inline colors → Game Boy palette ── */
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#fff"],
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#ecf0f1"],
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#f39c12"],
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#e74c3c"],
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#3498db"],
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#27ae60"],
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#2ecc71"],
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#9b59b6"]{color:#0f380f!important;}
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#7f8c8d"]{color:#306230!important;}
+
+/* big panels */
+#section-diet [style*="background:#16213e"],
+#section-achievements [style*="background:#16213e"],
+#section-progress [style*="background:#1a1a2e"]{background:#8bac0f!important;border:3px solid #0f380f;border-radius:0!important;box-shadow:4px 4px 0 #306230;}
+/* inner boxes */
+#section-diet [style*="background:#1a1a2e"]{background:#9bbc0f!important;border:2px solid #306230;border-radius:0!important;}
+/* highlight box (全日合計) */
+#section-diet [style*="background:#0f3460"]{background:#0f380f!important;border-radius:0!important;}
+#section-diet [style*="background:#0f3460"] *{color:#9bbc0f!important;}
+#section-diet [style*="background:#0f3460"] [style*="color:#7f8c8d"]{color:#8bac0f!important;}
+/* lines */
+#section-diet [style*="solid #2a2a4a"],#section-diet [style*="solid #1a1a2e"]{border-color:#306230!important;}
+#section-diet [style*="solid #f39c12"]{border-color:#0f380f!important;border-top-width:2px!important;}
+
+/* achievements: title progress bar + cards */
+#section-achievements [style*="background:#0a0a1a"]{background:#0f380f!important;border-radius:0!important;height:8px!important;}
+#section-achievements [style*="linear-gradient"]{background:#9bbc0f!important;border-radius:0!important;}
+.ach-card.unlocked{background:#0f380f!important;}
+.ach-card.unlocked .ach-name{color:#9bbc0f!important;}
+.ach-card.unlocked .ach-desc{color:#8bac0f!important;}
+.ach-card:not(.unlocked) .ach-name{color:#306230!important;}
+.ach-card:not(.unlocked) .ach-desc{color:#306230!important;opacity:.8;}
+
+/* progress chart bars */
+#section-progress [style*="background:#3498db"]{background:#0f380f!important;border-radius:0!important;width:10px!important;}
+
+/* map */
+#section-map button[style*="background:#1a1a2e"]{background:#0f380f!important;color:#9bbc0f!important;border-radius:0!important;}
+#section-map [style*="background:#12122a"]{background:#8bac0f!important;color:#306230!important;border-radius:0!important;}
+#section-map [style*="background:#0d0d1a"]{background:#9bbc0f!important;color:#8bac0f!important;border:2px solid #8bac0f!important;border-radius:0!important;}
+#section-map [style*="background:#1e7a45"]{background:#0f380f!important;color:#9bbc0f!important;border-radius:0!important;}
+#section-map div[style*="solid #f39c12"]{background:#e0f8a0!important;color:#0f380f!important;border:3px solid #0f380f!important;border-radius:0!important;}
+
+/* modals / overlays */
+.day-modal-set{color:#306230;}
+.part-btn span{color:#0f380f;}
+#ach-notif{background:#8bac0f;border:3px solid #0f380f;border-radius:0;box-shadow:4px 4px 0 #306230;}
+.ach-notif-label,.ach-notif-name{color:#0f380f;font-weight:700;}
+.ach-notif-desc{color:#306230;}
+.coach-header{background:#306230;color:#9bbc0f;}
+.coach-ex{background:#8bac0f;border-radius:0;border-left:6px solid #0f380f;}
+.coach-ex-name{color:#0f380f;}
+.coach-sets{color:#306230;}
+.advice-up,.advice-hold,.advice-down{border-radius:0;background:#9bbc0f;color:#0f380f;border:2px solid #0f380f;}
+.advice-up{background:#0f380f;color:#9bbc0f;}
+.coach-close-btn,.lvl-btn{background:#9bbc0f;color:#0f380f;border-radius:0;box-shadow:4px 4px 0 #306230;}
+.lvl-title{color:#9bbc0f;}
