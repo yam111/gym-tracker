@@ -551,6 +551,8 @@ function renderExercisesHTML(){
       currentSession[currentDay][ei] = ex.sets.map(s=>({w:s.w||'', r:s.r||8}));
     }
     const sess = currentSession[currentDay][ei];
+    // Sets removed down to 0 = skipped today; hide card (template untouched, returns next time)
+    if(!sess.length) return;
 
     html += '<div class="ex-card">';
     // Exercise name with edit/delete buttons
@@ -1056,6 +1058,7 @@ function showDayDetail(ds){
     html += '<div style="font-size:13px;color:#f39c12;margin-bottom:12px;">'+typeLabel+'日</div>';
 
     (sess.exercises||[]).forEach((ex,ei)=>{
+      if(!ex.sets||!ex.sets.length) return;
       html += '<div class="day-modal-ex">';
       html += '<div class="day-modal-ex-name">'+escHtml(ex.name)+'</div>';
       (ex.sets||[]).forEach((s,i)=>{
