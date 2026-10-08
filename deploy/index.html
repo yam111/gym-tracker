@@ -271,20 +271,40 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 :is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#7f8c8d"]{color:#306230!important;}
 
 /* big panels */
-#section-diet [style*="background:#16213e"],
 #section-achievements [style*="background:#16213e"],
 #section-progress [style*="background:#1a1a2e"]{background:#8bac0f!important;border:3px solid #0f380f;border-radius:0!important;box-shadow:4px 4px 0 #306230;}
-/* inner boxes */
-#section-diet [style*="background:#1a1a2e"]{background:#9bbc0f!important;border:2px solid #306230;border-radius:0!important;}
-/* highlight box (全日合計) */
-#section-diet [style*="background:#0f3460"]{background:#0f380f!important;border-radius:0!important;}
-#section-diet [style*="background:#0f3460"] *{color:#9bbc0f!important;}
-#section-diet [style*="background:#0f3460"] [style*="color:#7f8c8d"]{color:#8bac0f!important;}
-/* lines */
-#section-diet [style*="solid #2a2a4a"],#section-diet [style*="solid #1a1a2e"]{border-color:#306230!important;}
-#section-diet table{font-size:12px!important;min-width:0!important;}
-#section-diet th,#section-diet td{padding-left:2px!important;padding-right:2px!important;white-space:nowrap;}
-#section-diet [style*="solid #f39c12"]{border-color:#0f380f!important;border-top-width:2px!important;}
+/* diet page */
+.dt-wrap{padding:12px;}
+.dt-title{font-family:'PressStart',monospace;font-size:12px;text-align:center;letter-spacing:1px;background:#0f380f;color:#9bbc0f;padding:10px;margin-bottom:14px;box-shadow:4px 4px 0 #306230;}
+.dt-card{display:block;background:#8bac0f;border:3px solid #0f380f;box-shadow:4px 4px 0 #306230;padding:12px;margin-bottom:16px;color:#0f380f;}
+.dt-h{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;padding-bottom:8px;margin-bottom:10px;border-bottom:2px dashed #306230;list-style:none;}
+.dt-h::-webkit-details-marker{display:none;}
+.dt-h small{margin-left:auto;font-size:12px;font-weight:400;color:#306230;}
+summary.dt-h{cursor:pointer;}
+.dt-foods:not([open]) .dt-h{border-bottom:none;padding-bottom:0;margin-bottom:0;}
+.dt-foods[open] .dt-h small{visibility:hidden;}
+.dt-bar-row{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:12px;}
+.dt-bar-label{width:44px;flex-shrink:0;}
+.dt-bar{flex:1;height:12px;background:#9bbc0f;border:2px solid #0f380f;border-radius:0 6px 6px 0;overflow:hidden;}
+.dt-bar div{height:100%;background:repeating-linear-gradient(90deg,#0f380f 0 4px,#306230 4px 5px);}
+.dt-bar-val{width:74px;flex-shrink:0;text-align:right;color:#306230;}
+.dt-bar-val b{color:#0f380f;}
+.dt-note{margin-top:10px;font-size:12px;color:#306230;border-top:2px dashed #306230;padding-top:8px;}
+.dt-tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:10px;}
+.dt-tab{font-family:'Cubic11','Noto Sans TC',sans-serif;font-size:12px;padding:6px 0;background:#9bbc0f;color:#0f380f;border:2px solid #0f380f;cursor:pointer;}
+.dt-tab.active{background:#0f380f;color:#9bbc0f;}
+.dt-row{background:#9bbc0f;border:2px solid #306230;padding:8px 10px;margin-bottom:6px;}
+.dt-row-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:14px;}
+.dt-name{font-weight:700;}
+.dt-name small{font-weight:400;font-size:12px;color:#306230;margin-left:6px;}
+.dt-kcal{font-family:'PressStart',monospace;font-size:12px;white-space:nowrap;}
+.dt-kcal small{font-family:'Cubic11','Noto Sans TC',sans-serif;font-size:12px;margin-left:3px;color:#306230;}
+.dt-mac{display:flex;gap:12px;margin-top:4px;font-size:12px;color:#306230;}
+.dt-mac b{color:#0f380f;}
+.dt-total{background:#0f380f;color:#9bbc0f;padding:10px;margin-top:8px;}
+.dt-total .dt-row-top{font-weight:700;}
+.dt-total .dt-kcal small,.dt-total .dt-mac b{color:#9bbc0f;}
+.dt-total .dt-mac{color:#8bac0f;}
 
 /* achievements: title progress bar + cards */
 #section-achievements [style*="background:#0a0a1a"]{background:#0f380f!important;border-radius:0!important;height:8px!important;}
@@ -1977,131 +1997,86 @@ function closeDayModal(){
 }
 
 // ─── Diet ────────────────────────────────────────────────────
+// Diet reference page: data stays fixed (same numbers as before), only presentation is generated
+const DIET_TARGET = {kcal:2100, p:160, f:60, c:230, fiber:30};
+const DIET_FOODS = [ // name, portion, kcal, protein, fat, carbs
+  ['雞胸肉','100g 生',120,23,2.5,0],
+  ['牛小排','100g 生',290,24,21,0],
+  ['石安溫泉蛋','1顆 38g',54,5.2,3.1,1.2],
+  ['石安水煮蛋','1顆',70,6.3,4.8,0.4],
+  ['牛奶','250ml',163,8,8,12],
+  ['燕麥','100g 乾',389,13,7,66],
+  ['白飯','100g 熟',130,2.7,0.3,28],
+  ['義美可可蛋白飲','250ml',186,21,2.2,20.6],
+  ['葉菜類','100g',25,2,0.3,4],
+];
+const DIET_MEALS = [ // item, kcal, protein, fat, carbs
+  {name:'早餐', items:[['燕麥 80g',311,10,5.6,53],['義美可可蛋白飲 250ml',186,21,2.2,20.6],['石安溫泉蛋 2顆',108,10.4,6.2,2.4]]},
+  {name:'午餐', items:[['雞胸肉 200g（生）',240,46,5,0],['白飯 200g（熟）',260,5.4,0.6,56],['葉菜類 100g',25,2,0.3,4]]},
+  {name:'晚餐', items:[['牛小排 120g（生）',348,28.8,25.2,0],['白飯 150g（熟）',195,4,0.45,42],['葉菜類 100g',25,2,0.3,4],['牛奶 250ml',163,8,8,12]]},
+  {name:'點心', items:[['雞胸肉 100g（生）',120,23,2.5,0],['白飯 100g（熟）',130,2.7,0.3,28]]},
+];
+let dietTab = 0; // 0-3 = meal, 4 = whole day
+
+function dietNum(n){ return String(Math.round(n*10)/10); }
+function dietSum(items){
+  return items.reduce((a,it)=>[a[0]+it[1],a[1]+it[2],a[2]+it[3],a[3]+it[4]],[0,0,0,0]);
+}
+function dietMacros(p,f,c){
+  return '<span>蛋白 <b>'+dietNum(p)+'</b>g</span><span>脂 <b>'+dietNum(f)+'</b>g</span><span>碳 <b>'+dietNum(c)+'</b>g</span>';
+}
+function dietRow(name, sub, kcal, p, f, c){
+  return '<div class="dt-row"><div class="dt-row-top"><span class="dt-name">'+escHtml(name)+
+    (sub?'<small>'+escHtml(sub)+'</small>':'')+'</span><span class="dt-kcal">'+Math.round(kcal)+'<small>kcal</small></span></div>'+
+    '<div class="dt-mac">'+dietMacros(p,f,c)+'</div></div>';
+}
+function dietTotalRow(label, t){
+  return '<div class="dt-total"><div class="dt-row-top"><span>'+label+'</span><span class="dt-kcal">'+Math.round(t[0])+'<small>kcal</small></span></div>'+
+    '<div class="dt-mac">'+dietMacros(t[1],t[2],t[3])+'</div></div>';
+}
+function setDietTab(i){ dietTab = i; renderDiet(); }
+
 function renderDiet(){
   const wrap = document.getElementById('section-diet');
-  wrap.innerHTML = `
-  <div style="padding:16px;font-size:14px;line-height:1.7;color:#ecf0f1;">
+  const day = dietSum(DIET_MEALS.map(m=>['',...dietSum(m.items)]));
+  const T = DIET_TARGET;
+  const bar = (label, val, target, unit)=>
+    '<div class="dt-bar-row"><span class="dt-bar-label">'+label+'</span>'+
+    '<div class="dt-bar"><div style="width:'+Math.min(100,val/target*100)+'%"></div></div>'+
+    '<span class="dt-bar-val"><b>'+Math.round(val)+'</b>/'+target+unit+'</span></div>';
 
-    <div style="font-family:'PressStart',monospace;font-size:12px;color:#f39c12;text-align:center;margin-bottom:20px;letter-spacing:1px;">DIET PLAN</div>
+  let html = '<div class="dt-wrap"><div class="dt-title">DIET PLAN</div>';
 
-    <!-- 每日目標 -->
-    <div style="background:#16213e;border-radius:12px;padding:16px;margin-bottom:16px;">
-      <div style="font-size:14px;font-weight:700;color:#f39c12;margin-bottom:12px;display:flex;align-items:center;gap:6px;">${pxIcon('chart',1)}每日目標</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div style="background:#1a1a2e;border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:18px;font-weight:700;color:#e74c3c;">2,100</div>
-          <div style="font-size:12px;color:#7f8c8d;margin-top:2px;">熱量 kcal</div>
-        </div>
-        <div style="background:#1a1a2e;border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:18px;font-weight:700;color:#3498db;">160g</div>
-          <div style="font-size:12px;color:#7f8c8d;margin-top:2px;">蛋白質</div>
-        </div>
-        <div style="background:#1a1a2e;border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:18px;font-weight:700;color:#f39c12;">60g</div>
-          <div style="font-size:12px;color:#7f8c8d;margin-top:2px;">脂肪</div>
-        </div>
-        <div style="background:#1a1a2e;border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:18px;font-weight:700;color:#27ae60;">230g</div>
-          <div style="font-size:12px;color:#7f8c8d;margin-top:2px;">碳水</div>
-        </div>
-      </div>
-      <div style="background:#1a1a2e;border-radius:8px;padding:10px;text-align:center;margin-top:8px;">
-        <div style="font-size:18px;font-weight:700;color:#9b59b6;">≥30g</div>
-        <div style="font-size:12px;color:#7f8c8d;margin-top:2px;">膳食纖維</div>
-      </div>
-    </div>
+  // Targets: example menu total vs daily target
+  html += '<div class="dt-card"><div class="dt-h">'+pxIcon('chart',1)+'每日目標<small>範例菜單 / 目標</small></div>';
+  html += bar('熱量', day[0], T.kcal, '');
+  html += bar('蛋白質', day[1], T.p, 'g');
+  html += bar('脂肪', day[2], T.f, 'g');
+  html += bar('碳水', day[3], T.c, 'g');
+  html += '<div class="dt-note">膳食纖維 ≥'+T.fiber+'g ｜ 菜單約 15g，需另補蔬果</div></div>';
 
-    <!-- 食材營養素 -->
-    <div style="background:#16213e;border-radius:12px;padding:16px;margin-bottom:16px;">
-      <div style="font-size:14px;font-weight:700;color:#f39c12;margin-bottom:12px;display:flex;align-items:center;gap:6px;">${pxIcon('meat',1)}食材營養素</div>
-      <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:320px;">
-          <thead>
-            <tr style="color:#7f8c8d;border-bottom:1px solid #2a2a4a;">
-              <th style="text-align:left;padding:6px 4px;">食材</th>
-              <th style="text-align:center;padding:6px 4px;">份量</th>
-              <th style="text-align:center;padding:6px 4px;color:#e74c3c;">熱量</th>
-              <th style="text-align:center;padding:6px 4px;color:#3498db;">蛋白</th>
-              <th style="text-align:center;padding:6px 4px;color:#f39c12;">脂肪</th>
-              <th style="text-align:center;padding:6px 4px;color:#27ae60;">碳水</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="border-bottom:1px solid #1a1a2e;"><td style="padding:7px 4px;">雞胸肉</td><td style="text-align:center;color:#7f8c8d;">100g生</td><td style="text-align:center;">120</td><td style="text-align:center;">23g</td><td style="text-align:center;">2.5g</td><td style="text-align:center;">0g</td></tr>
-            <tr style="border-bottom:1px solid #1a1a2e;"><td style="padding:7px 4px;">牛小排</td><td style="text-align:center;color:#7f8c8d;">100g生</td><td style="text-align:center;">290</td><td style="text-align:center;">24g</td><td style="text-align:center;">21g</td><td style="text-align:center;">0g</td></tr>
-            <tr style="border-bottom:1px solid #1a1a2e;"><td style="padding:7px 4px;">石安溫泉蛋</td><td style="text-align:center;color:#7f8c8d;">1顆38g</td><td style="text-align:center;">54</td><td style="text-align:center;">5.2g</td><td style="text-align:center;">3.1g</td><td style="text-align:center;">1.2g</td></tr>
-            <tr style="border-bottom:1px solid #1a1a2e;"><td style="padding:7px 4px;">石安水煮蛋</td><td style="text-align:center;color:#7f8c8d;">1顆</td><td style="text-align:center;">70</td><td style="text-align:center;">6.3g</td><td style="text-align:center;">4.8g</td><td style="text-align:center;">0.4g</td></tr>
-            <tr style="border-bottom:1px solid #1a1a2e;"><td style="padding:7px 4px;">牛奶</td><td style="text-align:center;color:#7f8c8d;">250ml</td><td style="text-align:center;">163</td><td style="text-align:center;">8g</td><td style="text-align:center;">8g</td><td style="text-align:center;">12g</td></tr>
-            <tr style="border-bottom:1px solid #1a1a2e;"><td style="padding:7px 4px;">燕麥</td><td style="text-align:center;color:#7f8c8d;">100g乾</td><td style="text-align:center;">389</td><td style="text-align:center;">13g</td><td style="text-align:center;">7g</td><td style="text-align:center;">66g</td></tr>
-            <tr style="border-bottom:1px solid #1a1a2e;"><td style="padding:7px 4px;">白飯</td><td style="text-align:center;color:#7f8c8d;">100g熟</td><td style="text-align:center;">130</td><td style="text-align:center;">2.7g</td><td style="text-align:center;">0.3g</td><td style="text-align:center;">28g</td></tr>
-            <tr style="border-bottom:1px solid #1a1a2e;"><td style="padding:7px 4px;">義美可可蛋白飲</td><td style="text-align:center;color:#7f8c8d;">250ml</td><td style="text-align:center;">186</td><td style="text-align:center;">21g</td><td style="text-align:center;">2.2g</td><td style="text-align:center;">20.6g</td></tr>
-            <tr><td style="padding:7px 4px;">葉菜類</td><td style="text-align:center;color:#7f8c8d;">100g</td><td style="text-align:center;">25</td><td style="text-align:center;">2g</td><td style="text-align:center;">0.3g</td><td style="text-align:center;">4g</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+  // Example menu, one meal at a time
+  html += '<div class="dt-card"><div class="dt-h">'+pxIcon('bowl',1)+'範例菜單</div><div class="dt-tabs">';
+  DIET_MEALS.concat([{name:'全日'}]).forEach((m,i)=>{
+    html += '<button class="dt-tab'+(i===dietTab?' active':'')+'" onclick="setDietTab('+i+')">'+m.name+'</button>';
+  });
+  html += '</div>';
+  if(dietTab < DIET_MEALS.length){
+    const m = DIET_MEALS[dietTab];
+    m.items.forEach(it=>{ html += dietRow(it[0],'',it[1],it[2],it[3],it[4]); });
+    html += dietTotalRow('小計', dietSum(m.items));
+  } else {
+    DIET_MEALS.forEach(m=>{ const t=dietSum(m.items); html += dietRow(m.name,'',t[0],t[1],t[2],t[3]); });
+    html += dietTotalRow('全日合計', day);
+  }
+  html += '</div>';
 
-    <!-- 範例菜單 -->
-    <div style="background:#16213e;border-radius:12px;padding:16px;margin-bottom:16px;">
-      <div style="font-size:14px;font-weight:700;color:#f39c12;margin-bottom:12px;display:flex;align-items:center;gap:6px;">${pxIcon('bowl',1)}範例菜單</div>
+  // Ingredient reference, collapsed by default
+  html += '<details class="dt-card dt-foods"><summary class="dt-h">'+pxIcon('meat',1)+'食材營養素<small>點開 ▼</small></summary>';
+  DIET_FOODS.forEach(f=>{ html += dietRow(f[0],f[1],f[2],f[3],f[4],f[5]); });
+  html += '</details></div>';
 
-      <!-- 早餐 -->
-      <div style="margin-bottom:12px;">
-        <div style="font-size:12px;color:#f39c12;font-weight:700;margin-bottom:6px;">早餐</div>
-        <div style="background:#1a1a2e;border-radius:8px;padding:10px;font-size:12px;">
-          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #2a2a4a;"><span>燕麥 80g</span><span style="color:#7f8c8d;">311kcal　蛋白10g　脂5.6g　碳53g</span></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #2a2a4a;"><span>義美可可蛋白飲 250ml</span><span style="color:#7f8c8d;">186kcal　蛋白21g　脂2.2g　碳20.6g</span></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;"><span>石安溫泉蛋 2顆</span><span style="color:#7f8c8d;">108kcal　蛋白10.4g　脂6.2g　碳2.4g</span></div>
-          <div style="margin-top:8px;padding-top:6px;border-top:1px solid #f39c12;display:flex;justify-content:space-between;font-weight:700;"><span style="color:#f39c12;">小計</span><span>605kcal　蛋白41.4g　脂14g　碳76g</span></div>
-        </div>
-      </div>
-
-      <!-- 午餐 -->
-      <div style="margin-bottom:12px;">
-        <div style="font-size:12px;color:#f39c12;font-weight:700;margin-bottom:6px;">午餐</div>
-        <div style="background:#1a1a2e;border-radius:8px;padding:10px;font-size:12px;">
-          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #2a2a4a;"><span>雞胸肉 200g（生）</span><span style="color:#7f8c8d;">240kcal　蛋白46g　脂5g　碳0g</span></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #2a2a4a;"><span>白飯 200g（熟）</span><span style="color:#7f8c8d;">260kcal　蛋白5.4g　脂0.6g　碳56g</span></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;"><span>葉菜類 100g</span><span style="color:#7f8c8d;">25kcal　蛋白2g　脂0.3g　碳4g</span></div>
-          <div style="margin-top:8px;padding-top:6px;border-top:1px solid #f39c12;display:flex;justify-content:space-between;font-weight:700;"><span style="color:#f39c12;">小計</span><span>525kcal　蛋白53.4g　脂5.9g　碳60g</span></div>
-        </div>
-      </div>
-
-      <!-- 晚餐 -->
-      <div style="margin-bottom:12px;">
-        <div style="font-size:12px;color:#f39c12;font-weight:700;margin-bottom:6px;">晚餐</div>
-        <div style="background:#1a1a2e;border-radius:8px;padding:10px;font-size:12px;">
-          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #2a2a4a;"><span>牛小排 120g（生）</span><span style="color:#7f8c8d;">348kcal　蛋白28.8g　脂25.2g　碳0g</span></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #2a2a4a;"><span>白飯 150g（熟）</span><span style="color:#7f8c8d;">195kcal　蛋白4g　脂0.45g　碳42g</span></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #2a2a4a;"><span>葉菜類 100g</span><span style="color:#7f8c8d;">25kcal　蛋白2g　脂0.3g　碳4g</span></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;"><span>牛奶 250ml</span><span style="color:#7f8c8d;">163kcal　蛋白8g　脂8g　碳12g</span></div>
-          <div style="margin-top:8px;padding-top:6px;border-top:1px solid #f39c12;display:flex;justify-content:space-between;font-weight:700;"><span style="color:#f39c12;">小計</span><span>731kcal　蛋白42.8g　脂33.95g　碳58g</span></div>
-        </div>
-      </div>
-
-      <!-- 點心 -->
-      <div style="margin-bottom:12px;">
-        <div style="font-size:12px;color:#f39c12;font-weight:700;margin-bottom:6px;">點心</div>
-        <div style="background:#1a1a2e;border-radius:8px;padding:10px;font-size:12px;">
-          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #2a2a4a;"><span>雞胸肉 100g（生）</span><span style="color:#7f8c8d;">120kcal　蛋白23g　脂2.5g　碳0g</span></div>
-          <div style="display:flex;justify-content:space-between;padding:3px 0;"><span>白飯 100g（熟）</span><span style="color:#7f8c8d;">130kcal　蛋白2.7g　脂0.3g　碳28g</span></div>
-          <div style="margin-top:8px;padding-top:6px;border-top:1px solid #f39c12;display:flex;justify-content:space-between;font-weight:700;"><span style="color:#f39c12;">小計</span><span>250kcal　蛋白25.7g　脂2.8g　碳28g</span></div>
-        </div>
-      </div>
-
-      <!-- 全日合計 -->
-      <div style="background:#0f3460;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:12px;color:#f39c12;font-weight:700;margin-bottom:8px;">全日合計</div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;">
-          <div><div style="font-size:16px;font-weight:700;color:#e74c3c;">2,111</div><div style="font-size:12px;color:#7f8c8d;">kcal</div></div>
-          <div><div style="font-size:16px;font-weight:700;color:#3498db;">163g</div><div style="font-size:12px;color:#7f8c8d;">蛋白質</div></div>
-          <div><div style="font-size:16px;font-weight:700;color:#f39c12;">57g</div><div style="font-size:12px;color:#7f8c8d;">脂肪</div></div>
-          <div><div style="font-size:16px;font-weight:700;color:#27ae60;">222g</div><div style="font-size:12px;color:#7f8c8d;">碳水</div></div>
-        </div>
-      </div>
-    </div>
-
-  </div>`;
+  wrap.innerHTML = html;
 }
 
 // ─── Map ─────────────────────────────────────────────────────
