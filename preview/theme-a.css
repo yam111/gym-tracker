@@ -1,0 +1,33 @@
+/* A. 精修像素：保留深藍＋橘，直角、硬陰影、數字用像素字 */
+body{background:#0b0b1e;}
+#app-header{background:#141432;border-bottom:3px solid #000;box-shadow:0 3px 0 #23234a;}
+#app-title{font-size:12px;text-shadow:2px 2px 0 #000;}
+#xp-bar-wrap,#xp-bar{border-radius:0;}
+#xp-bar-wrap{height:10px;border:2px solid #000;background:#23234a;}
+#xp-bar{background:repeating-linear-gradient(90deg,#f39c12 0 6px,#e67e22 6px 8px);}
+#streak-bar{background:#1b1b44;border-bottom:3px solid #000;font-weight:700;}
+
+.day-tab{border-radius:0;box-shadow:3px 3px 0 #000;font-weight:700;}
+.day-header strong{font-size:17px;}
+
+.ex-card{border-radius:0;border:3px solid #000;background:#1c1c3c;box-shadow:inset 0 0 0 2px #2e2e5c,4px 4px 0 #000;margin:14px 12px;}
+.ex-name span[id^=exname]{font-size:17px!important;font-weight:700!important;color:#fff!important;margin-left:0!important;}
+.ex-name > span:last-child{font-family:'PressStart',monospace;font-size:9px!important;color:#f39c12!important;}
+
+.set-row{border-radius:0;background:#12122a;border:2px solid #000;}
+.set-num{font-family:'PressStart',monospace;font-size:10px;color:#f39c12;}
+.set-inp label{color:#8a8ab8;}
+.set-inp input{border-radius:0;border:2px solid #000;background:#262650;font-family:'PressStart',monospace;font-size:14px;padding:9px 4px;box-shadow:inset 2px 2px 0 #1a1a3a;}
+.set-inp input:focus{outline:none;border-color:#f39c12;}
+.set-row button{border-radius:0!important;border:2px solid #000!important;box-shadow:2px 2px 0 #000;}
+
+.add-set-btn{border-radius:0;border:2px dashed #3a3a6e;color:#8a8ab8;font-weight:700;}
+#complete-btn{border-radius:0;background:#f39c12;color:#000;border:3px solid #000;box-shadow:inset -4px -4px 0 #c0700a,inset 4px 4px 0 #ffc04d,4px 4px 0 #000;font-size:17px;}
+#complete-btn:active{transform:translate(3px,3px);box-shadow:inset -4px -4px 0 #c0700a,inset 4px 4px 0 #ffc04d,1px 1px 0 #000;}
+
+#bottom-nav{background:#141432;border-top:3px solid #000;}
+.nav-btn.active{color:#f39c12;text-shadow:0 0 0 #f39c12;}
+
+.set-group,.ach-card,.day-modal-box,.part-btn{border-radius:0!important;border:3px solid #000!important;box-shadow:4px 4px 0 #000;}
+.save-btn,.danger-btn,.day-modal-close{border-radius:0;border:2px solid #000;box-shadow:3px 3px 0 #000;font-weight:700;}
+#toast{border-radius:0;border:3px solid #000;box-shadow:3px 3px 0 #000;}

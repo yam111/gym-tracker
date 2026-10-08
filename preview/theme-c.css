@@ -1,0 +1,44 @@
+/* C. Game Boy：四階綠色單色畫面 */
+body{background:#9bbc0f;color:#0f380f;}
+#app-header{background:#306230;border-bottom:3px solid #0f380f;}
+#app-title,#level-badge{color:#9bbc0f;}
+#xp-text{color:#8bac0f;}
+#xp-bar-wrap{border-radius:0;background:#0f380f;border:2px solid #0f380f;height:10px;}
+#xp-bar{border-radius:0;background:#9bbc0f;}
+#streak-bar{background:#8bac0f;color:#0f380f;border-bottom:3px solid #0f380f;font-weight:700;}
+#streak-bar *{color:#0f380f!important;}
+
+.day-tab{border-radius:0;background:#0f380f!important;color:#9bbc0f!important;border:2px solid #0f380f!important;}
+.day-header{color:#306230;}
+.day-header strong{color:#0f380f;font-size:17px;}
+
+.ex-card{background:#8bac0f;border:3px solid #0f380f;border-radius:0;box-shadow:4px 4px 0 #306230;margin:14px 12px;}
+.ex-name span[id^=exname]{font-size:17px!important;font-weight:700!important;color:#0f380f!important;margin-left:0!important;}
+.ex-name > span:last-child{color:#0f380f!important;font-family:'PressStart',monospace;font-size:9px!important;}
+.ex-name button{filter:grayscale(1) brightness(.4);}
+
+.set-row{background:#9bbc0f;border:2px solid #306230;border-radius:0;}
+.set-num{font-family:'PressStart',monospace;font-size:10px;color:#0f380f;}
+.set-inp label{color:#306230;font-weight:700;}
+.set-inp input{background:#8bac0f;color:#0f380f;border:2px solid #0f380f;border-radius:0;font-family:'PressStart',monospace;font-size:14px;padding:8px 4px;}
+.set-inp input:focus{outline:none;background:#0f380f;color:#9bbc0f;}
+.set-row button{background:#306230!important;color:#9bbc0f!important;border-radius:0!important;}
+
+.add-set-btn{border:2px dashed #306230;border-radius:0;color:#0f380f;font-weight:700;}
+#complete-btn{background:#0f380f;color:#9bbc0f;border-radius:0;box-shadow:4px 4px 0 #306230;font-size:17px;}
+
+#bottom-nav{background:#306230;border-top:3px solid #0f380f;}
+.nav-btn{color:#8bac0f;}
+.nav-btn.active{color:#9bbc0f;background:#0f380f;}
+
+/* recolor body-part icons to green shades */
+.ex-icon rect{fill:#306230;}
+.ex-icon rect[fill="#c8a27a"],.ex-icon rect[fill="#6b5a48"]{fill:#0f380f;}
+.ex-icon rect[fill="#f39c12"]{fill:#e0f8a0;}
+.ex-icon rect[fill="#0a0a1a"]{fill:#9bbc0f;}
+
+.set-group,.ach-card,.day-modal-box,.part-btn{background:#8bac0f!important;color:#0f380f!important;border:3px solid #0f380f!important;border-radius:0!important;}
+.set-group h3,.day-modal-date,.ach-name,.day-modal-ex-name{color:#0f380f!important;}
+.save-btn,.day-modal-close{background:#0f380f;color:#9bbc0f;border-radius:0;}
+.danger-btn{border-radius:0;border-color:#0f380f;color:#0f380f;}
+#toast{background:#0f380f;color:#9bbc0f;border-radius:0;}

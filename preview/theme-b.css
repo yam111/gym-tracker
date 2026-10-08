@@ -1,0 +1,43 @@
+/* B. RPG 對話框：黑底白框，像勇者鬥惡龍的選單視窗 */
+body{background:#000;color:#fff;}
+#app-header{background:#000;border-bottom:3px solid #fff;}
+#app-title{color:#fff;}
+#level-badge{color:#f8d830;}
+#xp-bar-wrap{border-radius:0;border:2px solid #fff;background:#000;height:10px;}
+#xp-bar{border-radius:0;background:#f8d830;}
+#xp-text{color:#fff;}
+#streak-bar{background:#000;color:#f8d830;border-bottom:3px solid #fff;}
+
+.day-tab{border-radius:4px;background:#000!important;border:3px solid #fff!important;color:#fff!important;}
+.day-tab.active::before{content:'▶ ';color:#f8d830;}
+.day-header{color:#aaa;}
+.day-header strong{color:#fff;font-size:17px;}
+
+.ex-card{background:#000;border:3px solid #fff;border-radius:6px;box-shadow:inset 0 0 0 3px #000,inset 0 0 0 5px #555;margin:14px 12px;}
+.ex-name span[id^=exname]{font-size:17px!important;font-weight:700!important;color:#fff!important;margin-left:0!important;}
+.ex-name > span:last-child{color:#f8d830!important;font-family:'PressStart',monospace;font-size:9px!important;}
+
+.set-row{background:transparent;border-radius:0;border-bottom:2px dotted #444;margin-bottom:4px;}
+.set-row:focus-within .set-num{color:#f8d830;}
+.set-row:focus-within .set-num::before{content:'▶';}
+.set-num{font-family:'PressStart',monospace;font-size:10px;color:#fff;width:22px;}
+.set-inp label{color:#aaa;}
+.set-inp input{background:#000;border:none;border-bottom:3px solid #fff;border-radius:0;font-family:'PressStart',monospace;font-size:14px;padding:8px 4px;}
+.set-inp input:focus{outline:none;border-bottom-color:#f8d830;color:#f8d830;}
+.set-row button{background:#000!important;border:2px solid #fff!important;border-radius:4px!important;color:#fff!important;}
+
+.add-set-btn{border:2px solid #555;border-radius:4px;color:#aaa;}
+.add-set-btn:hover{border-color:#fff;color:#fff;}
+#complete-btn{background:#000;color:#fff;border:3px solid #fff;border-radius:6px;box-shadow:inset 0 0 0 3px #000,inset 0 0 0 5px #555;font-size:17px;}
+#complete-btn::before{content:'▶ ';color:#f8d830;}
+
+#bottom-nav{background:#000;border-top:3px solid #fff;}
+.nav-btn{color:#888;}
+.nav-btn.active{color:#f8d830;}
+
+.set-group,.ach-card,.day-modal-box,.part-btn{background:#000!important;border:3px solid #fff!important;border-radius:6px!important;}
+.set-group h3,.day-modal-date{color:#f8d830;}
+.save-btn{background:#000;border:2px solid #fff;color:#fff;border-radius:4px;}
+.danger-btn{border-radius:4px;}
+.day-modal-close{background:#000;border:2px solid #fff;border-radius:4px;}
+#toast{background:#000;color:#fff;border:3px solid #fff;border-radius:6px;}

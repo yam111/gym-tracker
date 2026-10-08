@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>風格比較</title>
+<style>
+body{margin:0;background:#222;color:#eee;font-family:'Noto Sans TC',sans-serif;}
+h1{font-size:18px;margin:16px;}
+.row{display:flex;gap:24px;padding:0 16px 24px;overflow-x:auto;}
+.col{flex-shrink:0;}
+.col h2{font-size:15px;margin:0 0 4px;}
+.col p{font-size:12px;color:#aaa;margin:0 0 8px;width:390px;}
+iframe{width:390px;height:780px;border:2px solid #555;border-radius:12px;background:#000;}
+</style>
+</head>
+<body>
+<h1>健身打卡遊戲：像素風改版預覽（都可以點、可以輸入）</h1>
+<div class="row">
+  <div class="col"><h2>現在</h2><p>目前上線的版本</p><iframe src="../game.html"></iframe></div>
+  <div class="col"><h2>A. 精修像素</h2><p>保留深藍＋橘色，改成直角、硬陰影、數字用像素字，按鈕有按下去的感覺</p><iframe src="style-a.html"></iframe></div>
+  <div class="col"><h2>B. RPG 對話框</h2><p>黑底白框，像勇者鬥惡龍的選單，選中的地方有 ▶ 游標</p><iframe src="style-b.html"></iframe></div>
+  <div class="col"><h2>C. Game Boy</h2><p>四階綠色單色畫面，懷舊掌機感</p><iframe src="style-c.html"></iframe></div>
+</div>
+</body>
+</html>
