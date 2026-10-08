@@ -503,6 +503,7 @@ const GYM_TEMPLATES = 'gym_tpl';
 const GYM_PLAN      = 'gym_plan';
 const GYM_SESSION_DRAFT = 'gym_draft';
 const GYM_PROGRESS  = 'gym_progress';
+const GYM_SFX       = 'gym_sfx'; // '0' = sound effects off (default on); device setting, not in backups
 
 const XP_PER_SET   = 3;
 const XP_COMPLETE  = 50;
@@ -1541,6 +1542,7 @@ function confirmSet(ei, si){
   }
   if(!confirmedSets[currentDay]) confirmedSets[currentDay]={};
   confirmedSets[currentDay][ei] = si;
+  sfx('set');
   awardXP(XP_PER_SET);
   // Target reps = what the plan pre-filled for this set; extra sets beyond the plan have no target
   const planSet = ((templates[currentDay]||[])[ei]||{}).sets;
@@ -1675,6 +1677,7 @@ function completeWorkout(){
   advanceCycle();
 
   showToast('訓練完成！+'+XP_COMPLETE+' XP！');
+  sfx('done');
   renderHeader();
   renderAll();
 }
@@ -1720,10 +1723,58 @@ function closeCoach(){
 function showLevelUp(lv){
   document.getElementById('lvl-title').innerHTML = 'LEVEL UP!<br>LV.'+lv;
   document.getElementById('lvl-overlay').classList.add('show');
+  sfx('level');
 }
 
 function closeLvlOverlay(){
   document.getElementById('lvl-overlay').classList.remove('show');
+}
+
+// ─── 8-bit sound effects (Web Audio square wave, no audio files) ───
+const SFX_TUNES = { // [frequency Hz, seconds]
+  set:   [[988,.05],[1319,.09]],
+  done:  [[523,.09],[659,.09],[784,.09],[1047,.09],[784,.07],[1047,.28]],
+  level: [[392,.08],[523,.08],[659,.08],[784,.12],[659,.06],[784,.32]],
+  ach:   [[1319,.07],[1568,.07],[2093,.22]],
+};
+let sfxCtx = null, sfxReq = [], sfxTimer = null;
+function sfxOn(){ try{ return localStorage.getItem(GYM_SFX)!=='0'; }catch(e){ return true; } }
+function sfx(name){
+  if(!sfxOn()) return;
+  try{
+    // create/resume inside the tap handler so mobile browsers allow audio
+    if(!sfxCtx) sfxCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(sfxCtx.state==='suspended') sfxCtx.resume();
+  }catch(e){ return; }
+  sfxReq.push(name);
+  if(!sfxTimer) sfxTimer = setTimeout(flushSfx, 0);
+}
+// Several events in one tap (e.g. last set → level up) play only the biggest tune; achievements chime after it
+function flushSfx(){
+  const req = sfxReq; sfxReq = []; sfxTimer = null;
+  let t = 0;
+  const main = ['level','done','set'].find(n=>req.includes(n));
+  if(main) t = playTune(SFX_TUNES[main], 0);
+  if(req.includes('ach')) playTune(SFX_TUNES.ach, t);
+}
+function playTune(notes, delay){
+  let t = sfxCtx.currentTime + delay + 0.01;
+  notes.forEach(([f,d])=>{
+    const o = sfxCtx.createOscillator(), g = sfxCtx.createGain();
+    o.type = 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(0.06, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t+d);
+    o.connect(g); g.connect(sfxCtx.destination);
+    o.start(t); o.stop(t+d);
+    t += d;
+  });
+  return t - sfxCtx.currentTime;
+}
+function toggleSfx(){
+  const on = !sfxOn();
+  try{ localStorage.setItem(GYM_SFX, on?'1':'0'); }catch(e){}
+  renderSettings();
+  if(on) sfx('set');
 }
 
 // ─── Achievements ────────────────────────────────────────────
@@ -1739,6 +1790,7 @@ function processAchNotifQueue(){
   if(!achNotifQueue.length){ achNotifRunning=false; return; }
   achNotifRunning = true;
   const def = achNotifQueue.shift();
+  sfx('ach');
   document.getElementById('ach-notif-icon').innerHTML = achIconHTML(def.icon);
   document.getElementById('ach-notif-name').textContent = def.name;
   document.getElementById('ach-notif-desc').textContent = def.secret ? '??? 隱藏成就解鎖！' : def.desc;
@@ -2203,6 +2255,10 @@ function renderSettings(){
     '<span style="font-size:12px;color:#7f8c8d;">完成訓練後自動推進，不依賴日期</span>'+
     '</div>'+
     '<button class="save-btn" onclick="restartCycle()">從頭開始（重設進度）</button>'+
+    '</div>'+
+    '<div class="set-group">'+
+    '<h3>音效</h3>'+
+    '<button class="save-btn" onclick="toggleSfx()">8-bit 音效：'+(sfxOn()?'開':'關')+'</button>'+
     '</div>'+
     '<div class="set-group">'+
     '<h3>資料管理</h3>'+
