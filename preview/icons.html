@@ -1,0 +1,12 @@
+<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>像素圖示</title>
+<style>body{background:#9bbc0f;color:#0f380f;font-family:sans-serif;padding:16px}
+.g{display:flex;flex-wrap:wrap;gap:14px}.i{text-align:center;font-size:12px;font-weight:700}
+.t{background:#9bbc0f;border:3px solid #0f380f;line-height:0;display:inline-block;padding:4px}
+.dark{background:#0f380f;padding:8px;margin-top:16px;display:inline-flex;gap:8px}</style></head><body>
+<div class="g" id="g"></div>
+<script src="icons.js"></script><script>
+const PAL={K:'#0f380f',D:'#306230',M:'#8bac0f',L:'#e0f8a0'};
+function svg(g,s){let r='';g.forEach((row,y)=>{for(let x=0;x<16;x++){const f=PAL[row[x]];if(f)r+='<rect x="'+x+'" y="'+y+'" width="1" height="1" fill="'+f+'"/>';}});
+return '<svg width="'+16*s+'" height="'+16*s+'" viewBox="0 0 16 16" shape-rendering="crispEdges">'+r+'</svg>';}
+for(const k in PX_ICONS){document.getElementById('g').innerHTML+='<div class="i"><div class="t">'+svg(PX_ICONS[k],4)+'</div><div>'+k+'</div></div>';}
+</script></body></html>

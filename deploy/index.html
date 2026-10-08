@@ -113,6 +113,10 @@ body{font-family:'Noto Sans TC',sans-serif;background:#0a0a1a;color:#e0e0e0;min-
 .ex-icon{flex-shrink:0;margin-right:8px;image-rendering:pixelated;}
 .ex-tile{flex-shrink:0;width:46px;height:46px;margin-right:10px;display:flex;align-items:center;justify-content:center;background:#9bbc0f;border:3px solid #0f380f;box-shadow:2px 2px 0 #306230;}
 .ex-tile .ex-icon{margin-right:0;}
+.px{vertical-align:middle;flex-shrink:0;}
+.px-tile{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;background:#9bbc0f;border:3px solid #0f380f;box-shadow:2px 2px 0 #306230;}
+.ach-card:not(.unlocked) .px-tile{opacity:.55;}
+.ach-lock{opacity:.7;}
 .day-modal-close{width:100%;padding:12px;border-radius:8px;border:none;background:#2a2a4e;color:#fff;font-size:15px;cursor:pointer;margin-top:12px;font-family:'Noto Sans TC',sans-serif;}
 
 /* Achievements */
@@ -318,7 +322,7 @@ body{background:#9bbc0f;color:#0f380f;}
 
 <!-- Coach Analysis Overlay -->
 <div id="coach-overlay">
-  <div class="coach-header">📊 教練分析</div>
+  <div class="coach-header"><span data-px="chart"></span> 教練分析</div>
   <div class="coach-body" id="coach-body"></div>
   <div class="coach-footer">
     <button class="coach-close-btn" onclick="closeCoach()">了解，繼續 ▶</button>
@@ -339,7 +343,7 @@ body{background:#9bbc0f;color:#0f380f;}
   <div class="ach-notif-inner">
     <div class="ach-notif-icon" id="ach-notif-icon"></div>
     <div class="ach-notif-text">
-      <div class="ach-notif-label">🏆 成就解鎖！</div>
+      <div class="ach-notif-label"><span data-px="trophy"></span> 成就解鎖！</div>
       <div class="ach-notif-name" id="ach-notif-name"></div>
       <div class="ach-notif-desc" id="ach-notif-desc"></div>
     </div>
@@ -357,7 +361,7 @@ body{background:#9bbc0f;color:#0f380f;}
 </div>
 
 <!-- Streak -->
-<div id="streak-bar">🔥 連續 <strong id="streak-val">0</strong> 天　<span id="title-badge" style="font-size:11px;color:#f39c12;"></span></div>
+<div id="streak-bar"><span data-px="fire"></span> 連續 <strong id="streak-val">0</strong> 天　<span id="title-badge" style="font-size:11px;color:#f39c12;"></span></div>
 
 <!-- Main -->
 <div id="main">
@@ -589,6 +593,7 @@ function init(){
   const sched = getCurrentSchedule();
   currentDay = sched.day || 1;
 
+  document.querySelectorAll('[data-px]').forEach(el=>{ el.innerHTML = pxIcon(el.dataset.px, 1); });
   loadDraft();
   renderHeader();
   renderAll();
@@ -719,6 +724,75 @@ function bodyIconSVG(part, scale){
   });
   if(view==='front') rects += '<rect x="5" y="2" width="1" height="1" fill="#0a0a1a"/><rect x="7" y="2" width="1" height="1" fill="#0a0a1a"/>';
   return '<svg class="ex-icon" width="'+(13*scale)+'" height="'+(20*scale)+'" viewBox="0 0 13 20" shape-rendering="crispEdges">'+rects+'</svg>';
+}
+
+// ─── Pixel icons (16x16, replace emojis) ─────────────────────
+const PX_ICONS = {
+  medal1:["...KK......KK...","..KDDK....KDDK..","...KDDK..KDDK...","....KDDKKDDK....",".....KDDDDK.....",".....KKKKKK.....","....KLLLLLLK....","...KLMMMMMMLK...","...KLMMKMMMLK...","...KLMKKMMMLK...","...KLMMKMMMLK...","...KLMMKMMMLK...","...KLMKKKMMLK...","...KLMMMMMMLK...","....KLLLLLLK....",".....KKKKKK....."],
+  medal2:["...KK......KK...","..KDDK....KDDK..","...KDDK..KDDK...","....KDDKKDDK....",".....KDDDDK.....",".....KKKKKK.....","....KLLLLLLK....","...KLMMMMMMLK...","...KLMKKMMMLK...","...KLMMMKMMLK...","...KLMMKMMMLK...","...KLMKMMMMLK...","...KLMKKKMMLK...","...KLMMMMMMLK...","....KLLLLLLK....",".....KKKKKK....."],
+  medal3:["...KK......KK...","..KDDK....KDDK..","...KDDK..KDDK...","....KDDKKDDK....",".....KDDDDK.....",".....KKKKKK.....","....KLLLLLLK....","...KLMMMMMMLK...","...KLMKKMMMLK...","...KLMMMKMMLK...","...KLMMKMMMLK...","...KLMMMKMMLK...","...KLMKKMMMLK...","...KLMMMMMMLK...","....KLLLLLLK....",".....KKKKKK....."],
+  trophy:["................","..KKKKKKKKKKKK..",".KLKLLLLLLLLKLK.","K.KLLLLLLLLLLK.K","K.KLMLLLLLLMLK.K",".KKLMLLLLLLMLKK.","...KLMLLLLMLK...","....KLMMMMLK....",".....KLLLLK.....","......KLLK......","......KMMK......",".....KMMMMK.....","....KKKKKKKK....","....KMMMMMMK....","....KKKKKKKK....","................"],
+  fire:["................",".......K........","......KDK.......","......KDDK......",".....KDDDK..K...","....KDDDDDK.KK..","...KDDDLDDDKDK..","...KDDLLDDDDDK..","..KDDLLLLDDDDK..","..KDDLLLLLDDDK..","..KDLLLMLLLDDK..","..KDLLMMMLLDDK..","...KDLMMMLLDK...","....KDLLLLDK....",".....KKKKKK.....","................"],
+  bolt:["................","........KKKK....",".......KLLK.....","......KLLK......",".....KLLK.......","....KLLKKKKK....","...KLLLLLLLK....","...KKKKKLLK.....",".......KLLK.....","......KLLK......",".....KLLK.......","....KLLK........","....KLK.........","....KK..........","................","................"],
+  star:["................",".......KK.......","......KLLK......","......KLLK......",".KKKKKKLLKKKKKK.",".KLLLLLLLLLLLLK.","..KLLLLLLLLLLK..","...KLLLLLLLLK...","....KLLLLLLK....","....KLLLLLLK....","...KLLLKKLLLK...","...KLLK..KLLK...","..KLLK....KLLK..","..KKK......KKK..","................","................"],
+  crown:["................","................","..K....KK....K..",".KLK..KLLK..KLK.","..KK..KLLK..KK..","..KLK.KLLK.KLK..","..KLLKKLLKKLLK..","..KLLLLLLLLLLK..","..KLLMLLLLMLLK..","..KLLLLLLLLLLK..","..KKKKKKKKKKKK..","..KMMMMMMMMMMK..","..KKKKKKKKKKKK..","................","................","................"],
+  gem:["................","................","....KKKKKKKK....","...KLLKLLKMMK...","..KLLKLLLLKMMK..",".KKKKKKKKKKKKKK.",".KLLLKLLLLKMMMK.","..KLLKLLLLKMMK..","...KLLKLLKMMK...","....KLKLLKMK....",".....KLLLMMK....","......KLMK......",".......KK.......","................","................","................"],
+  skull:["................","....KKKKKKKK....","...KLLLLLLLLK...","..KLLLLLLLLLLK..","..KLLLLLLLLLLK..","..KLKKKLLKKKLK..","..KLKKKLLKKKLK..","..KLLKLLLLKLLK..","..KLLLLKKLLLLK..","...KLLLKKLLLK...","....KLLLLLLK....","....KLKLKLKK....","....KKLKLKLK....",".....KKKKKK.....","................","................"],
+  beast:["................",".KK..........KK.",".KLK........KLK.","..KLKKKKKKKKLK..","...KDDDDDDDDK...","..KDDDDDDDDDDK..","..KDLLKDDKLLDK..","..KDLKKDDKKLDK..","..KDDDDDDDDDDK..","..KDDDKKKKDDDK..","..KDDKLKKLKDDK..","..KDDKKKKKKDDK..","...KDDDDDDDDK...","....KKKKKKKK....","................","................"],
+  muscle:["................","................","..........KKKK..",".........KLLLLK.",".........KLLLLK.","..........KLLK..","..........KLLK..","....KKKK..KLLK..","...KLLLLKKLLLK..","..KLLLLLLLLLLK..","KKLLLLLLLLLLLK..","KLLLLLLLMMMLK...","KLLLLLLLLLLK....","KKKKKKKKKKK.....","................","................"],
+  leg:["................","......KKKKK.....","......KLLLK.....","......KLLLK.....","......KLLLK.....","......KLLLLK....",".......KLLLK....",".......KLLLK....","......KLLLK.....","......KLLLK.....","......KLLLK.....","......KLLLKKKK..","......KLLLLLLLK.","......KKKKKKKKK.","................","................"],
+  run:["................","................","........KKK.....","........KLK.....","........KKK.....",".....KKKKDK.....","....KLK.KDDK....",".......KDDKLK...","......KDDK..KK..","......KDDKK.....",".....KDK.KDK....","....KDK...KDK...","...KDK.....KDKK.","..KKK.......KK..","................","................"],
+  calendar:["................","................","....K......K....","..KKKKKKKKKKKK..","..KDDDDDDDDDDK..","..KKKKKKKKKKKK..","..KLLLLLLLLLLK..","..KLKLKLKLKLLK..","..KLLLLLLLLLLK..","..KLKLKLKLKLLK..","..KLLLLLLLLLLK..","..KLKLKLKKKLLK..","..KLLLLLLKKLLK..","..KKKKKKKKKKKK..","................","................"],
+  hundred:["................","................","................","..K...KKK...KKK.",".KK..K...K.K...K","..K..K...K.K...K","..K..K...K.K...K","..K..K...K.K...K",".KKK..KKK...KKK.","................","KKKKKKKKKKKKKKKK","................","KKKKKKKKKKKKKKKK","................","................","................"],
+  robot:["................",".......KK.......",".......KK.......","...KKKKKKKKKK...","...KLLLLLLLLK...","..KKLKKLLKKLKK..","..KKLKKLLKKLKK..","...KLLLLLLLLK...","...KLKKKKKKLK...","...KLLLLLLLLK...","...KKKKKKKKKK...",".....KDDDDK.....","....KDDDDDDK....","....KKKKKKKK....","................","................"],
+  orb:["................","................","................",".....KKKKKK.....","....KLLMMMMK....","...KLLLMMMMMK...","...KLMMMMMMMK...","...KMMMMMMMMK...","...KMMMMMMMDK...","....KMMMMMDK....",".....KKKKKK.....","....KDDDDDDK....","...KKKKKKKKKK...","................","................","................"],
+  rainbow:["................","................","................","....KKKKKKKK....","...KDDDDDDDDK...","..KDKKKKKKKKDK..",".KDKMMMMMMMMKDK.",".KDKMKKKKKKMKDK.","KDKMK......KMKDK","KDKMK......KMKDK","KDKMK......KMKDK","KKKKK......KKKKK","................","................","................","................"],
+  owl:["................","..K..........K..","..KK........KK..","..KDKKKKKKKKDK..","..KDDDDDDDDDDK..","..KLLLKDDKLLLK..",".KLKKLLKKLLKKLK.",".KLKKLLKKLLKKLK.","..KLLLKMMKLLLK..","..KDDDDKKDDDDK..","..KDDDDDDDDDDK..","..KDDLDDDDLDDK..","...KDDDDDDDDK...","....KKKKKKKK....","....K.K..K.K....","................"],
+  sun:["................","................",".......K........","..K....K....K...","...K..KKK..K....",".....KLLLK......","....KLLLLLK.....","KK.KLLLLLLLK.KK.","....KLLLLLK.....",".....KLLLK......","...K..KKK..K....","..K....K....K...",".......K........","KKKKKKKKKKKKKKKK","................","................"],
+  loop:["................","................",".....KKKKKK.....","...KKDDDDDDKK.K.","..KDDKKKKKKDDKK.","..KDK......KDDK.",".KDK......KDDDK.",".KDK.......KKKK.",".KKKK.......KDK.",".KDDDK......KDK.",".KDDK......KDK..",".KKDDKKKKKKDDK..",".K.KKDDDDDDKK...",".....KKKKKK.....","................","................"],
+  target:["................",".....KKKKKK.....","...KKLLLLLLKK...","..KLLKKKKKKLLK..","..KLKLLLLLLKLK..",".KLKLLKKKKLLKLK.",".KLKLKLLLLKLKLK.",".KLKLKLKKLKLKLK.",".KLKLKLKKLKLKLK.",".KLKLKLLLLKLKLK.",".KLKLLKKKKLLKLK.","..KLKLLLLLLKLK..","..KLLKKKKKKLLK..","...KKLLLLLLKK...",".....KKKKKK.....","................"],
+  flag:["................","..KKKKKKKKKKKKK.","..KKKLLKKLLKKLK.","..KKKLLKKLLKKLK.","..KLLKKLLKKLLKK.","..KLLKKLLKKLLKK.","..KKKLLKKLLKKLK.","..KKKLLKKLLKKLK.","..KKKKKKKKKKKKK.","..KK............","..KK............","..KK............","..KK............",".KKKK...........","................","................"],
+  pencil:["................","................","...........KK...","..........KLLK..",".........KDKLK..","........KDDDK...",".......KDDDK....","......KDDDK.....",".....KDDDK......","....KDDDK.......","...KLDDK........","...KLLK.........","...KKK..........","................","................","................"],
+  trash:["................","................","................","......KKKK......","...KKKKKKKKKK...","...KKKKKKKKKK...","....KLLLLLLK....","....KLKLKLLK....","....KLKLKLLK....","....KLKLKLLK....","....KLKLKLLK....","....KLLLLLLK....","....KKKKKKKK....","................","................","................"],
+  x:["................","................","................","..KK......KK....","..KKK....KKK....","...KKK..KKK.....","....KKKKKK......",".....KKKK.......","....KKKKKK......","...KKK..KKK.....","..KKK....KKK....","..KK......KK....","................","................","................","................"],
+  question:["................",".....KKKKKK.....","....KKLLLLKK....","...KKLKKKKLKK...","...KKK....KLK...","..........KLK...",".........KLKK...","........KLKK....",".......KLKK.....",".......KLK......",".......KKK......","................",".......KKK......",".......KLK......",".......KKK......","................"],
+  lock:["................","................",".....KKKKKK.....","....KK....KK....","....K......K....","....K......K....","...KKKKKKKKKK...","...KLLLLLLLLK...","...KLLLKKLLLK...","...KLLLKKLLLK...","...KLLLLKLLLK...","...KLLLLLLLLK...","...KKKKKKKKKK...","................","................","................"],
+  chart:["................","................","................",".K..............",".K.........KK...",".K.........KK...",".K.....KK..KK...",".K.....KK..KK...",".K..KK.KK..KK...",".K..KK.KK..KK...",".K..KK.KK..KK...",".KKKKKKKKKKKKKK.","................","................","................","................"],
+  up:["................","................","................",".......KK.......","......KKKK......",".....KKKKKK.....","....KKKKKKKK....","...KKK.KK.KKK...",".......KK.......",".......KK.......",".......KK.......",".......KK.......","................","................","................","................"],
+  down:["................","................","................",".......KK.......",".......KK.......",".......KK.......",".......KK.......","...KKK.KK.KKK...","....KKKKKKKK....",".....KKKKKK.....","......KKKK......",".......KK.......","................","................","................","................"],
+  right:["................","................","................","................","................","........KK......","........KKK.....","..KKKKKKKKKK....","..KKKKKKKKKKK...","........KKK.....","........KK......","................","................","................","................","................"],
+  meat:["................","................","....KKKKK.......","...KDDDDDK......","..KDDLDDDDK.....","..KDLDDDDDDK....","..KDDDDDDDDK....","...KDDDDDDK.....","....KDDDDKK.....",".....KKKKLLK....","..........KLK...",".........KLLLK..","..........KLLK..","...........KK...","................","................"],
+  bowl:["................","................","................","....K..K..K.....",".....K..K..K....","....K..K..K.....","................",".KKKKKKKKKKKKKK.",".KLLLLLLLLLLLLK.","..KLLLLLLLLLLK..","...KLLLLLLLLK...","....KKKKKKKK....","......KKKK......","................","................","................"],
+  barbell:["................","................","................","................",".KK..........KK.","KMMK........KMMK","KMMK........KMMK","KMMKKKKKKKKKKMMK","KMMKKKKKKKKKKMMK","KMMK........KMMK","KMMK........KMMK",".KK..........KK.","................","................","................","................"],
+  heart:["................","................","..KKK....KKK....",".KLLLK..KLLLK...","KLLLLLKKLLLLLK..","KLLLLLLLLLLLLK..","KLLLLLLLLLLLLK..",".KLLLLLLLLLLK...","..KLLLLLLLLK....","...KLLLLLLK.....","....KLLLLK......",".....KLLK.......","......KK........","................","................","................"]
+};
+const EMOJI_PX = {
+  '🥉':['medal3'],'🥈':['medal2'],'🥇':['medal1'],'👹':['beast'],'🦁':['beast'],
+  '⚡':['bolt'],'💥':['bolt'],'🦵':['leg'],'🦵🦵':['leg','leg'],'🏃':['run'],
+  '📅':['calendar'],'📆':['calendar'],'🗓️':['calendar'],'💯':['hundred'],'🤖':['robot'],
+  '🔥':['fire'],'🔥🔥':['fire','fire'],'👑':['crown'],'⭐':['star'],'🌟':['star'],'💫':['star'],
+  '🔮':['orb'],'🏆':['trophy'],'💪':['muscle'],'💪💪':['muscle','muscle'],'🦾':['muscle'],
+  '💀':['skull'],'💎':['gem'],'💎💎':['gem','gem'],'💠':['gem'],'🌈':['rainbow'],
+  '🦉':['owl'],'🌅':['sun'],'🔄':['loop'],'🔁':['loop'],'🎯':['target']
+};
+
+function pxSVG(grid, scale){
+  const n = grid.length;
+  let r='';
+  grid.forEach((row,y)=>{
+    for(let x=0;x<row.length;x++){
+      const f = SPRITE_PAL[row[x]];
+      if(f) r += '<rect x="'+x+'" y="'+y+'" width="1" height="1" fill="'+f+'"/>';
+    }
+  });
+  return '<svg class="px" width="'+(n*scale)+'" height="'+(n*scale)+'" viewBox="0 0 '+n+' '+n+'" shape-rendering="crispEdges">'+r+'</svg>';
+}
+function pxIcon(name, scale){ return PX_ICONS[name] ? pxSVG(PX_ICONS[name], scale||1) : ''; }
+
+// Achievement emoji -> pixel tile (two icons side by side for doubled emojis)
+function achIconHTML(emoji){
+  const names = EMOJI_PX[emoji] || ['star'];
+  return '<span class="px-tile">'+names.map(n=>pxIcon(n, names.length>1?1:2)).join('')+'</span>';
 }
 
 // ─── Exercise sprites (Game Boy style, 20x20) ────────────────
@@ -1223,7 +1297,7 @@ function renderWorkout(){
   const dayInfo = WEEK_CYCLE.find(w=>w.day===currentDay) || WEEK_CYCLE[0];
   html += '<div class="day-header"><strong>'+escHtml(dayInfo.label)+'</strong></div>';
   html += '<div id="ex-list">'+renderExercisesHTML()+'</div>';
-  html += '<div id="complete-btn-wrap"><button id="complete-btn" onclick="completeWorkout()">完成訓練 🏁</button></div>';
+  html += '<div id="complete-btn-wrap"><button id="complete-btn" onclick="completeWorkout()">完成訓練 '+pxIcon('flag',1)+'</button></div>';
 
   wrap.innerHTML = html;
 }
@@ -1252,8 +1326,8 @@ function renderExercisesHTML(){
     html += '<div class="ex-name" style="display:flex;align-items:center;">'+
       exIconHTML(ex)+
       '<span id="exname-'+ei+'">'+escHtml(ex.name)+'</span>'+
-      '<button onclick="editExName('+ei+')" style="background:none;border:none;color:#7f8c8d;font-size:12px;cursor:pointer;margin-left:6px;" title="改名">✏️</button>'+
-      '<button onclick="removeExercise('+ei+')" style="background:none;border:none;color:#e74c3c;font-size:12px;cursor:pointer;margin-left:2px;" title="刪除動作">🗑</button>'+
+      '<button onclick="editExName('+ei+')" style="background:none;border:none;color:#7f8c8d;font-size:12px;cursor:pointer;margin-left:6px;" title="改名">'+pxIcon('pencil',1)+'</button>'+
+      '<button onclick="removeExercise('+ei+')" style="background:none;border:none;color:#e74c3c;font-size:12px;cursor:pointer;margin-left:2px;" title="刪除動作">'+pxIcon('trash',1)+'</button>'+
       '<span style="font-size:12px;font-weight:400;color:#7f8c8d;margin-left:auto;">'+sess.length+' 組</span>'+
     '</div>';
 
@@ -1261,7 +1335,7 @@ function renderExercisesHTML(){
       html += '<div class="set-row" id="setrow-'+ei+'-'+si+'">';
       html += '<div class="set-num">'+(si+1)+'</div>';
       html += setInputsHTML(ei,si,set,false);
-      html += '<button onclick="removeSet('+ei+','+si+')" style="width:36px;height:36px;border-radius:50%;background:#2a1a1a;border:none;color:#e74c3c;font-size:16px;cursor:pointer;flex-shrink:0;">✕</button>';
+      html += '<button onclick="removeSet('+ei+','+si+')" style="width:36px;height:36px;border-radius:50%;background:#2a1a1a;border:none;color:#e74c3c;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">'+pxIcon('x',1)+'</button>';
       html += '</div>';
     });
 
@@ -1438,7 +1512,7 @@ function completeWorkout(){
   // Advance to next training day
   advanceCycle();
 
-  showToast('訓練完成！+'+XP_COMPLETE+' XP 🎉');
+  showToast('訓練完成！+'+XP_COMPLETE+' XP！');
   renderHeader();
   renderAll();
 }
@@ -1503,7 +1577,7 @@ function processAchNotifQueue(){
   if(!achNotifQueue.length){ achNotifRunning=false; return; }
   achNotifRunning = true;
   const def = achNotifQueue.shift();
-  document.getElementById('ach-notif-icon').textContent = def.icon;
+  document.getElementById('ach-notif-icon').innerHTML = achIconHTML(def.icon);
   document.getElementById('ach-notif-name').textContent = def.name;
   document.getElementById('ach-notif-desc').textContent = def.secret ? '??? 隱藏成就解鎖！' : def.desc;
   const el = document.getElementById('ach-notif');
@@ -1634,18 +1708,18 @@ function renderAchievements(){
   const title = getTitle();
 
   const cats = [
-    {key:'bench',  label:'🏋️ 臥推挑戰'},
-    {key:'pull',   label:'🔙 滑輪下拉'},
-    {key:'legs',   label:'🦵 腿推舉'},
-    {key:'squat',  label:'🏋️ 深蹲挑戰'},
-    {key:'dead',   label:'⛏️ 硬拉挑戰'},
-    {key:'attend', label:'📅 出勤紀錄'},
-    {key:'streak', label:'🔥 連續挑戰'},
-    {key:'upper',  label:'💪 上肢戰士'},
-    {key:'lower',  label:'🦵 下肢英雄'},
-    {key:'level',  label:'⭐ 等級成長'},
-    {key:'xp',     label:'💎 XP 累積'},
-    {key:'secret', label:'💀 隱藏成就'},
+    {key:'bench',  icon:'barbell', label:'臥推挑戰'},
+    {key:'pull',   icon:'barbell', label:'滑輪下拉'},
+    {key:'legs',   icon:'leg', label:'腿推舉'},
+    {key:'squat',  icon:'barbell', label:'深蹲挑戰'},
+    {key:'dead',   icon:'barbell', label:'硬拉挑戰'},
+    {key:'attend', icon:'calendar', label:'出勤紀錄'},
+    {key:'streak', icon:'fire', label:'連續挑戰'},
+    {key:'upper',  icon:'muscle', label:'上肢戰士'},
+    {key:'lower',  icon:'leg', label:'下肢英雄'},
+    {key:'level',  icon:'star', label:'等級成長'},
+    {key:'xp',     icon:'gem', label:'XP 累積'},
+    {key:'secret', icon:'skull', label:'隱藏成就'},
   ];
 
   let html = '<div style="padding:12px;">';
@@ -1664,17 +1738,17 @@ function renderAchievements(){
     if(!items.length) return;
     const catGot = items.filter(a=>unlocked.has(a.id)).length;
     html += '<div style="margin-bottom:14px;">';
-    html += '<div style="font-size:13px;font-weight:700;color:#f39c12;margin-bottom:8px;padding:0 2px;">'+cat.label+' <span style="font-size:11px;color:#7f8c8d;font-weight:400;">'+catGot+'/'+items.length+'</span></div>';
+    html += '<div style="font-size:13px;font-weight:700;color:#f39c12;margin-bottom:8px;padding:0 2px;display:flex;align-items:center;gap:6px;">'+pxIcon(cat.icon,1)+cat.label+' <span style="font-size:11px;color:#7f8c8d;font-weight:400;">'+catGot+'/'+items.length+'</span></div>';
     items.forEach(a=>{
       const done = unlocked.has(a.id);
       const isSecret = a.secret && !done;
       html += '<div class="ach-card'+(done?' unlocked':'')+'" style="margin-bottom:6px;">';
-      html += '<div class="ach-icon">'+(isSecret?'❓':a.icon)+'</div>';
+      html += '<div class="ach-icon">'+(isSecret?'<span class="px-tile">'+pxIcon('question',2)+'</span>':achIconHTML(a.icon))+'</div>';
       html += '<div class="ach-info">';
       html += '<div class="ach-name">'+(isSecret?'???':escHtml(a.name))+'</div>';
       html += '<div class="ach-desc">'+(isSecret?'達成條件未知':escHtml(a.desc))+'</div>';
       html += '</div>';
-      if(!done) html += '<div class="ach-lock">🔒</div>';
+      if(!done) html += '<div class="ach-lock">'+pxIcon('lock',2)+'</div>';
       html += '</div>';
     });
     html += '</div>';
@@ -1707,14 +1781,14 @@ function renderProgress(){
   });
 
   let html = '<div style="padding:12px;">';
-  html += '<div style="font-family:\'PressStart\',monospace;font-size:10px;color:#f39c12;padding:8px 4px 16px;letter-spacing:1px;">📈 重量進步紀錄</div>';
+  html += '<div style="font-family:\'PressStart\',monospace;font-size:10px;color:#f39c12;padding:8px 4px 16px;letter-spacing:1px;display:flex;align-items:center;gap:6px;">'+pxIcon('chart',1)+'重量進步紀錄</div>';
 
   Object.keys(exHistory).forEach(name=>{
     const history = exHistory[name].sort((a,b)=>a.date.localeCompare(b.date));
     const first = history[0];
     const last  = history[history.length-1];
     const diff  = last.maxW - first.maxW;
-    const diffStr = diff > 0 ? '+'+diff+'kg ⬆️' : diff < 0 ? diff+'kg ⬇️' : '持平 ➡️';
+    const diffStr = diff > 0 ? '+'+diff+'kg '+pxIcon('up',1) : diff < 0 ? diff+'kg '+pxIcon('down',1) : '持平 '+pxIcon('right',1);
     const diffColor = diff > 0 ? '#2ecc71' : diff < 0 ? '#e74c3c' : '#f39c12';
 
     html += '<div style="background:#1a1a2e;border-radius:12px;margin-bottom:12px;padding:14px;">';
@@ -1792,7 +1866,7 @@ function renderDiet(){
 
     <!-- 每日目標 -->
     <div style="background:#16213e;border-radius:12px;padding:16px;margin-bottom:16px;">
-      <div style="font-size:13px;font-weight:700;color:#f39c12;margin-bottom:12px;">📊 每日目標</div>
+      <div style="font-size:13px;font-weight:700;color:#f39c12;margin-bottom:12px;display:flex;align-items:center;gap:6px;">${pxIcon('chart',1)}每日目標</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <div style="background:#1a1a2e;border-radius:8px;padding:10px;text-align:center;">
           <div style="font-size:18px;font-weight:700;color:#e74c3c;">2,100</div>
@@ -1819,7 +1893,7 @@ function renderDiet(){
 
     <!-- 食材營養素 -->
     <div style="background:#16213e;border-radius:12px;padding:16px;margin-bottom:16px;">
-      <div style="font-size:13px;font-weight:700;color:#f39c12;margin-bottom:12px;">🥩 食材營養素</div>
+      <div style="font-size:13px;font-weight:700;color:#f39c12;margin-bottom:12px;display:flex;align-items:center;gap:6px;">${pxIcon('meat',1)}食材營養素</div>
       <div style="overflow-x:auto;">
         <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:320px;">
           <thead>
@@ -1849,7 +1923,7 @@ function renderDiet(){
 
     <!-- 範例菜單 -->
     <div style="background:#16213e;border-radius:12px;padding:16px;margin-bottom:16px;">
-      <div style="font-size:13px;font-weight:700;color:#f39c12;margin-bottom:12px;">🍽 範例菜單</div>
+      <div style="font-size:13px;font-weight:700;color:#f39c12;margin-bottom:12px;display:flex;align-items:center;gap:6px;">${pxIcon('bowl',1)}範例菜單</div>
 
       <!-- 早餐 -->
       <div style="margin-bottom:12px;">
