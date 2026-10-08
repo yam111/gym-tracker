@@ -201,8 +201,11 @@ body{background:#9bbc0f;color:#0f380f;}
 #app-header{background:#306230;border-bottom:3px solid #0f380f;}
 #app-title,#level-badge{color:#9bbc0f;}
 #xp-text{color:#8bac0f;}
-#xp-bar-wrap{border-radius:0;background:#0f380f;border:2px solid #0f380f;height:10px;}
-#xp-bar{border-radius:0;background:#9bbc0f;}
+/* Pokémon HP-style EXP bar: dark rounded frame, label, segmented fill that moves in steps */
+#xp-row{display:flex;align-items:center;gap:3px;background:#0f380f;padding:2px 3px 2px 4px;border-radius:2px 8px 8px 2px;box-shadow:2px 2px 0 #8bac0f;}
+#xp-label{font-family:'PressStart',monospace;font-size:8px;line-height:1;color:#9bbc0f;}
+#xp-bar-wrap{width:104px;height:8px;border-radius:0 5px 5px 0;background:#306230;border:2px solid #306230;overflow:hidden;}
+#xp-bar{border-radius:0;background:repeating-linear-gradient(90deg,#9bbc0f 0 4px,#8bac0f 4px 5px);transition:width .6s steps(10);}
 #streak-bar{background:#8bac0f;color:#0f380f;border-bottom:3px solid #0f380f;font-weight:700;}
 #streak-bar *{color:#0f380f!important;}
 
@@ -412,7 +415,7 @@ body{background:#9bbc0f;color:#0f380f;}
   <div id="app-title">GYM QUEST</div>
   <div id="xp-area">
     <div id="level-badge">LV.1</div>
-    <div id="xp-bar-wrap"><div id="xp-bar" style="width:0%"></div></div>
+    <div id="xp-row"><span id="xp-label">EXP</span><div id="xp-bar-wrap"><div id="xp-bar" style="width:0%"></div></div></div>
     <div id="xp-text">0 / 800 XP</div>
   </div>
 </div>
