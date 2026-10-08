@@ -562,17 +562,17 @@ const ACHIEVEMENTS_DEF = [
   {id:'bench_100',cat:'bench', name:'百公斤臥推', desc:'臥推達到 100kg',  icon:'🥇', secret:false},
   {id:'bench_120',cat:'bench', name:'臥推猛獸',   desc:'臥推達到 120kg',  icon:'👹', secret:false},
 
-  // 🔙 滑輪下拉挑戰
-  {id:'pull_50',  cat:'pull',  name:'下拉入門',   desc:'滑輪下拉達到 50kg', icon:'🥉', secret:false},
-  {id:'pull_65',  cat:'pull',  name:'下拉進階',   desc:'滑輪下拉達到 65kg', icon:'🥈', secret:false},
-  {id:'pull_80',  cat:'pull',  name:'下拉強者',   desc:'滑輪下拉達到 80kg', icon:'🥇', secret:false},
-  {id:'pull_100', cat:'pull',  name:'下拉傳說',   desc:'滑輪下拉達到 100kg',icon:'⚡', secret:false},
+  // 🔙 高位下拉挑戰
+  {id:'pull_50',  cat:'pull',  name:'下拉入門',   desc:'高位下拉達到 50kg', icon:'🥉', secret:false},
+  {id:'pull_65',  cat:'pull',  name:'下拉進階',   desc:'高位下拉達到 65kg', icon:'🥈', secret:false},
+  {id:'pull_80',  cat:'pull',  name:'下拉強者',   desc:'高位下拉達到 80kg', icon:'🥇', secret:false},
+  {id:'pull_100', cat:'pull',  name:'下拉傳說',   desc:'高位下拉達到 100kg',icon:'⚡', secret:false},
 
-  // 🦵 腿推舉挑戰
-  {id:'leg_60',   cat:'legs',  name:'腿力覺醒',   desc:'腿推舉達到 60kg',  icon:'🥉', secret:false},
-  {id:'leg_100',  cat:'legs',  name:'腿力精英',   desc:'腿推舉達到 100kg', icon:'🥈', secret:false},
-  {id:'leg_150',  cat:'legs',  name:'鐵腿戰士',   desc:'腿推舉達到 150kg', icon:'🥇', secret:false},
-  {id:'leg_200',  cat:'legs',  name:'腿推傳說',   desc:'腿推舉達到 200kg', icon:'🦵', secret:false},
+  // 🦵 腿推挑戰
+  {id:'leg_60',   cat:'legs',  name:'腿力覺醒',   desc:'腿推達到 60kg',  icon:'🥉', secret:false},
+  {id:'leg_100',  cat:'legs',  name:'腿力精英',   desc:'腿推達到 100kg', icon:'🥈', secret:false},
+  {id:'leg_150',  cat:'legs',  name:'鐵腿戰士',   desc:'腿推達到 150kg', icon:'🥇', secret:false},
+  {id:'leg_200',  cat:'legs',  name:'腿推傳說',   desc:'腿推達到 200kg', icon:'🦵', secret:false},
 
   // 📅 出勤系列
   {id:'sess_10',  cat:'attend', name:'初出茅廬',  desc:'累積完成 10 次訓練',  icon:'📅', secret:false},
@@ -596,10 +596,10 @@ const ACHIEVEMENTS_DEF = [
   {id:'squat_120',cat:'squat', name:'深蹲猛獸',   desc:'深蹲達到 120kg', icon:'🦁', secret:false},
 
   // ⛏️ 硬拉挑戰
-  {id:'dead_100', cat:'dead', name:'硬拉破百',    desc:'硬拉達到 100kg', icon:'🥉', secret:false},
-  {id:'dead_120', cat:'dead', name:'硬拉強者',    desc:'硬拉達到 120kg', icon:'🥈', secret:false},
-  {id:'dead_150', cat:'dead', name:'硬拉精英',    desc:'硬拉達到 150kg', icon:'🥇', secret:false},
-  {id:'dead_180', cat:'dead', name:'硬拉傳說',    desc:'硬拉達到 180kg', icon:'💀', secret:false},
+  {id:'dead_100', cat:'dead', name:'硬拉破百',    desc:'硬舉達到 100kg', icon:'🥉', secret:false},
+  {id:'dead_120', cat:'dead', name:'硬拉強者',    desc:'硬舉達到 120kg', icon:'🥈', secret:false},
+  {id:'dead_150', cat:'dead', name:'硬拉精英',    desc:'硬舉達到 150kg', icon:'🥇', secret:false},
+  {id:'dead_180', cat:'dead', name:'硬拉傳說',    desc:'硬舉達到 180kg', icon:'💀', secret:false},
 
   // 💪 上肢日系列
   {id:'upper_5',  cat:'upper', name:'上肢初鳴',   desc:'完成 5 次上肢訓練',  icon:'💪', secret:false},
@@ -1777,10 +1777,10 @@ function checkAchievements(sessionData, extraFlags){
     });
   });
   const bench  = maxWeights['臥推']||0;
-  const pullW  = maxWeights['滑輪下拉']||0;
-  const legW   = maxWeights['腿推舉']||0;
+  const pullW  = maxWeights['高位下拉']||0;
+  const legW   = maxWeights['腿推']||0;
   const squatW = maxWeights['深蹲']||0;
-  const deadW  = Math.max(maxWeights['傳統硬拉']||0, maxWeights['羅馬尼亞硬拉']||0);
+  const deadW  = maxWeights['硬舉']||0;
   [{id:'bench_60',v:60},{id:'bench_80',v:80},{id:'bench_100',v:100},{id:'bench_120',v:120}]
     .forEach(({id,v})=>{ if(bench>=v && !unlocked.has(id)) newOnes.push(id); });
   [{id:'pull_50',v:50},{id:'pull_65',v:65},{id:'pull_80',v:80},{id:'pull_100',v:100}]
@@ -1793,8 +1793,8 @@ function checkAchievements(sessionData, extraFlags){
     .forEach(({id,v})=>{ if(deadW>=v && !unlocked.has(id)) newOnes.push(id); });
 
   // 上肢/下肢日次數
-  const upperCount = sessions.filter(s=>s.type==='upper').length;
-  const lowerCount = sessions.filter(s=>s.type==='lower').length;
+  const upperCount = sessions.filter(s=>(s.type||'').startsWith('upper')).length;
+  const lowerCount = sessions.filter(s=>(s.type||'').startsWith('lower')).length;
   [{id:'upper_5',v:5},{id:'upper_15',v:15},{id:'upper_30',v:30},{id:'upper_60',v:60}]
     .forEach(({id,v})=>{ if(upperCount>=v && !unlocked.has(id)) newOnes.push(id); });
   [{id:'lower_5',v:5},{id:'lower_15',v:15},{id:'lower_30',v:30},{id:'lower_60',v:60}]
@@ -1816,7 +1816,8 @@ function checkAchievements(sessionData, extraFlags){
       const d = new Date(s.date); const mon = new Date(d); mon.setDate(d.getDate()-d.getDay()+1);
       const wk = mon.toISOString().slice(0,10);
       if(!weekMap[wk]) weekMap[wk]={upper:0,lower:0};
-      if(weekMap[wk][s.type]!==undefined) weekMap[wk][s.type]++;
+      const kind = (s.type||'').replace(/[AB]$/,''); // upperA → upper
+      if(weekMap[wk][kind]!==undefined) weekMap[wk][kind]++;
     });
     if(Object.values(weekMap).some(w=>w.upper>0&&w.lower>0)) newOnes.push('full_week');
   }
@@ -1864,8 +1865,8 @@ function renderAchievements(){
 
   const cats = [
     {key:'bench',  icon:'barbell', label:'臥推挑戰'},
-    {key:'pull',   icon:'barbell', label:'滑輪下拉'},
-    {key:'legs',   icon:'leg', label:'腿推舉'},
+    {key:'pull',   icon:'barbell', label:'高位下拉'},
+    {key:'legs',   icon:'leg', label:'腿推'},
     {key:'squat',  icon:'barbell', label:'深蹲挑戰'},
     {key:'dead',   icon:'barbell', label:'硬拉挑戰'},
     {key:'attend', icon:'calendar', label:'出勤紀錄'},
