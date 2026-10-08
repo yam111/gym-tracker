@@ -178,6 +178,117 @@ body{font-family:'Noto Sans TC',sans-serif;background:#0a0a1a;color:#e0e0e0;min-
 /* Day header */
 .day-header{padding:10px 12px 4px;font-size:13px;color:#7f8c8d;}
 .day-header strong{color:#fff;font-size:15px;}
+
+/* ─── Game Boy theme（四階綠：#0f380f / #306230 / #8bac0f / #9bbc0f）───
+   Overrides the base styles above; inline colors in render functions are
+   remapped with attribute selectors. */
+body{background:#9bbc0f;color:#0f380f;}
+#app-header{background:#306230;border-bottom:3px solid #0f380f;}
+#app-title,#level-badge{color:#9bbc0f;}
+#xp-text{color:#8bac0f;}
+#xp-bar-wrap{border-radius:0;background:#0f380f;border:2px solid #0f380f;height:10px;}
+#xp-bar{border-radius:0;background:#9bbc0f;}
+#streak-bar{background:#8bac0f;color:#0f380f;border-bottom:3px solid #0f380f;font-weight:700;}
+#streak-bar *{color:#0f380f!important;}
+
+.day-tab{border-radius:0;background:#0f380f!important;color:#9bbc0f!important;border:2px solid #0f380f!important;}
+.day-header{color:#306230;}
+.day-header strong{color:#0f380f;font-size:17px;}
+
+.ex-card{background:#8bac0f;border:3px solid #0f380f;border-radius:0;box-shadow:4px 4px 0 #306230;margin:14px 12px;}
+.ex-name span[id^=exname]{font-size:17px!important;font-weight:700!important;color:#0f380f!important;margin-left:0!important;}
+.ex-name > span:last-child{color:#0f380f!important;font-family:'PressStart',monospace;font-size:9px!important;}
+.ex-name button{filter:grayscale(1) brightness(.4);}
+
+.set-row{background:#9bbc0f;border:2px solid #306230;border-radius:0;}
+.set-num{font-family:'PressStart',monospace;font-size:10px;color:#0f380f;}
+.set-inp label{color:#306230;font-weight:700;}
+.set-inp input{background:#8bac0f;color:#0f380f;border:2px solid #0f380f;border-radius:0;font-family:'PressStart',monospace;font-size:14px;padding:8px 4px;}
+.set-inp input:focus{outline:none;background:#0f380f;color:#9bbc0f;}
+.set-row button{background:#306230!important;color:#9bbc0f!important;border-radius:0!important;}
+
+.add-set-btn{border:2px dashed #306230;border-radius:0;color:#0f380f;font-weight:700;}
+#complete-btn{background:#0f380f;color:#9bbc0f;border-radius:0;box-shadow:4px 4px 0 #306230;font-size:17px;}
+
+#bottom-nav{background:#306230;border-top:3px solid #0f380f;}
+.nav-btn{color:#8bac0f;}
+.nav-btn.active{color:#9bbc0f;background:#0f380f;}
+
+/* recolor body-part icons to green shades */
+.ex-icon rect{fill:#306230;}
+.ex-icon rect[fill="#c8a27a"],.ex-icon rect[fill="#6b5a48"]{fill:#0f380f;}
+.ex-icon rect[fill="#f39c12"]{fill:#e0f8a0;}
+.ex-icon rect[fill="#0a0a1a"]{fill:#9bbc0f;}
+
+.set-group,.ach-card,.day-modal-box,.part-btn{background:#8bac0f!important;color:#0f380f!important;border:3px solid #0f380f!important;border-radius:0!important;}
+.set-group h3,.day-modal-date,.ach-name,.day-modal-ex-name{color:#0f380f!important;}
+.save-btn,.day-modal-close{background:#0f380f;color:#9bbc0f;border-radius:0;}
+.danger-btn{border-radius:0;border-color:#0f380f;color:#0f380f;}
+#toast{background:#0f380f;color:#9bbc0f;border-radius:0;}
+
+/* ── Other tabs (map / diet / achievements / progress): inline colors → Game Boy palette ── */
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#fff"],
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#ecf0f1"],
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#f39c12"],
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#e74c3c"],
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#3498db"],
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#27ae60"],
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#2ecc71"],
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#9b59b6"]{color:#0f380f!important;}
+:is(#section-map,#section-diet,#section-achievements,#section-progress) [style*="color:#7f8c8d"]{color:#306230!important;}
+
+/* big panels */
+#section-diet [style*="background:#16213e"],
+#section-achievements [style*="background:#16213e"],
+#section-progress [style*="background:#1a1a2e"]{background:#8bac0f!important;border:3px solid #0f380f;border-radius:0!important;box-shadow:4px 4px 0 #306230;}
+/* inner boxes */
+#section-diet [style*="background:#1a1a2e"]{background:#9bbc0f!important;border:2px solid #306230;border-radius:0!important;}
+/* highlight box (全日合計) */
+#section-diet [style*="background:#0f3460"]{background:#0f380f!important;border-radius:0!important;}
+#section-diet [style*="background:#0f3460"] *{color:#9bbc0f!important;}
+#section-diet [style*="background:#0f3460"] [style*="color:#7f8c8d"]{color:#8bac0f!important;}
+/* lines */
+#section-diet [style*="solid #2a2a4a"],#section-diet [style*="solid #1a1a2e"]{border-color:#306230!important;}
+#section-diet [style*="solid #f39c12"]{border-color:#0f380f!important;border-top-width:2px!important;}
+
+/* achievements: title progress bar + cards */
+#section-achievements [style*="background:#0a0a1a"]{background:#0f380f!important;border-radius:0!important;height:8px!important;}
+#section-achievements [style*="linear-gradient"]{background:#9bbc0f!important;border-radius:0!important;}
+.ach-card.unlocked{background:#0f380f!important;}
+.ach-card.unlocked .ach-name{color:#9bbc0f!important;}
+.ach-card.unlocked .ach-desc{color:#8bac0f!important;}
+.ach-card:not(.unlocked) .ach-name{color:#306230!important;}
+.ach-card:not(.unlocked) .ach-desc{color:#306230!important;opacity:.8;}
+
+/* progress chart bars */
+#section-progress [style*="background:#3498db"]{background:#0f380f!important;border-radius:0!important;width:10px!important;}
+
+/* map */
+#section-map button[style*="background:#1a1a2e"]{background:#0f380f!important;color:#9bbc0f!important;border-radius:0!important;}
+#section-map [style*="background:#12122a"]{background:#8bac0f!important;color:#306230!important;border-radius:0!important;}
+#section-map [style*="background:#0d0d1a"]{background:#9bbc0f!important;color:#8bac0f!important;border:2px solid #8bac0f!important;border-radius:0!important;}
+#section-map [style*="background:#1e7a45"]{background:#0f380f!important;color:#9bbc0f!important;border-radius:0!important;}
+#section-map div[style*="solid #f39c12"]{background:#e0f8a0!important;color:#0f380f!important;border:3px solid #0f380f!important;border-radius:0!important;}
+
+/* modals / overlays */
+.day-modal-set{color:#306230;}
+.part-btn span{color:#0f380f;}
+#ach-notif{background:#8bac0f;border:3px solid #0f380f;border-radius:0;box-shadow:4px 4px 0 #306230;}
+.ach-notif-label,.ach-notif-name{color:#0f380f;font-weight:700;}
+.ach-notif-desc{color:#306230;}
+.coach-header{background:#306230;color:#9bbc0f;}
+.coach-ex{background:#8bac0f;border-radius:0;border-left:6px solid #0f380f;}
+.coach-ex-name{color:#0f380f;}
+.coach-sets{color:#306230;}
+.advice-up,.advice-hold,.advice-down{border-radius:0;background:#9bbc0f;color:#0f380f;border:2px solid #0f380f;}
+.advice-up{background:#0f380f;color:#9bbc0f;}
+.coach-close-btn,.lvl-btn{background:#9bbc0f;color:#0f380f;border-radius:0;box-shadow:4px 4px 0 #306230;}
+.lvl-title{color:#9bbc0f;}
+
+/* settings: progress box (inline colors) */
+#section-settings [style*="background:#0f0f2a"]{background:#9bbc0f!important;border:2px solid #306230;border-radius:0!important;color:#0f380f!important;}
+#section-settings [style*="color:#f39c12"]{color:#0f380f!important;}
+#section-settings [style*="color:#7f8c8d"]{color:#306230!important;}
 </style>
 </head>
 <body>
