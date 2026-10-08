@@ -1580,12 +1580,15 @@ function completeWorkout(){
   const exList = templates[currentDay] || [];
   const today = todayStr();
   const dayInfo = WEEK_CYCLE.find(w=>w.day===currentDay) || WEEK_CYCLE[0];
+  const filled = s=>s.w!==''&&s.w!==undefined&&s.r!==''&&s.r!==undefined;
+  const entered = ei=>(currentSession[currentDay]&&currentSession[currentDay][ei]||[]);
+  const doneUpTo = confirmedSets[currentDay] || {};
+  // History keeps only the sets actually confirmed (✓) — pre-filled but untouched sets are dropped
   const sessionData = {
     date:today, day:currentDay, type:dayInfo.type,
     exercises: exList.map((ex,ei)=>({
       name:ex.name,
-      sets:(currentSession[currentDay]&&currentSession[currentDay][ei]||[])
-        .filter(s=>s.w!==''&&s.w!==undefined&&s.r!==''&&s.r!==undefined)
+      sets:entered(ei).filter((s,si)=>doneUpTo[ei]!==undefined && si<=doneUpTo[ei] && filled(s))
     }))
   };
   sessions.push(sessionData);
@@ -1595,11 +1598,13 @@ function completeWorkout(){
   const saved = localStorage.getItem(GYM_TEMPLATES);
   const custom = saved ? JSON.parse(saved) : {};
   if(!custom[currentDay]) custom[currentDay] = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES[currentDay]||exList));
-  sessionData.exercises.forEach((ex, ei)=>{
-    if(!ex.sets.length) return;
+  // (uses every filled-in set, so skipping a set doesn't shrink next time's plan)
+  exList.forEach((ex, ei)=>{
+    const sets = entered(ei).filter(filled);
+    if(!sets.length) return;
     if(!custom[currentDay][ei]) return;
     custom[currentDay][ei].name = ex.name;
-    custom[currentDay][ei].sets = ex.sets.map(s=>({w:s.w, r:s.r}));
+    custom[currentDay][ei].sets = sets.map(s=>({w:s.w, r:s.r}));
   });
   localStorage.setItem(GYM_TEMPLATES, JSON.stringify(custom));
   templates = getTemplates();
