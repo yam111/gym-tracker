@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>像素圖樣本</title>
+<style>
+body{margin:0;padding:16px;background:#9bbc0f;color:#0f380f;font-family:'Noto Sans TC',sans-serif;}
+h1{font-size:16px;}
+.row{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;}
+.item{text-align:center;font-size:13px;font-weight:700;}
+.tile{background:#9bbc0f;border:3px solid #0f380f;box-shadow:3px 3px 0 #306230;display:inline-block;line-height:0;}
+.card{background:#8bac0f;border:3px solid #0f380f;padding:10px;margin-top:24px;display:flex;align-items:center;gap:10px;width:300px;font-weight:700;font-size:17px;}
+</style>
+</head>
+<body>
+<h1>動作像素圖樣本（放大版 / 卡片上實際大小）</h1>
+<div class="row" id="big"></div>
+<div id="cards"></div>
+<script>
+const PAL = {K:'#0f380f', D:'#306230', M:'#8bac0f', L:'#e0f8a0'};
+const SPRITES = {
+  '臥推': [
+    "....................",
+    "....................",
+    "....................",
+    ".KK..............KK.",
+    "KMMK............KMMK",
+    "KMMKKKKKKKKKKKKKKMMK",
+    "KMMK.KLK....KLK.KMMK",
+    ".KK..KLK....KLK..KK.",
+    ".....KLK....KLK.....",
+    "..KK.KLK....KLK.....",
+    ".KLLKKDDDDDDDDDK....",
+    ".KKLKDDDDDDDDDDDDDK.",
+    "..KKKKKKKKKKKKKKKDK.",
+    ".KKKKKKKKKKKKKK..DK.",
+    "..K.........K...KDK.",
+    "..K.........K..KKKK.",
+    "..K.........K.......",
+    "....................",
+    "....................",
+    "...................."
+  ],
+  '深蹲': [
+    "....................",
+    "........KKKK........",
+    "......KKLLLLKK......",
+    "......KLKLLKLK......",
+    "KKKK..KLLLLLLK..KKKK",
+    "KMMKKKKKKKKKKKKKKMMK",
+    "KMMK.KDDDDDDDDK.KMMK",
+    "KMMK.KLDDDDDDLK.KMMK",
+    "KKKK..KDDDDDDK..KKKK",
+    "......KDDDDDDK......",
+    ".....KDDKKKKDDK.....",
+    "....KDDK....KDDK....",
+    "...KDDK......KDDK...",
+    "...KLLK......KLLK...",
+    "....KLLK....KLLK....",
+    "....KLLK....KLLK....",
+    "...KKKKK....KKKKK...",
+    "....................",
+    "....................",
+    "...................."
+  ],
+  '二頭彎舉': [
+    "....................",
+    ".KK.KK........KK.KK.",
+    ".KKKKK........KKKKK.",
+    ".KK.KK.KKKKKK.KK.KK.",
+    "..KLK.KLLLLLLK.KLK..",
+    "..KLK.KLKLLKLK.KLK..",
+    "..KLK.KLLLLLLK.KLK..",
+    "..KLKKKKKLLKKKKKLK..",
+    "..KLLLKDDDDDDKLLLK..",
+    "..KKKKKDDDDDDKKKKK..",
+    "......KDDDDDDK......",
+    "......KDDDDDDK......",
+    "......KDDKKDDK......",
+    "......KLLKKLLK......",
+    "......KLLKKLLK......",
+    "......KLLKKLLK......",
+    ".....KKKKKKKKKK.....",
+    "....................",
+    "....................",
+    "...................."
+  ]
+};
+function spriteSVG(grid, scale){
+  let r='';
+  grid.forEach((row,y)=>{ for(let x=0;x<row.length;x++){ const c=row[x]; if(PAL[c]) r+='<rect x="'+x+'" y="'+y+'" width="1" height="1" fill="'+PAL[c]+'"/>'; } });
+  return '<svg width="'+(20*scale)+'" height="'+(20*scale)+'" viewBox="0 0 20 20" shape-rendering="crispEdges">'+r+'</svg>';
+}
+const big = document.getElementById('big'), cards = document.getElementById('cards');
+Object.keys(SPRITES).forEach(name=>{
+  big.innerHTML += '<div class="item"><div class="tile">'+spriteSVG(SPRITES[name],6)+'</div><div>'+name+'</div></div>';
+  cards.innerHTML += '<div class="card"><span class="tile">'+spriteSVG(SPRITES[name],2)+'</span>'+name+'</div>';
+});
+</script>
+</body>
+</html>
