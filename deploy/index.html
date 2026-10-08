@@ -42,6 +42,8 @@ body{font-family:'Cubic11','Noto Sans TC',sans-serif;background:#0a0a1a;color:#e
 .nav-btn{flex:1;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:none;color:#7f8c8d;font-size:9px;font-family:'Cubic11','Noto Sans TC',sans-serif;transition:color 0.2s;}
 .nav-btn.active{color:#f39c12;}
 .nav-btn svg{width:22px;height:22px;}
+.nav-btn svg.px{width:24px;height:24px;}
+.nav-px{display:flex;line-height:0;}
 .nav-btn span{font-size:10px;}
 
 /* Day Tabs */
@@ -385,27 +387,27 @@ body{background:#9bbc0f;color:#0f380f;}
 <!-- Bottom Nav -->
 <nav id="bottom-nav">
   <button class="nav-btn active" onclick="showSection('workout')" id="nav-workout">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5h11M6.5 17.5h11M4 12h16M2 8.5l2-2M2 15.5l2 2M20 6.5l2 2M20 17.5l2-2"/></svg>
+    <span class="nav-px" data-pxnav="barbell"></span>
     <span>訓練</span>
   </button>
   <button class="nav-btn" onclick="showSection('map')" id="nav-map">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+    <span class="nav-px" data-pxnav="calendar"></span>
     <span>地圖</span>
   </button>
   <button class="nav-btn" onclick="showSection('diet')" id="nav-diet">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+    <span class="nav-px" data-pxnav="bowl"></span>
     <span>飲食</span>
   </button>
   <button class="nav-btn" onclick="showSection('achievements')" id="nav-achievements">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    <span class="nav-px" data-pxnav="trophy"></span>
     <span>成就</span>
   </button>
   <button class="nav-btn" onclick="showSection('progress')" id="nav-progress">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <span class="nav-px" data-pxnav="chart"></span>
     <span>進步</span>
   </button>
   <button class="nav-btn" onclick="showSection('settings')" id="nav-settings">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span class="nav-px" data-pxnav="gear"></span>
     <span>設定</span>
   </button>
 </nav>
@@ -603,6 +605,7 @@ function init(){
   currentDay = sched.day || 1;
 
   document.querySelectorAll('[data-px]').forEach(el=>{ el.innerHTML = pxIcon(el.dataset.px, 1); });
+  document.querySelectorAll('[data-pxnav]').forEach(el=>{ el.innerHTML = pxNavIcon(el.dataset.pxnav); });
   loadDraft();
   renderHeader();
   renderAll();
@@ -773,7 +776,8 @@ const PX_ICONS = {
   meat:["................","................","....KKKKK.......","...KDDDDDK......","..KDDLDDDDK.....","..KDLDDDDDDK....","..KDDDDDDDDK....","...KDDDDDDK.....","....KDDDDKK.....",".....KKKKLLK....","..........KLK...",".........KLLLK..","..........KLLK..","...........KK...","................","................"],
   bowl:["................","................","................","....K..K..K.....",".....K..K..K....","....K..K..K.....","................",".KKKKKKKKKKKKKK.",".KLLLLLLLLLLLLK.","..KLLLLLLLLLLK..","...KLLLLLLLLK...","....KKKKKKKK....","......KKKK......","................","................","................"],
   barbell:["................","................","................","................",".KK..........KK.","KMMK........KMMK","KMMK........KMMK","KMMKKKKKKKKKKMMK","KMMKKKKKKKKKKMMK","KMMK........KMMK","KMMK........KMMK",".KK..........KK.","................","................","................","................"],
-  heart:["................","................","..KKK....KKK....",".KLLLK..KLLLK...","KLLLLLKKLLLLLK..","KLLLLLLLLLLLLK..","KLLLLLLLLLLLLK..",".KLLLLLLLLLLK...","..KLLLLLLLLK....","...KLLLLLLK.....","....KLLLLK......",".....KLLK.......","......KK........","................","................","................"]
+  heart:["................","................","..KKK....KKK....",".KLLLK..KLLLK...","KLLLLLKKLLLLLK..","KLLLLLLLLLLLLK..","KLLLLLLLLLLLLK..",".KLLLLLLLLLLK...","..KLLLLLLLLK....","...KLLLLLLK.....","....KLLLLK......",".....KLLK.......","......KK........","................","................","................"],
+  gear:["......KKKK......","......KKKK......","..KK..KKKK..KK..","..KKKKKKKKKKKK..","...KKKKKKKKKK...","...KKKK..KKKK...","KKKKKK....KKKKKK","KKKKK......KKKKK","KKKKK......KKKKK","KKKKKK....KKKKKK","...KKKK..KKKK...","...KKKKKKKKKK...","..KKKKKKKKKKKK..","..KK..KKKK..KK..","......KKKK......","......KKKK......"]
 };
 const EMOJI_PX = {
   '🥉':['medal3'],'🥈':['medal2'],'🥇':['medal1'],'👹':['beast'],'🦁':['beast'],
@@ -795,6 +799,13 @@ function pxSVG(grid, scale){
     }
   });
   return '<svg class="px" width="'+(n*scale)+'" height="'+(n*scale)+'" viewBox="0 0 '+n+' '+n+'" shape-rendering="crispEdges">'+r+'</svg>';
+}
+// Single-colour version for the nav bar: outline pixels (K/D) take currentColor, fills stay transparent
+function pxNavIcon(name){
+  const g = PX_ICONS[name]; if(!g) return '';
+  let r='';
+  g.forEach((row,y)=>{ for(let x=0;x<row.length;x++){ if(row[x]==='K'||row[x]==='D') r += '<rect x="'+x+'" y="'+y+'" width="1" height="1"/>'; } });
+  return '<svg class="px" width="24" height="24" viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges">'+r+'</svg>';
 }
 function pxIcon(name, scale){ return PX_ICONS[name] ? pxSVG(PX_ICONS[name], scale||1) : ''; }
 

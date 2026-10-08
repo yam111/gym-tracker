@@ -521,6 +521,26 @@ KLLLLLLLLLLLLK..
 """
 
 
+I['gear'] = """
+......KKKK......
+......KKKK......
+..KK..KKKK..KK..
+..KKKKKKKKKKKK..
+...KKKKKKKKKK...
+...KKKK..KKKK...
+KKKKKK....KKKKKK
+KKKKK......KKKKK
+KKKKK......KKKKK
+KKKKKK....KKKKKK
+...KKKK..KKKK...
+...KKKKKKKKKK...
+..KKKKKKKKKKKK..
+..KK..KKKK..KK..
+......KKKK......
+......KKKK......
+"""
+
+
 def norm(art):
     rows = [r for r in art.strip('\n').split('\n')]
     for r in rows:
