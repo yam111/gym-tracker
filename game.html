@@ -684,8 +684,19 @@ function removeExercise(ei){
   if(!custom[currentDay]) custom[currentDay] = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES[currentDay]));
   custom[currentDay].splice(ei,1);
   localStorage.setItem(GYM_TEMPLATES, JSON.stringify(custom));
-  // Also remove from currentSession
-  if(currentSession[currentDay]) delete currentSession[currentDay][ei];
+  // Also remove from currentSession / confirmedSets, shifting later indices down
+  // so each exercise keeps its own entered sets
+  [currentSession, confirmedSets].forEach(store=>{
+    const byIdx = store[currentDay];
+    if(!byIdx) return;
+    const shifted = {};
+    Object.keys(byIdx).forEach(k=>{
+      const i = parseInt(k);
+      if(i < ei) shifted[i] = byIdx[k];
+      else if(i > ei) shifted[i-1] = byIdx[k];
+    });
+    store[currentDay] = shifted;
+  });
   templates = getTemplates();
   saveDraft();
   renderWorkout();
