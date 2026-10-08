@@ -1732,6 +1732,7 @@ function closeLvlOverlay(){
 
 // ─── 8-bit sound effects (Web Audio square wave, no audio files) ───
 const SFX_TUNES = { // [frequency Hz, seconds]
+  tap:   [[1760,.03]],
   set:   [[988,.05],[1319,.09]],
   done:  [[523,.09],[659,.09],[784,.09],[1047,.09],[784,.07],[1047,.28]],
   level: [[392,.08],[523,.08],[659,.08],[784,.12],[659,.06],[784,.32]],
@@ -1753,7 +1754,7 @@ function sfx(name){
 function flushSfx(){
   const req = sfxReq; sfxReq = []; sfxTimer = null;
   let t = 0;
-  const main = ['level','done','set'].find(n=>req.includes(n));
+  const main = ['level','done','set','tap'].find(n=>req.includes(n));
   if(main) t = playTune(SFX_TUNES[main], 0);
   if(req.includes('ach')) playTune(SFX_TUNES.ach, t);
 }
@@ -1770,6 +1771,13 @@ function playTune(notes, delay){
   });
   return t - sfxCtx.currentTime;
 }
+// Generic select blip for anything tappable; specific sounds in the same tap win (see flushSfx)
+document.addEventListener('click', e=>{
+  const el = e.target.closest('button,summary,a,[onclick]');
+  if(!el || el.disabled) return;
+  if((el.getAttribute('onclick')||'').trim()==='event.stopPropagation()') return; // modal body, not a control
+  sfx('tap');
+}, true);
 function toggleSfx(){
   const on = !sfxOn();
   try{ localStorage.setItem(GYM_SFX, on?'1':'0'); }catch(e){}
