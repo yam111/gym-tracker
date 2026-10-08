@@ -223,6 +223,9 @@ body{background:#9bbc0f;color:#0f380f;}
 .set-inp label{color:#306230;font-weight:700;}
 .set-inp input{background:#8bac0f;color:#0f380f;border:2px solid #0f380f;border-radius:0;font-family:'PressStart',monospace;font-size:14px;padding:8px 4px;}
 .set-inp input:focus{outline:none;background:#0f380f;color:#9bbc0f;}
+/* hide the browser's white number spinner arrows */
+input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 .set-row button{background:#306230!important;color:#9bbc0f!important;border-radius:0!important;}
 
 .add-set-btn{border:2px dashed #306230;border-radius:0;color:#0f380f;font-weight:700;}
