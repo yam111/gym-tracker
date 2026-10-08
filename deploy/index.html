@@ -309,6 +309,30 @@ body{background:#9bbc0f;color:#0f380f;}
 #section-settings [style*="background:#0f0f2a"]{background:#9bbc0f!important;border:2px solid #306230;border-radius:0!important;color:#0f380f!important;}
 #section-settings [style*="color:#f39c12"]{color:#0f380f!important;}
 #section-settings [style*="color:#7f8c8d"]{color:#306230!important;}
+
+/* ── Pokémon-style dialog boxes: light box, double dark border, blinking ▶ cursor ── */
+@keyframes px-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+.day-modal-box,#ach-notif,#toast,.lvl-title{
+  background:#e0f8a0!important;color:#0f380f!important;
+  border:4px solid #0f380f!important;border-radius:6px!important;
+  box-shadow:inset 0 0 0 3px #e0f8a0,inset 0 0 0 5px #306230,4px 4px 0 #306230!important;
+}
+.day-modal-box{margin:0 8px 8px;width:calc(100% - 16px);padding:20px 18px!important;}
+.day-modal-box .day-modal-set{color:#306230;}
+.part-btn{background:#e0f8a0!important;border-width:2px!important;}
+.part-btn:active,.part-btn:focus{background:#9bbc0f!important;outline:none;}
+.day-modal-close,.lvl-btn,.coach-close-btn{text-align:left;padding-left:18px!important;background:#e0f8a0!important;color:#0f380f!important;border:3px solid #0f380f!important;border-radius:4px!important;box-shadow:none!important;font-weight:700;}
+.day-modal-close::before,.lvl-btn::before,.coach-close-btn::before,#complete-btn::before{content:'▶ ';display:inline-block;animation:px-blink 1s steps(1) infinite;}
+#complete-btn{text-align:center;}
+/* level up: text box in the middle of the dark screen */
+#lvl-overlay{background:#0f380f!important;}
+.lvl-title{padding:18px 26px;font-size:14px!important;}
+.lvl-btn{min-width:180px;border-color:#9bbc0f!important;box-shadow:inset 0 0 0 2px #306230!important;}
+/* toast + achievement popup: stepped motion like a GB screen */
+#toast{border-radius:4px!important;padding:12px 18px!important;font-weight:700;white-space:nowrap;transition-timing-function:steps(4)!important;}
+#toast::after{content:' ▼';animation:px-blink 1s steps(1) infinite;}
+#ach-notif{transition-timing-function:steps(5)!important;}
+.ach-notif-label{font-family:'PressStart','Cubic11',monospace!important;font-size:9px!important;display:flex;align-items:center;gap:4px;}
 </style>
 </head>
 <body>
@@ -336,14 +360,14 @@ body{background:#9bbc0f;color:#0f380f;}
   <div class="coach-header"><span data-px="chart"></span> 教練分析</div>
   <div class="coach-body" id="coach-body"></div>
   <div class="coach-footer">
-    <button class="coach-close-btn" onclick="closeCoach()">了解，繼續 ▶</button>
+    <button class="coach-close-btn" onclick="closeCoach()">了解，繼續</button>
   </div>
 </div>
 
 <!-- Level Up Overlay -->
 <div id="lvl-overlay">
   <div class="lvl-title" id="lvl-title"></div>
-  <button class="lvl-btn" onclick="closeLvlOverlay()">繼續 ▶</button>
+  <button class="lvl-btn" onclick="closeLvlOverlay()">繼續</button>
 </div>
 
 <!-- Toast -->
