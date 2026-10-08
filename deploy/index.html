@@ -1508,8 +1508,20 @@ function updateSet(ei,si,field,val){
   saveDraft();
 }
 
+// Secret achievements that trigger while logging sets (not at workout completion)
+const relockedSets = new Set(); // 'day_ei_si' of confirmed sets the user unlocked again
+let preciseStreak = 0;          // consecutive confirmed sets with reps exactly on target
+function awardSecretAch(id){
+  if(gameState.achievements.includes(id)) return;
+  gameState.achievements.push(id);
+  localStorage.setItem(GYM_GAME, JSON.stringify(gameState));
+  const def = ACHIEVEMENTS_DEF.find(a=>a.id===id);
+  if(def) showAchNotif(def);
+}
+
 function unlockSet(ei, si){
   if(!confirmedSets[currentDay]) return;
+  if(confirmedSets[currentDay][ei] >= si) relockedSets.add(currentDay+'_'+ei+'_'+si);
   // Roll back confirmed index to si-1 (unlock this set and all after)
   confirmedSets[currentDay][ei] = si - 1;
   // Also unlock all subsequent exercises
@@ -1530,6 +1542,16 @@ function confirmSet(ei, si){
   if(!confirmedSets[currentDay]) confirmedSets[currentDay]={};
   confirmedSets[currentDay][ei] = si;
   awardXP(XP_PER_SET);
+  // Target reps = what the plan pre-filled for this set; extra sets beyond the plan have no target
+  const planSet = ((templates[currentDay]||[])[ei]||{}).sets;
+  const target = planSet && planSet[si] ? parseFloat(planSet[si].r) : NaN;
+  const reps = parseFloat(set.r);
+  if(!isNaN(target)){
+    if(reps >= target+2) awardSecretAch('overachiever');
+    preciseStreak = reps===target ? preciseStreak+1 : 0;
+    if(preciseStreak >= 5) awardSecretAch('precise');
+  } else preciseStreak = 0;
+  if(relockedSets.has(currentDay+'_'+ei+'_'+si)) awardSecretAch('unlock_relock');
   saveDraft();
   renderWorkout();
 }
@@ -1806,14 +1828,7 @@ function checkAchievements(sessionData, extraFlags){
     if(Object.values(mMap).some(v=>v>=12)) newOnes.push('monthly_full');
   }
 
-  // 超額完成（flag from confirmSet）
-  if(flag.overachiever && !unlocked.has('overachiever')) newOnes.push('overachiever');
-
-  // 完美主義者（flag from unlockSet）
-  if(flag.unlock_relock && !unlocked.has('unlock_relock')) newOnes.push('unlock_relock');
-
-  // 精準打擊（flag from confirmSet）
-  if(flag.precise && !unlocked.has('precise')) newOnes.push('precise');
+  // 超額完成 / 完美主義者 / 精準打擊 are awarded live from confirmSet (awardSecretAch)
 
   // 全成就（非隱藏）
   if(!unlocked.has('all_normal')){
