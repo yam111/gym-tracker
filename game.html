@@ -105,6 +105,12 @@ body{font-family:'Noto Sans TC',sans-serif;background:#0a0a1a;color:#e0e0e0;min-
 .day-modal-ex{margin-bottom:12px;}
 .day-modal-ex-name{font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;}
 .day-modal-set{font-size:12px;color:#bdc3c7;padding:3px 0;}
+#part-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:flex-end;justify-content:center;z-index:9996;}
+#part-modal.show{display:flex;}
+#part-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.part-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:8px;border:1px solid #2a2a4e;background:#0f0f2a;color:#e0e0e0;font-size:13px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+.part-btn:active{border-color:#f39c12;}
+.ex-icon{flex-shrink:0;margin-right:8px;image-rendering:pixelated;}
 .day-modal-close{width:100%;padding:12px;border-radius:8px;border:none;background:#2a2a4e;color:#fff;font-size:15px;cursor:pointer;margin-top:12px;font-family:'Noto Sans TC',sans-serif;}
 
 /* Achievements */
@@ -182,6 +188,15 @@ body{font-family:'Noto Sans TC',sans-serif;background:#0a0a1a;color:#e0e0e0;min-
     <div class="day-modal-date" id="day-modal-date"></div>
     <div id="day-modal-body"></div>
     <button class="day-modal-close" onclick="closeDayModal()">關閉</button>
+  </div>
+</div>
+
+<!-- Body Part Picker -->
+<div id="part-modal" onclick="closePartPicker()">
+  <div class="day-modal-box" onclick="event.stopPropagation()">
+    <div class="day-modal-date">訓練部位</div>
+    <div id="part-grid"></div>
+    <button class="day-modal-close" onclick="closePartPicker()">取消</button>
   </div>
 </div>
 
@@ -519,6 +534,95 @@ function renderAll(){
   else if(currentSection==='settings')     renderSettings();
 }
 
+// ─── Body part icons ─────────────────────────────────────────
+// 13x20 pixel figure. H=head C=chest/upper torso A=abs G=hips
+// S=shoulder B=upper arm F=forearm Q=thigh K=calf
+const BODY_PIXELS = [
+  '.....HHH.....',
+  '....HHHHH....',
+  '....HHHHH....',
+  '.....HHH.....',
+  '..SSSCCCSSS..',
+  '.SSSCCCCCSSS.',
+  '.BB.CCCCC.BB.',
+  '.BB.CCCCC.BB.',
+  '.BB.AAAAA.BB.',
+  '.FF.AAAAA.FF.',
+  '.FF.AAAAA.FF.',
+  '.FF.GGGGG.FF.',
+  '....QQ.QQ....',
+  '....QQ.QQ....',
+  '....QQ.QQ....',
+  '....QQ.QQ....',
+  '....KK.KK....',
+  '....KK.KK....',
+  '....KK.KK....',
+  '...KKK.KKK...'
+];
+// view: front shows a face, back shows hair
+const BODY_PARTS = {
+  chest:    {label:'胸',      view:'front', hl:'C'},
+  back:     {label:'背',      view:'back',  hl:'CA'},
+  shoulder: {label:'肩',      view:'front', hl:'S'},
+  biceps:   {label:'二頭',    view:'front', hl:'B'},
+  triceps:  {label:'三頭',    view:'back',  hl:'B'},
+  quads:    {label:'大腿前',  view:'front', hl:'Q'},
+  hams:     {label:'大腿後/臀', view:'back', hl:'GQ'},
+  calves:   {label:'小腿',    view:'back',  hl:'K'},
+  abs:      {label:'腹部',    view:'front', hl:'A'}
+};
+// Fallback for exercises saved without a part (defaults / older data)
+const PART_KEYWORDS = [
+  ['三頭','triceps'],['二頭','biceps'],['腹','abs'],['小腿','calves'],
+  ['腿彎舉','hams'],['硬舉','hams'],['臀','hams'],
+  ['深蹲','quads'],['腿推','quads'],['腿伸展','quads'],
+  ['肩','shoulder'],['平舉','shoulder'],
+  ['下拉','back'],['划船','back'],['引體','back'],
+  ['臥推','chest'],['夾胸','chest'],['胸','chest']
+];
+
+function getExPart(ex){
+  if(ex.part && BODY_PARTS[ex.part]) return ex.part;
+  const hit = PART_KEYWORDS.find(([kw])=>ex.name.indexOf(kw)>=0);
+  return hit ? hit[1] : null;
+}
+
+function bodyIconSVG(part, scale){
+  const p = BODY_PARTS[part];
+  const view = p ? p.view : 'front';
+  const hl = p ? p.hl : '';
+  let rects = '';
+  BODY_PIXELS.forEach((row,y)=>{
+    for(let x=0;x<row.length;x++){
+      const c = row[x];
+      if(c==='.') continue;
+      let fill = hl.indexOf(c)>=0 ? '#f39c12' : '#3a3a62';
+      if(c==='H') fill = view==='back' ? '#6b5a48' : '#c8a27a';
+      rects += '<rect x="'+x+'" y="'+y+'" width="1" height="1" fill="'+fill+'"/>';
+    }
+  });
+  if(view==='front') rects += '<rect x="5" y="2" width="1" height="1" fill="#0a0a1a"/><rect x="7" y="2" width="1" height="1" fill="#0a0a1a"/>';
+  return '<svg class="ex-icon" width="'+(13*scale)+'" height="'+(20*scale)+'" viewBox="0 0 13 20" shape-rendering="crispEdges">'+rects+'</svg>';
+}
+
+let partPickCallback = null;
+function openPartPicker(cb){
+  partPickCallback = cb;
+  document.getElementById('part-grid').innerHTML = Object.keys(BODY_PARTS).map(k=>
+    '<button class="part-btn" onclick="pickPart(\''+k+'\')">'+bodyIconSVG(k,2)+'<span>'+BODY_PARTS[k].label+'</span></button>'
+  ).join('');
+  document.getElementById('part-modal').classList.add('show');
+}
+function pickPart(k){
+  const cb = partPickCallback;
+  closePartPicker();
+  if(cb) cb(k);
+}
+function closePartPicker(){
+  partPickCallback = null;
+  document.getElementById('part-modal').classList.remove('show');
+}
+
 // ─── Workout ─────────────────────────────────────────────────
 function renderWorkout(){
   const wrap = document.getElementById('section-workout');
@@ -556,7 +660,8 @@ function renderExercisesHTML(){
 
     html += '<div class="ex-card">';
     // Exercise name with edit/delete buttons
-    html += '<div class="ex-name">'+
+    html += '<div class="ex-name" style="display:flex;align-items:center;">'+
+      bodyIconSVG(getExPart(ex),2)+
       '<span id="exname-'+ei+'">'+escHtml(ex.name)+'</span>'+
       '<button onclick="editExName('+ei+')" style="background:none;border:none;color:#7f8c8d;font-size:12px;cursor:pointer;margin-left:6px;" title="改名">✏️</button>'+
       '<button onclick="removeExercise('+ei+')" style="background:none;border:none;color:#e74c3c;font-size:12px;cursor:pointer;margin-left:2px;" title="刪除動作">🗑</button>'+
@@ -666,13 +771,15 @@ function editExName(ei){
 function addExercise(){
   const name = prompt('動作名稱：', '');
   if(!name||!name.trim()) return;
-  const saved = localStorage.getItem(GYM_TEMPLATES);
-  const custom = saved ? JSON.parse(saved) : {};
-  if(!custom[currentDay]) custom[currentDay] = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES[currentDay]));
-  custom[currentDay].push({name:name.trim(), sets:[{w:'',r:8}]});
-  localStorage.setItem(GYM_TEMPLATES, JSON.stringify(custom));
-  templates = getTemplates();
-  renderWorkout();
+  openPartPicker(part=>{
+    const saved = localStorage.getItem(GYM_TEMPLATES);
+    const custom = saved ? JSON.parse(saved) : {};
+    if(!custom[currentDay]) custom[currentDay] = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES[currentDay]));
+    custom[currentDay].push({name:name.trim(), part, sets:[{w:'',r:8}]});
+    localStorage.setItem(GYM_TEMPLATES, JSON.stringify(custom));
+    templates = getTemplates();
+    renderWorkout();
+  });
 }
 
 function removeExercise(ei){
