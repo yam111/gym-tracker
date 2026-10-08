@@ -630,7 +630,7 @@ const ACHIEVEMENTS_DEF = [
   {id:'night_owl',   cat:'secret', name:'夜梟',     desc:'晚上10點後完成訓練',         icon:'🦉', secret:true},
   {id:'early_bird',  cat:'secret', name:'早起鳥',   desc:'早上7點前完成訓練',           icon:'🌅', secret:true},
   {id:'century_sets',cat:'secret', name:'百組達人', desc:'累積完成 100 組',             icon:'💯', secret:true},
-  {id:'full_week',   cat:'secret', name:'週全勤',   desc:'同一週推拉腿各完成一次',       icon:'🔄', secret:true},
+  {id:'full_week',   cat:'secret', name:'週全勤',   desc:'同一週上肢、下肢各完成一次',   icon:'🔄', secret:true},
   {id:'monthly_full',cat:'secret', name:'月度全勤', desc:'單月完成 12 次訓練',          icon:'📆', secret:true},
   {id:'overachiever',cat:'secret', name:'超額完成', desc:'某組次數超過目標 2 下以上',    icon:'💪', secret:true},
   {id:'unlock_relock',cat:'secret',name:'完美主義者','desc':'解鎖又重鎖再重新確認',      icon:'🔁', secret:true},
@@ -1886,7 +1886,7 @@ function renderAchievements(){
       html += '<div class="ach-icon">'+(isSecret?'<span class="px-tile">'+pxIcon('question',2)+'</span>':achIconHTML(a.icon))+'</div>';
       html += '<div class="ach-info">';
       html += '<div class="ach-name">'+(isSecret?'???':escHtml(a.name))+'</div>';
-      html += '<div class="ach-desc">'+(isSecret?'達成條件未知':escHtml(a.desc))+'</div>';
+      html += '<div class="ach-desc">'+escHtml(a.desc)+'</div>'; // secret ones still hide name + icon
       html += '</div>';
       if(!done) html += '<div class="ach-lock">'+pxIcon('lock',2)+'</div>';
       html += '</div>';
