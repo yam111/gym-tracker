@@ -1314,6 +1314,10 @@ function renderSettings(){
     '</div>'+
     '<div class="set-group">'+
     '<h3>資料管理</h3>'+
+    '<button class="save-btn" onclick="exportData()">匯出備份</button>'+
+    '<button class="save-btn" onclick="document.getElementById(\'import-file\').click()">匯入備份</button>'+
+    '<input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="importData(this)">'+
+    '<div style="font-size:11px;color:#7f8c8d;margin:4px 0 12px;">紀錄只存在這支手機的瀏覽器，換手機或清除瀏覽器資料前請先匯出</div>'+
     '<button class="danger-btn" onclick="resetTemplates()">重設課表</button>'+
     '<button class="danger-btn" onclick="resetAll()">重設所有資料</button>'+
     '</div>'+
@@ -1367,6 +1371,51 @@ function resetAll(){
   renderHeader();
   showToast('所有資料已清除');
   renderAll();
+}
+
+// ─── Backup ──────────────────────────────────────────────────
+const BACKUP_KEYS = [GYM_SESSIONS,GYM_GAME,GYM_TEMPLATES,GYM_PLAN,GYM_SESSION_DRAFT,GYM_PROGRESS];
+
+function exportData(){
+  const data = {};
+  BACKUP_KEYS.forEach(k=>{
+    const v = localStorage.getItem(k);
+    if(v!==null) data[k] = v;
+  });
+  const blob = new Blob([JSON.stringify({app:'gym-tracker', exportedAt:new Date().toISOString(), data})],
+    {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'gym-backup-'+todayStr()+'.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  showToast('備份已匯出');
+}
+
+function importData(input){
+  const file = input.files && input.files[0];
+  input.value = '';
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    let backup;
+    try{ backup = JSON.parse(reader.result); }catch(e){ backup = null; }
+    if(!backup || backup.app!=='gym-tracker' || !backup.data){
+      showToast('不是有效的備份檔');
+      return;
+    }
+    const when = backup.exportedAt ? backup.exportedAt.slice(0,10) : '未知日期';
+    if(!confirm('匯入 '+when+' 的備份？目前手機上的資料會被覆蓋。')) return;
+    BACKUP_KEYS.forEach(k=>{
+      if(k in backup.data) localStorage.setItem(k, backup.data[k]);
+      else localStorage.removeItem(k);
+    });
+    alert('匯入完成，將重新載入');
+    location.reload();
+  };
+  reader.readAsText(file);
 }
 
 // ─── Helpers ─────────────────────────────────────────────────
