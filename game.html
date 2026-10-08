@@ -223,6 +223,7 @@ body{background:#9bbc0f;color:#0f380f;}
 .set-row button{background:#306230!important;color:#9bbc0f!important;border-radius:0!important;}
 
 .add-set-btn{border:2px dashed #306230;border-radius:0;color:#0f380f;font-weight:700;}
+.add-set-btn:hover,.add-set-btn:active{border-color:#0f380f;color:#0f380f;background:#9bbc0f!important;}
 #complete-btn{background:#0f380f;color:#9bbc0f;border-radius:0;box-shadow:4px 4px 0 #306230;font-size:17px;}
 
 #bottom-nav{background:#306230;border-top:3px solid #0f380f;}
@@ -324,6 +325,7 @@ body{background:#9bbc0f;color:#0f380f;}
 .day-modal-close,.lvl-btn,.coach-close-btn{text-align:left;padding-left:18px!important;background:#e0f8a0!important;color:#0f380f!important;border:3px solid #0f380f!important;border-radius:4px!important;box-shadow:none!important;font-weight:700;}
 .day-modal-close::before,.lvl-btn::before,.coach-close-btn::before,#complete-btn::before{content:'▶ ';display:inline-block;animation:px-blink 1s steps(1) infinite;}
 #complete-btn{text-align:center;}
+#complete-btn .px rect[fill="#0f380f"]{fill:#9bbc0f;}
 /* level up: text box in the middle of the dark screen */
 #lvl-overlay{background:rgba(15,56,15,.92)!important;}
 .lvl-title{padding:18px 26px;font-size:14px!important;}
@@ -1386,7 +1388,7 @@ function renderExercisesHTML(){
     html += '<button class="add-set-btn" onclick="addSet('+ei+')">+ 新增一組</button>';
     html += '</div>';
   });
-  html += '<button class="add-set-btn" onclick="addExercise()" style="width:100%;margin-top:4px;background:#1a2a1a;border:1px dashed #27ae60;color:#27ae60;">+ 新增動作</button>';
+  html += '<button class="add-set-btn" onclick="addExercise()" style="width:calc(100% - 24px);margin:4px 12px 0;background:#8bac0f;border:3px dashed #0f380f;color:#0f380f;font-weight:700;">+ 新增動作</button>';
   return html;
 }
 
