@@ -633,9 +633,6 @@ const ACHIEVEMENTS_DEF = [
   {id:'century_sets',cat:'secret', name:'百組達人', desc:'累積完成 100 組',             icon:'💯', secret:true},
   {id:'full_week',   cat:'secret', name:'週全勤',   desc:'同一週上肢、下肢各完成一次',   icon:'🔄', secret:true},
   {id:'monthly_full',cat:'secret', name:'月度全勤', desc:'單月完成 12 次訓練',          icon:'📆', secret:true},
-  {id:'overachiever',cat:'secret', name:'超額完成', desc:'某組次數超過目標 2 下以上',    icon:'💪', secret:true},
-  {id:'unlock_relock',cat:'secret',name:'完美主義者','desc':'解鎖又重鎖再重新確認',      icon:'🔁', secret:true},
-  {id:'precise',     cat:'secret', name:'精準打擊', desc:'連續5組剛好達到目標次數',     icon:'🎯', secret:true},
   {id:'all_normal',  cat:'secret', name:'全成就',   desc:'解鎖所有非隱藏成就',          icon:'👑', secret:true},
 ];
 
@@ -1509,20 +1506,8 @@ function updateSet(ei,si,field,val){
   saveDraft();
 }
 
-// Secret achievements that trigger while logging sets (not at workout completion)
-const relockedSets = new Set(); // 'day_ei_si' of confirmed sets the user unlocked again
-let preciseStreak = 0;          // consecutive confirmed sets with reps exactly on target
-function awardSecretAch(id){
-  if(gameState.achievements.includes(id)) return;
-  gameState.achievements.push(id);
-  localStorage.setItem(GYM_GAME, JSON.stringify(gameState));
-  const def = ACHIEVEMENTS_DEF.find(a=>a.id===id);
-  if(def) showAchNotif(def);
-}
-
 function unlockSet(ei, si){
   if(!confirmedSets[currentDay]) return;
-  if(confirmedSets[currentDay][ei] >= si) relockedSets.add(currentDay+'_'+ei+'_'+si);
   // Roll back confirmed index to si-1 (unlock this set and all after)
   confirmedSets[currentDay][ei] = si - 1;
   // Also unlock all subsequent exercises
@@ -1544,16 +1529,6 @@ function confirmSet(ei, si){
   confirmedSets[currentDay][ei] = si;
   sfx('set');
   awardXP(XP_PER_SET);
-  // Target reps = what the plan pre-filled for this set; extra sets beyond the plan have no target
-  const planSet = ((templates[currentDay]||[])[ei]||{}).sets;
-  const target = planSet && planSet[si] ? parseFloat(planSet[si].r) : NaN;
-  const reps = parseFloat(set.r);
-  if(!isNaN(target)){
-    if(reps >= target+2) awardSecretAch('overachiever');
-    preciseStreak = reps===target ? preciseStreak+1 : 0;
-    if(preciseStreak >= 5) awardSecretAch('precise');
-  } else preciseStreak = 0;
-  if(relockedSets.has(currentDay+'_'+ei+'_'+si)) awardSecretAch('unlock_relock');
   saveDraft();
   renderWorkout();
 }
@@ -1887,8 +1862,6 @@ function checkAchievements(sessionData, extraFlags){
     sessions.forEach(s=>{ const m=s.date.slice(0,7); mMap[m]=(mMap[m]||0)+1; });
     if(Object.values(mMap).some(v=>v>=12)) newOnes.push('monthly_full');
   }
-
-  // 超額完成 / 完美主義者 / 精準打擊 are awarded live from confirmSet (awardSecretAch)
 
   // 全成就（非隱藏）
   if(!unlocked.has('all_normal')){
