@@ -223,6 +223,11 @@ body{background:#9bbc0f;color:#0f380f;}
 .set-inp label{color:#306230;font-weight:700;}
 .set-inp input{background:#8bac0f;color:#0f380f;border:2px solid #0f380f;border-radius:0;font-family:'PressStart',monospace;font-size:14px;padding:8px 4px;}
 .set-inp input:focus{outline:none;background:#0f380f;color:#9bbc0f;}
+/* Game Boy scrollbars (replace the browser's white ones) */
+*{scrollbar-width:thin;scrollbar-color:#306230 #8bac0f;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:#8bac0f;}
+::-webkit-scrollbar-thumb{background:#306230;border:2px solid #8bac0f;border-radius:0;}
 /* hide the browser's white number spinner arrows */
 input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
