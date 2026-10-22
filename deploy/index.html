@@ -241,6 +241,15 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
 .add-set-btn{border:2px dashed #306230;border-radius:0;color:#0f380f;font-weight:700;}
 .add-set-btn:hover,.add-set-btn:active{border-color:#0f380f;color:#0f380f;background:#9bbc0f!important;}
+.ex-done-btn{width:100%;padding:10px;margin-top:6px;border:3px solid #0f380f;border-radius:0;background:#0f380f;color:#9bbc0f;font-size:15px;font-weight:700;cursor:pointer;font-family:'Cubic11','Noto Sans TC',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;}
+.ex-done-btn .px rect[fill="#0f380f"]{fill:#9bbc0f;}
+.ex-done-btn.undo{background:#9bbc0f;color:#0f380f;}
+.ex-done-btn.undo .px rect[fill="#0f380f"]{fill:#0f380f;}
+.ex-card.done{background:#9bbc0f;box-shadow:none;border-style:dashed;opacity:.85;}
+.ex-card.done.collapsed{padding:8px 12px;cursor:pointer;}
+.ex-done-row{display:flex;align-items:center;gap:6px;color:#0f380f;}
+.ex-done-row b{font-size:15px;white-space:nowrap;}
+.ex-done-sum{font-size:12px;color:#306230;margin-left:auto;text-align:right;}
 #complete-btn{background:#0f380f;color:#9bbc0f;border-radius:0;box-shadow:4px 4px 0 #306230;font-size:17px;}
 
 #bottom-nav{background:#306230;border-top:3px solid #0f380f;}
@@ -646,6 +655,8 @@ let currentDay     = 1;   // 1=上肢A, 2=下肢A, 3=上肢B, 4=下肢B
 let cycleProgress  = 0;   // 0-3, which step in WEEK_CYCLE we're on
 let currentSession = {};
 let confirmedSets  = {};
+let doneEx         = {};   // day -> exercise indices marked done today, in the order they were done
+let openDoneEx     = {};   // done cards expanded for editing (not saved)
 let staleDraft     = null; // unfinished workout from an earlier day (forgot to tap 完成訓練)
 
 // ─── Init ────────────────────────────────────────────────────
@@ -653,6 +664,7 @@ function saveDraft(){
   localStorage.setItem(GYM_SESSION_DRAFT, JSON.stringify({
     session: currentSession,
     confirmed: confirmedSets,
+    done: doneEx,
     day: currentDay,
     date: todayStr()
   }));
@@ -667,6 +679,7 @@ function loadDraft(){
     if(d.date === todayStr()){
       currentSession = d.session || {};
       confirmedSets  = d.confirmed || {};
+      doneEx         = d.done || {};
       if(d.day) currentDay = d.day;
     } else if(d.session && d.day && Object.values(d.session[d.day]||{}).some(sets=>sets.length)){
       staleDraft = d;
@@ -688,6 +701,7 @@ async function resolveStaleDraft(){
   }
   localStorage.removeItem(GYM_SESSION_DRAFT);
   currentSession = {};
+  doneEx = {}; openDoneEx = {};
   currentDay = getCurrentSchedule().day;
   renderAll();
 }
@@ -880,6 +894,7 @@ const PX_ICONS = {
   bowl:["................","................","................","....K..K..K.....",".....K..K..K....","....K..K..K.....","................",".KKKKKKKKKKKKKK.",".KLLLLLLLLLLLLK.","..KLLLLLLLLLLK..","...KLLLLLLLLK...","....KKKKKKKK....","......KKKK......","................","................","................"],
   barbell:["................","................","................","................",".KK..........KK.","KMMK........KMMK","KMMK........KMMK","KMMKKKKKKKKKKMMK","KMMKKKKKKKKKKMMK","KMMK........KMMK","KMMK........KMMK",".KK..........KK.","................","................","................","................"],
   heart:["................","................","..KKK....KKK....",".KLLLK..KLLLK...","KLLLLLKKLLLLLK..","KLLLLLLLLLLLLK..","KLLLLLLLLLLLLK..",".KLLLLLLLLLLK...","..KLLLLLLLLK....","...KLLLLLLK.....","....KLLLLK......",".....KLLK.......","......KK........","................","................","................"],
+  check:["................","................","................","................","............KK..","...........KKK..","..........KKK...","..KK.....KKK....","..KKK...KKK.....","...KKK.KKK......","....KKKKK.......",".....KKK........","......K.........","................","................","................"],
   gear:["......KKKK......","......KKKK......","..KK..KKKK..KK..","..KKKKKKKKKKKK..","...KKKKKKKKKK...","...KKKK..KKKK...","KKKKKK....KKKKKK","KKKKK......KKKKK","KKKKK......KKKKK","KKKKKK....KKKKKK","...KKKK..KKKK...","...KKKKKKKKKK...","..KKKKKKKKKKKK..","..KK..KKKK..KK..","......KKKK......","......KKKK......"]
 };
 const EMOJI_PX = {
@@ -1466,8 +1481,12 @@ function renderExercisesHTML(){
   const exList = templates[currentDay] || [];
   if(!currentSession[currentDay]) currentSession[currentDay] = {};
 
+  const done = (doneEx[currentDay]||[]).filter(i=>i<exList.length);
+  const order = done.concat(exList.map((_,i)=>i).filter(i=>!done.includes(i)));
+
   let html = '';
-  exList.forEach((ex, ei)=>{
+  order.forEach(ei=>{
+    const ex = exList[ei];
     // Pre-fill with template weight+reps if not yet started
     if(!currentSession[currentDay][ei]){
       currentSession[currentDay][ei] = ex.sets.map(s=>({w:(s.w===''||s.w==null)?'':s.w, r:s.r||8}));
@@ -1476,7 +1495,17 @@ function renderExercisesHTML(){
     // Sets removed down to 0 = skipped today; hide card (template untouched, returns next time)
     if(!sess.length) return;
 
-    html += '<div class="ex-card">';
+    const isDone = done.includes(ei);
+    if(isDone && !openDoneEx[ei]){
+      // Done: one line with what was done, tap to open and edit
+      html += '<div class="ex-card done collapsed" onclick="toggleDoneOpen('+ei+')"><div class="ex-done-row">'+
+        pxIcon('check',1)+'<b>'+escHtml(ex.name)+'</b>'+
+        '<span class="ex-done-sum">'+sess.map(s=>escHtml(String(s.w===''?'-':s.w))+'×'+escHtml(String(s.r===''?'-':s.r))).join('、')+'</span>'+
+        '</div></div>';
+      return;
+    }
+
+    html += '<div class="ex-card'+(isDone?' done':'')+'">';
     // Exercise name with edit/delete buttons
     html += '<div class="ex-name" style="display:flex;align-items:center;">'+
       exIconHTML(ex)+
@@ -1495,6 +1524,9 @@ function renderExercisesHTML(){
     });
 
     html += '<button class="add-set-btn" onclick="addSet('+ei+')">+ 新增一組</button>';
+    html += isDone
+      ? '<button class="ex-done-btn undo" onclick="toggleExDone('+ei+')">取消完成</button>'
+      : '<button class="ex-done-btn" onclick="toggleExDone('+ei+')">'+pxIcon('check',1)+'完成這個動作</button>';
     html += '</div>';
   });
   html += '<button class="add-set-btn" onclick="addExercise()" style="width:calc(100% - 24px);margin:4px 12px 0;background:#8bac0f;border:3px dashed #0f380f;color:#0f380f;font-weight:700;">+ 新增動作</button>';
@@ -1519,6 +1551,27 @@ async function selectDay(d, silent){
     }
   }
   currentDay = d;
+  renderWorkout();
+}
+
+function toggleExDone(ei){
+  const list = doneEx[currentDay] = doneEx[currentDay]||[];
+  const at = list.indexOf(ei);
+  if(at>=0){
+    list.splice(at,1);
+  } else {
+    const sets = (currentSession[currentDay]||{})[ei]||[];
+    if(!sets.some(s=>s.w!==''&&s.w!=null&&s.r!==''&&s.r!=null)){ showToast('請先填重量和次數'); return; }
+    list.push(ei);
+    sfx('set');
+  }
+  delete openDoneEx[ei];
+  saveDraft();
+  renderWorkout();
+}
+
+function toggleDoneOpen(ei){
+  openDoneEx[ei] = !openDoneEx[ei];
   renderWorkout();
 }
 
@@ -1623,6 +1676,8 @@ async function removeExercise(ei){
     });
     store[currentDay] = shifted;
   });
+  if(doneEx[currentDay]) doneEx[currentDay] = doneEx[currentDay].filter(i=>i!==ei).map(i=>i>ei?i-1:i);
+  openDoneEx = {};
   templates = getTemplates();
   saveDraft();
   renderWorkout();
@@ -1679,6 +1734,7 @@ function finishWorkout(date){
   // Reset session data for this day
   currentSession[currentDay]={};
   confirmedSets[currentDay]={};
+  doneEx = {}; openDoneEx = {};
   localStorage.removeItem(GYM_SESSION_DRAFT);
 
   // Advance to next training day
@@ -2296,6 +2352,7 @@ async function restartCycle(){
   currentDay = WEEK_CYCLE[0].day;
   currentSession = {};
   confirmedSets = {};
+  doneEx = {}; openDoneEx = {};
   localStorage.removeItem(GYM_SESSION_DRAFT);
   showToast('已從'+WEEK_CYCLE[0].label+'重新開始');
   renderAll();
@@ -2308,6 +2365,7 @@ async function resetTemplates(){
   templates = getTemplates();
   currentSession = {};
   confirmedSets  = {};
+  doneEx = {}; openDoneEx = {};
   showToast('課表已重設');
   renderAll();
 }
@@ -2322,6 +2380,7 @@ async function resetAll(){
   templates     = getTemplates();
   currentSession= {};
   confirmedSets = {};
+  doneEx = {}; openDoneEx = {};
   renderHeader();
   showToast('所有資料已清除');
   renderAll();
