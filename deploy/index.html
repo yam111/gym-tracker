@@ -545,6 +545,7 @@ const DEFAULT_TEMPLATES = {
     {name:'肩推',          sets:[{w:12,r:10},{w:12,r:10}]},
     {name:'高位下拉',      sets:[{w:50,r:10},{w:50,r:10}]},
     {name:'側平舉',        sets:[{w:6,r:15},{w:6,r:15}]},
+    {name:'臉拉',           part:'shoulder', sets:[{w:'',r:15},{w:'',r:15}]},
     {name:'二頭',          sets:[{w:10,r:12},{w:10,r:12}]},
     {name:'三頭',          sets:[{w:18,r:12},{w:18,r:12}]},
   ],
@@ -711,6 +712,7 @@ function init(){
   if(gs) try{ gameState = JSON.parse(gs); }catch(e){}
   const ss = localStorage.getItem(GYM_SESSIONS);
   if(ss) try{ sessions = JSON.parse(ss); }catch(e){}
+  applyTemplateUpdates();
   templates = getTemplates();
 
   // Load progress (which cycle step we're on)
@@ -737,6 +739,48 @@ function getTemplates(){
       : JSON.parse(JSON.stringify(DEFAULT_TEMPLATES[d]));
   }
   return merged;
+}
+
+// One-time changes to a plan already saved on the phone (keeps the user's weights/edits).
+// gameState.tplRev remembers which ones ran, so deleting an added exercise sticks.
+const TPL_UPDATES = [
+  // 1: 上肢B 加臉拉 2×15 (rear delts), right after 側平舉
+  ()=>({day:3, after:'側平舉', ex:{name:'臉拉', part:'shoulder', sets:[{w:'',r:15},{w:'',r:15}]}}),
+];
+function applyTemplateUpdates(){
+  const rev = gameState.tplRev||0;
+  if(rev >= TPL_UPDATES.length) return;
+  const saved = localStorage.getItem(GYM_TEMPLATES);
+  const custom = saved ? JSON.parse(saved) : {};
+  for(let i=rev;i<TPL_UPDATES.length;i++){
+    const u = TPL_UPDATES[i]();
+    const list = custom[u.day];
+    if(!list || list.some(e=>e.name===u.ex.name)) continue; // default plan already has it
+    const a = list.findIndex(e=>e.name===u.after);
+    const at = a>=0 ? a+1 : list.length;
+    list.splice(at, 0, u.ex);
+    shiftDraftIndices(u.day, at);
+  }
+  localStorage.setItem(GYM_TEMPLATES, JSON.stringify(custom));
+  gameState.tplRev = TPL_UPDATES.length;
+  localStorage.setItem(GYM_GAME, JSON.stringify(gameState));
+}
+// An exercise was inserted at `at`: move today's unfinished entries for that day along with it
+function shiftDraftIndices(day, at){
+  const raw = localStorage.getItem(GYM_SESSION_DRAFT);
+  if(!raw) return;
+  try{
+    const d = JSON.parse(raw);
+    if(d.day!==day) return;
+    const byIdx = (d.session||{})[day];
+    if(byIdx){
+      const shifted = {};
+      Object.keys(byIdx).forEach(k=>{ const i=parseInt(k); shifted[i>=at?i+1:i] = byIdx[k]; });
+      d.session[day] = shifted;
+    }
+    if(d.done && d.done[day]) d.done[day] = d.done[day].map(i=>i>=at?i+1:i);
+    localStorage.setItem(GYM_SESSION_DRAFT, JSON.stringify(d));
+  }catch(e){}
 }
 
 // ─── Schedule ────────────────────────────────────────────────
@@ -2375,7 +2419,8 @@ async function resetAll(){
   [GYM_SESSIONS,GYM_GAME,GYM_TEMPLATES,GYM_PLAN,GYM_SESSION_DRAFT,GYM_PROGRESS].forEach(k=>localStorage.removeItem(k));
   cycleProgress = 0;
   currentDay = WEEK_CYCLE[0].day;
-  gameState     = {xp:0,level:1,streak:0,lastDate:'',achievements:[]};
+  gameState     = {xp:0,level:1,streak:0,lastDate:'',achievements:[],tplRev:TPL_UPDATES.length};
+  localStorage.setItem(GYM_GAME, JSON.stringify(gameState));
   sessions      = [];
   templates     = getTemplates();
   currentSession= {};
