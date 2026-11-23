@@ -1009,7 +1009,9 @@ async function resolveStaleDraft(){
   if(await pxConfirm(d.date+' 的「'+label+'」還沒按完成訓練。要補記到那天嗎？（選否會丟掉這筆）')){
     currentDay = d.day;
     currentSession = d.session;
-    if(!finishWorkout(d.date)) showToast('那筆沒有填重量和次數，已略過');
+    doneEx = d.done || {};
+    const onlyDone = await askOpenOnes();
+    if(!finishWorkout(d.date, onlyDone)) showToast('那筆沒有填重量和次數，已略過');
   }
   localStorage.removeItem(GYM_SESSION_DRAFT);
   currentSession = {};
@@ -1864,16 +1866,21 @@ function renderExercisesHTML(){
   const done = (doneEx[currentDay]||[]).filter(i=>i<exList.length);
   const order = done.concat(exList.map((_,i)=>i).filter(i=>!done.includes(i)));
 
-  let html = '';
+  let html = '', skipped = '';
   order.forEach(ei=>{
     const ex = exList[ei];
     // Pre-fill with template weight+reps if not yet started
     if(!currentSession[currentDay][ei]){
-      currentSession[currentDay][ei] = ex.sets.map(s=>({w:(s.w===''||s.w==null)?'':s.w, r:s.r||8}));
+      const log = exLog(ex.name), last = log[log.length-1], tw = parseFloat(ex.sets[0]&&ex.sets[0].w)||0;
+      const lastR = (!ex.up && !ex.down && last && tw>0 && last.top===tw) ? last.sets.filter(s=>s.w===tw).map(s=>s.r) : [];
+      currentSession[currentDay][ei] = ex.sets.map((s,i)=>({w:(s.w===''||s.w==null)?'':s.w, r:(parseFloat(s.w)===tw && lastR[i]) || s.r || 8}));
     }
     const sess = currentSession[currentDay][ei];
     // Sets removed down to 0 = skipped today; hide card (template untouched, returns next time)
-    if(!sess.length) return;
+    if(!sess.length){
+      skipped += '<div class="ex-card done collapsed" onclick="restoreEx('+ei+')"><div class="ex-done-row"><b>'+escHtml(ex.name)+'</b><span class="ex-done-sum">今天跳過・點一下放回來</span></div></div>';
+      return;
+    }
 
     const isDone = done.includes(ei);
     if(isDone && !openDoneEx[ei]){
@@ -1911,6 +1918,7 @@ function renderExercisesHTML(){
       : '<button class="ex-done-btn" onclick="toggleExDone('+ei+')">'+pxIcon('check',1)+'完成這個動作</button>';
     html += '</div>';
   });
+  html += skipped;
   html += '<button class="add-set-btn add-ex-btn" onclick="addExercise()" style="width:calc(100% - 24px);margin:4px 12px 0;background:#8bac0f;border:3px dashed #0f380f;color:#0f380f;font-weight:700;">+ 新增動作</button>';
   return html;
 }
@@ -1972,9 +1980,18 @@ function toggleDoneOpen(ei){
   renderWorkout();
 }
 
+// A card skipped today (every set removed) → put it back with the planned sets
+function restoreEx(ei){
+  if(currentSession[currentDay]) delete currentSession[currentDay][ei];
+  if(doneEx[currentDay]) doneEx[currentDay] = doneEx[currentDay].filter(i=>i!==ei);
+  saveDraft();
+  renderWorkout();
+}
+
 function updateSet(ei,si,field,val){
   if(!currentSession[currentDay] || !currentSession[currentDay][ei]) return;
-  currentSession[currentDay][ei][si][field] = (val==='' ? '' : parseFloat(val));
+  const n = parseFloat(val);
+  currentSession[currentDay][ei][si][field] = (val==='' || isNaN(n) || n<0) ? '' : n;
   saveDraft();
 }
 
@@ -2084,16 +2101,30 @@ async function completeWorkout(){
   const doneToday = sessions.filter(x=>x.date===todayStr()).length;
   const msg = doneToday ? '今天已經記過 '+doneToday+' 次訓練，確定再記一次並進到下一天？' : '完成訓練並進到下一天？';
   if(!await pxConfirm(msg)) return;
-  if(!finishWorkout(todayStr())) showToast('還沒有填任何一組（重量和次數）');
+  const onlyDone = await askOpenOnes();
+  if(!finishWorkout(todayStr(), onlyDone)) showToast('還沒有填任何一組（重量和次數）');
+}
+
+// Some exercises are marked done and others are still open with (pre-filled) numbers on screen:
+// ask whether the open ones were really done. Returns true = record only the marked ones.
+// Nothing marked at all → everything on screen counts, as before.
+async function askOpenOnes(){
+  const exList = templates[currentDay] || [], marked = doneEx[currentDay] || [];
+  if(!marked.some(i=>i<exList.length)) return false;
+  const filled = s=>s.w!==''&&s.w!=null&&s.r!==''&&s.r!=null;
+  const open = exList.map((_,ei)=>ei).filter(ei=>!marked.includes(ei) && ((currentSession[currentDay]||{})[ei]||[]).some(filled));
+  if(!open.length) return false;
+  return !(await pxConfirm('還有 '+open.length+' 個動作沒按「完成這個動作」：'+open.map(ei=>exList[ei].name).join('、')+'。這些也有做嗎？（選否就不記這幾個）'));
 }
 
 // Records the on-screen workout for `date`; returns false if no set was filled in
-function finishWorkout(date){
+function finishWorkout(date, onlyDone){
   const exList = templates[currentDay] || [];
   const backfill = date !== todayStr();
   const dayInfo = WEEK_CYCLE.find(w=>w.day===currentDay) || WEEK_CYCLE[0];
   const filled = s=>s.w!==''&&s.w!=null&&s.r!==''&&s.r!=null;
-  const entered = ei=>(currentSession[currentDay]&&currentSession[currentDay][ei]||[]);
+  const marked = doneEx[currentDay] || [];
+  const entered = ei=>(onlyDone && !marked.includes(ei)) ? [] : (currentSession[currentDay]&&currentSession[currentDay][ei]||[]);
   // The workout screen has no per-set ✓: sets still on screen count as done (skipped ones get deleted)
   const sessionData = {
     date, day:currentDay, type:dayInfo.type,
@@ -2146,7 +2177,8 @@ function finishWorkout(date){
   const coachHTML = coachReportHTML(sessionData, currentDay);
 
   updateStreak(date);
-  awardXP(XP_COMPLETE);
+  const gain = XP_COMPLETE + XP_PER_SET*sessionData.exercises.reduce((a,e)=>a+e.sets.length,0);
+  awardXP(gain);
   checkAchievements(sessionData, {backfill});
 
   // Reset session data for this day
@@ -2158,7 +2190,7 @@ function finishWorkout(date){
   // Advance to next training day
   advanceCycle();
 
-  showToast((backfill ? date+' 已補記！' : '訓練完成！')+'+'+XP_COMPLETE+' XP！');
+  showToast((backfill ? date+' 已補記！' : '訓練完成！')+'+'+gain+' XP！');
   sfx('done');
   renderHeader();
   renderAll();
@@ -2564,8 +2596,8 @@ function checkAchievements(sessionData, extraFlags){
   const maxWeights = {};
   sessions.forEach(s=>{
     (s.exercises||[]).forEach(ex=>{
-      const mx = Math.max(...(ex.sets||[]).map(st=>parseFloat(st.w)||0));
-      if(!maxWeights[ex.name] || mx > maxWeights[ex.name]) maxWeights[ex.name] = mx;
+      const mx = Math.max(0, ...(ex.sets||[]).map(st=>parseFloat(st.w)||0)), nm = canonEx(ex.name);
+      if(!maxWeights[nm] || mx > maxWeights[nm]) maxWeights[nm] = mx;
     });
   });
   const bench  = maxWeights['臥推']||0;
@@ -2610,7 +2642,8 @@ function checkAchievements(sessionData, extraFlags){
       const wk = mon.toISOString().slice(0,10);
       if(!weekMap[wk]) weekMap[wk]={upper:0,lower:0};
       const kind = (s.type||'').replace(/[AB]$/,''); // upperA → upper
-      if(weekMap[wk][kind]!==undefined) weekMap[wk][kind]++;
+      if(kind==='full'){ weekMap[wk].upper++; weekMap[wk].lower++; } // full-body day trains both
+      else if(weekMap[wk][kind]!==undefined) weekMap[wk][kind]++;
     });
     if(Object.values(weekMap).some(w=>w.upper>0&&w.lower>0)) newOnes.push('full_week');
   }
@@ -2637,8 +2670,10 @@ function checkAchievements(sessionData, extraFlags){
   if(newOnes.length) localStorage.setItem(GYM_GAME, JSON.stringify(gameState));
 }
 
+// Unlocked count: only achievements that still exist (old saves can carry ids that were removed)
+function achGot(){ return gameState.achievements.filter(id=>ACHIEVEMENTS_DEF.some(a=>a.id===id)).length; }
 function getTitle(){
-  const n = gameState.achievements.length;
+  const n = achGot();
   if(n>=40) return '傳說';
   if(n>=25) return '猛獸';
   if(n>=15) return '鐵人';
@@ -2652,7 +2687,7 @@ function renderAchievements(){
   const wrap = document.getElementById('section-achievements');
   const unlocked = new Set(gameState.achievements);
   const total = ACHIEVEMENTS_DEF.length;
-  const got   = gameState.achievements.length;
+  const got   = achGot();
   const title = getTitle();
 
   const cats = [
@@ -3202,7 +3237,7 @@ function lxWorkoutHead(){
 function renderAchievementsLux(){
   const wrap = document.getElementById('section-achievements');
   const unlocked = new Set(gameState.achievements);
-  const total = ACHIEVEMENTS_DEF.length, got = gameState.achievements.length;
+  const total = ACHIEVEMENTS_DEF.length, got = achGot();
   const C = 2*Math.PI*45, off = C*(1-Math.min(1,got/total));
   let html = '<h1 class="page">成就</h1><p class="sub">已解鎖 '+got+' 項，共 '+total+' 項</p>';
   html += '<div class="card hero"><div class="ring"><svg viewBox="0 0 104 104"><circle class="bg" cx="52" cy="52" r="45"/><circle class="fg" cx="52" cy="52" r="45" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"/></svg>'+
@@ -3346,6 +3381,15 @@ if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 init();
+
+// The app stays in memory on the phone. Coming back on a later day: reload, so the date, the streak,
+// a workout left unfinished on that earlier day and any new version are picked up (everything typed is already saved).
+const BOOT_DAY = todayStr();
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState!=='visible' || todayStr()===BOOT_DAY) return;
+  if(navigator.onLine===false && !(navigator.serviceWorker && navigator.serviceWorker.controller)) return;
+  location.reload();
+});
 </script>
 </body>
 </html>
