@@ -117,6 +117,9 @@ body{font-family:'Cubic11','Noto Sans TC',sans-serif;background:#0a0a1a;color:#e
 .day-modal-ex{margin-bottom:12px;}
 .day-modal-ex-name{font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;}
 .day-modal-set{font-size:12px;color:#bdc3c7;padding:3px 0;}
+.day-acts{display:flex;gap:8px;margin-bottom:14px;}
+.day-acts .day-modal-close{flex:1;margin-top:4px;padding:10px;font-size:14px;}
+.day-edit-note{font-size:12px;color:#7f8c8d;margin:2px 0 10px;}
 #part-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:flex-end;justify-content:center;z-index:9996;}
 #part-modal.show{display:flex;}
 #part-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
@@ -2117,42 +2120,26 @@ async function askOpenOnes(){
   return !(await pxConfirm('還有 '+open.length+' 個動作沒按「完成這個動作」：'+open.map(ei=>exList[ei].name).join('、')+'。這些也有做嗎？（選否就不記這幾個）'));
 }
 
-// Records the on-screen workout for `date`; returns false if no set was filled in
-function finishWorkout(date, onlyDone){
-  const exList = templates[currentDay] || [];
-  const backfill = date !== todayStr();
-  const dayInfo = WEEK_CYCLE.find(w=>w.day===currentDay) || WEEK_CYCLE[0];
-  const filled = s=>s.w!==''&&s.w!=null&&s.r!==''&&s.r!=null;
-  const marked = doneEx[currentDay] || [];
-  const entered = ei=>(onlyDone && !marked.includes(ei)) ? [] : (currentSession[currentDay]&&currentSession[currentDay][ei]||[]);
-  // The workout screen has no per-set ✓: sets still on screen count as done (skipped ones get deleted)
-  const sessionData = {
-    date, day:currentDay, type:dayInfo.type,
-    exercises: exList.map((ex,ei)=>({
-      name:ex.name,
-      sets:entered(ei).filter(filled)
-    }))
-  };
-  if(!sessionData.exercises.some(e=>e.sets.length)) return false;
-  sessions.push(sessionData);
-  localStorage.setItem(GYM_SESSIONS, JSON.stringify(sessions));
-
-  // Save last-used weights/reps back to templates so next session pre-fills with them
+// Writes a finished workout back into the plan for `day`: next pre-fill, add weight, drop weight.
+// setsOf(ei) = the filled sets of exercise ei. Returns the plan as it was before (kept on the session so an edit / delete can redo it).
+function updatePlan(day, date, setsOf){
+  const exList = templates[day] || [];
   const saved = localStorage.getItem(GYM_TEMPLATES);
   const custom = saved ? JSON.parse(saved) : {};
-  if(!custom[currentDay]) custom[currentDay] = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES[currentDay]||exList));
+  if(!custom[day]) custom[day] = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES[day]||exList));
+  const before = JSON.stringify(custom[day]);
   // Skipping a set (×) is for today only: keep the planned set count; extra sets added today are kept
   exList.forEach((ex, ei)=>{
-    const sets = entered(ei).filter(filled);
+    const sets = setsOf(ei);
     if(!sets.length) return;
-    if(!custom[currentDay][ei]) return;
+    if(!custom[day][ei]) return;
     const plan = sets.map(s=>({w:s.w, r:s.r}));
-    const planned = (custom[currentDay][ei].sets||[]).length;
+    const planned = (custom[day][ei].sets||[]).length;
     while(plan.length < planned) plan.push(Object.assign({}, plan[plan.length-1]));
-    custom[currentDay][ei].name = ex.name;
-    custom[currentDay][ei].sets = plan;
+    custom[day][ei].name = ex.name;
+    custom[day][ei].sets = plan;
     // Every planned set reached the top of the range → next time start heavier at the bottom of the range
-    const t = custom[currentDay][ei];
+    const t = custom[day][ei];
     if(t.range){
       const hit = sets.length>=planned && sets.every(s=>parseFloat(s.r)>=t.range[1]);
       t.up = hit;
@@ -2174,10 +2161,36 @@ function finishWorkout(date, onlyDone){
   });
   localStorage.setItem(GYM_TEMPLATES, JSON.stringify(custom));
   templates = getTemplates();
+  return before;
+}
+
+// Records the on-screen workout for `date`; returns false if no set was filled in
+function finishWorkout(date, onlyDone){
+  const exList = templates[currentDay] || [];
+  const backfill = date !== todayStr();
+  const dayInfo = WEEK_CYCLE.find(w=>w.day===currentDay) || WEEK_CYCLE[0];
+  const filled = s=>s.w!==''&&s.w!=null&&s.r!==''&&s.r!=null;
+  const marked = doneEx[currentDay] || [];
+  const entered = ei=>(onlyDone && !marked.includes(ei)) ? [] : (currentSession[currentDay]&&currentSession[currentDay][ei]||[]);
+  // The workout screen has no per-set ✓: sets still on screen count as done (skipped ones get deleted)
+  const sessionData = {
+    date, day:currentDay, type:dayInfo.type,
+    exercises: exList.map((ex,ei)=>({
+      name:ex.name,
+      sets:entered(ei).filter(filled)
+    }))
+  };
+  if(!sessionData.exercises.some(e=>e.sets.length)) return false;
+  sessions.push(sessionData);
+  // Only the newest workout of each day keeps the plan snapshot
+  sessions.forEach(x=>{ if(x!==sessionData && x.day===currentDay) delete x.tb; });
+  sessionData.tb = updatePlan(currentDay, date, ei=>entered(ei).filter(filled));
   const coachHTML = coachReportHTML(sessionData, currentDay);
 
   updateStreak(date);
   const gain = XP_COMPLETE + XP_PER_SET*sessionData.exercises.reduce((a,e)=>a+e.sets.length,0);
+  sessionData.xp = gain;
+  localStorage.setItem(GYM_SESSIONS, JSON.stringify(sessions));
   awardXP(gain);
   checkAchievements(sessionData, {backfill});
 
@@ -2814,6 +2827,8 @@ function renderProgress(){
 }
 
 
+let dayEdit = null; // {idx, ex:[{name, sets:[{w,r}]}]} — the record being edited in the day window
+
 function showDayDetail(ds){
   const list = sessions.filter(s=>s.date===ds);
   document.getElementById('day-modal-date').textContent = ds;
@@ -2822,6 +2837,8 @@ function showDayDetail(ds){
     html = '<div style="color:#7f8c8d;font-size:14px;padding:8px 0;">這天沒有訓練紀錄</div>';
   }
   list.forEach(sess=>{
+    const idx = sessions.indexOf(sess);
+    if(dayEdit && dayEdit.idx===idx){ html += dayEditHTML(sess); return; }
     const typeLabel = {fullA:'全身A',fullB:'全身B',upper:'上肢',lower:'下肢',upperA:'上肢A',lowerA:'下肢A',upperB:'上肢B',lowerB:'下肢B',push:'推',pull:'拉',legs:'腿'}[sess.type]||sess.type;
     html += '<div style="font-size:14px;color:#f39c12;margin-bottom:12px;">'+typeLabel+'日</div>';
 
@@ -2834,13 +2851,116 @@ function showDayDetail(ds){
       });
       html += '</div>';
     });
+    if(!dayEdit) html += '<div class="day-acts"><button class="day-modal-close" onclick="editSession('+idx+')">修改</button><button class="day-modal-close" onclick="deleteSession('+idx+')">刪除這筆</button></div>';
   });
   document.getElementById('day-modal-body').innerHTML = html;
   document.getElementById('day-modal').classList.add('show');
 }
 
 function closeDayModal(){
+  dayEdit = null;
   document.getElementById('day-modal').classList.remove('show');
+}
+
+const SESS_TYPE_LABEL = {fullA:'全身A',fullB:'全身B',upper:'上肢',lower:'下肢',upperA:'上肢A',lowerA:'下肢A',upperB:'上肢B',lowerB:'下肢B',push:'推',pull:'拉',legs:'腿'};
+function dayEditHTML(sess){
+  let h = '<div style="font-size:14px;color:#f39c12;margin-bottom:4px;">修改 '+escHtml(SESS_TYPE_LABEL[sess.type]||sess.type||'')+'日</div>'+
+    '<div class="day-edit-note">重量和次數清空＝那一組不算</div>';
+  dayEdit.ex.forEach((ex,ei)=>{
+    h += '<div class="day-modal-ex"><div class="day-modal-ex-name">'+escHtml(ex.name)+'</div>';
+    ex.sets.forEach((st,si)=>{
+      const v = x=>(x===''||x==null) ? '' : escHtml(String(x));
+      h += '<div class="set-row"><div class="set-num">'+(si+1)+'</div>'+
+        '<div class="set-inp"><label>'+(LUX?'kg':'重量kg')+'</label><input type="number" inputmode="decimal" value="'+v(st.w)+'" oninput="dayEditSet('+ei+','+si+',0,this.value)"></div>'+
+        '<div class="set-inp"><label>'+(LUX?'下':'次數')+'</label><input type="number" inputmode="numeric" value="'+v(st.r)+'" oninput="dayEditSet('+ei+','+si+',1,this.value)"></div></div>';
+    });
+    h += '<button class="add-set-btn" onclick="dayEditAdd('+ei+')">+ 新增一組</button></div>';
+  });
+  return h+'<div class="day-acts"><button class="day-modal-close" onclick="cancelSessionEdit()">取消</button><button class="day-modal-close" onclick="saveSessionEdit()">儲存</button></div>';
+}
+function editSession(idx){
+  const s = sessions[idx]; if(!s) return;
+  dayEdit = {idx, ex:(s.exercises||[]).map(e=>({name:e.name, sets:(e.sets||[]).map(x=>({w:x.w, r:x.r}))}))};
+  showDayDetail(s.date);
+  document.querySelector('#day-modal .day-modal-box').scrollTop = 0;
+}
+function cancelSessionEdit(){
+  const s = dayEdit && sessions[dayEdit.idx]; dayEdit = null;
+  if(s) showDayDetail(s.date);
+}
+function dayEditSet(ei,si,f,val){
+  const n = parseFloat(val);
+  dayEdit.ex[ei].sets[si][f ? 'r' : 'w'] = (val==='' || isNaN(n) || n<0) ? '' : n;
+}
+function dayEditAdd(ei){
+  const sets = dayEdit.ex[ei].sets, last = sets[sets.length-1];
+  sets.push({w:last?last.w:'', r:last?last.r:''});
+  showDayDetail(sessions[dayEdit.idx].date);
+}
+// The newest workout of its day whose plan snapshot still lines up with today's plan → the plan can be redone from it
+function planRedoable(s){
+  if(!s.tb || !templates[s.day]) return false;
+  for(let i=sessions.length-1;i>=0;i--){ if(sessions[i].day===s.day && /^full/.test(sessions[i].type||'')){ if(sessions[i]!==s) return false; break; } }
+  const cur = templates[s.day];
+  return cur.length===(s.exercises||[]).length && cur.every((t,i)=>t.name===s.exercises[i].name);
+}
+function restorePlan(s){
+  const saved = localStorage.getItem(GYM_TEMPLATES);
+  const custom = saved ? JSON.parse(saved) : {};
+  custom[s.day] = JSON.parse(s.tb);
+  localStorage.setItem(GYM_TEMPLATES, JSON.stringify(custom));
+  templates = getTemplates();
+}
+// Numbers pre-filled on the workout screen come from the plan: refresh them unless a workout is in progress
+function refreshPrefill(){
+  if(localStorage.getItem(GYM_SESSION_DRAFT)) return;
+  currentSession = {}; doneEx = {}; openDoneEx = {};
+}
+function recalcStreak(){
+  const days = [...new Set(sessions.map(s=>s.date))].sort();
+  let st = 0, prev = '';
+  days.forEach(d=>{ st = (prev && dateDiffDays(prev,d)<=STREAK_MAX_GAP+1) ? st+1 : 1; prev = d; });
+  gameState.streak = st; gameState.lastDate = prev;
+  localStorage.setItem(GYM_GAME, JSON.stringify(gameState));
+}
+function saveSessionEdit(){
+  const s = dayEdit && sessions[dayEdit.idx]; if(!s) return;
+  const filled = x=>x.w!==''&&x.w!=null&&x.r!==''&&x.r!=null;
+  const ex = dayEdit.ex.map(e=>({name:e.name, sets:e.sets.filter(filled)}));
+  if(!ex.some(e=>e.sets.length)){ showToast('至少要留一組；整筆不要就用「刪除這筆」'); return; }
+  const redo = planRedoable(s);
+  s.exercises = ex;
+  if(redo){ restorePlan(s); s.tb = updatePlan(s.day, s.date, ei=>s.exercises[ei].sets); refreshPrefill(); }
+  localStorage.setItem(GYM_SESSIONS, JSON.stringify(sessions));
+  dayEdit = null;
+  checkAchievements(s, {backfill:true});
+  renderHeader(); renderAll();
+  showDayDetail(s.date);
+  showToast('已修改');
+}
+async function deleteSession(idx){
+  const s = sessions[idx]; if(!s) return;
+  if(!await pxConfirm(s.date+' 的「'+(SESS_TYPE_LABEL[s.type]||s.type||'訓練')+'」這筆紀錄要刪掉嗎？刪了拿不回來。')) return;
+  const redo = planRedoable(s), wasLast = idx===sessions.length-1;
+  sessions.splice(idx,1);
+  localStorage.setItem(GYM_SESSIONS, JSON.stringify(sessions));
+  if(redo){ restorePlan(s); refreshPrefill(); }
+  // Deleting the newest record: go back to that day so it can be done again (not while a workout is in progress)
+  const step = WEEK_CYCLE.findIndex(w=>w.type===s.type);
+  if(wasLast && step>=0 && !localStorage.getItem(GYM_SESSION_DRAFT)){
+    cycleProgress = step;
+    localStorage.setItem(GYM_PROGRESS, JSON.stringify({step}));
+    currentDay = WEEK_CYCLE[step].day;
+    currentSession = {}; doneEx = {}; openDoneEx = {};
+  }
+  if(s.xp){
+    gameState.xp = Math.max(0, gameState.xp - s.xp);
+    gameState.level = Math.min(MAX_LEVEL, Math.floor(gameState.xp/XP_PER_LEVEL)+1);
+  }
+  recalcStreak();
+  renderHeader(); renderAll();
+  if(sessions.some(x=>x.date===s.date)) showDayDetail(s.date); else closeDayModal();
+  showToast('已刪除');
 }
 
 // ─── Diet ────────────────────────────────────────────────────
