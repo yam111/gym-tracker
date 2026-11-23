@@ -243,10 +243,9 @@ body{font-family:'Cubic11','Noto Sans TC',sans-serif;background:#0a0a1a;color:#e
 .pick-txt{width:52px;height:52px;display:grid;place-items:center;font-size:16px;}
 .pick-foot{flex:none;}
 .pick-foot .day-modal-close{margin-top:8px;}
-.exi{width:52px;height:52px;fill:none;stroke:#efe9dc;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex:none;}
-.exi .eq{stroke:#d8b676;stroke-width:2;}
+.exi{width:66px;height:66px;flex:none;display:block;}
 #tip-title{display:flex;align-items:center;gap:10px;}
-.tip-ic{width:46px;height:46px;}
+.tip-ic{width:56px;height:56px;}
 .tip-list{padding-left:22px;margin:4px 0 0;}
 .tip-list li{font-size:14.5px;line-height:1.75;margin-bottom:8px;}
 .set-num{cursor:pointer;border:none;background:none;padding:0;font-family:inherit;}
@@ -768,9 +767,8 @@ p.sub{color:var(--muted);font-size:13.5px;margin-bottom:18px;}
 #toast{top:auto;bottom:calc(var(--safe-b) + 92px);transform:translateX(-50%) translateY(200px);}
 #toast.show{transform:translateX(-50%) translateY(0);}
 .lx-part{background:var(--s3);color:var(--gold2);}
-.lx-part.lx-exi{padding:0;width:40px;height:40px;border-radius:12px;}
-.lx-part .exi{width:34px;height:34px;stroke-width:2.6;}
-.lx-part .exi .eq{stroke-width:2.4;}
+.lx-part.lx-exi{padding:0;width:44px;height:44px;border-radius:12px;overflow:hidden;}
+.lx-part .exi{width:44px;height:44px;}
 #ex-picker,#tip-modal{background:rgba(4,6,5,.62);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
 #ex-picker.show,#tip-modal.show{animation:lx-fade .25s both;}
 .pick-tab{background:var(--s1);border-color:var(--line2);color:var(--muted);font-size:13px;letter-spacing:.04em;}
@@ -3654,29 +3652,29 @@ function showToast(msg){
 const EX_LIB_GROUPS = [
   {key:'chest', label:'胸', items:[
     ['臥推','chest','bench',2.5,[6,8],3],['上斜臥推','chest','incline',2.5,[8,10],3],
-    ['啞鈴臥推','chest','bench',2,[8,12],3],['上斜啞鈴臥推','chest','incline',2,[8,12],3],
-    ['上斜槓片臥推','chest','incline',0,[8,12],3],['機械胸推','chest','bench',0,[8,12],3],
-    ['蝴蝶機夾胸','chest','fly',0,[10,15],3],['雙槓撐體','chest','dip',0,[6,12],3,0]]},
+    ['啞鈴臥推','chest','dbbench',2,[8,12],3],['上斜啞鈴臥推','chest','dbincline',2,[8,12],3],
+    ['上斜槓片臥推','chest','plateincline',0,[8,12],3],['機械胸推','chest','chestpress',0,[8,12],3],
+    ['蝴蝶機夾胸','chest','pecdeck',0,[10,15],3],['雙槓撐體','chest','dip',0,[6,12],3,0]]},
   {key:'back', label:'背', items:[
     ['高位下拉','back','pulldown',0,[8,12],3],['引體向上','back','pullup',0,[5,10],3,0],
-    ['輔助引體向上','back','pullup',0,[6,10],3],['機械划船','back','row',0,[10,12],3],
-    ['坐姿划船','back','row',0,[10,12],3],['槓片划船機','back','row',0,[8,12],3],
-    ['啞鈴划船','back','dbrow',2,[8,12],3],['槓鈴划船','back','rdl',2.5,[6,10],3]]},
+    ['輔助引體向上','back','apullup',0,[6,10],3],['機械划船','back','machrow',0,[10,12],3],
+    ['坐姿划船','back','cablerow',0,[10,12],3],['槓片划船機','back','platerow',0,[8,12],3],
+    ['啞鈴划船','back','dbrow',2,[8,12],3],['槓鈴划船','back','bbrow',2.5,[6,10],3]]},
   {key:'quads', label:'腿', items:[
-    ['深蹲','quads','squat',5,[5,8],3],['哈克深蹲','quads','squat',5,[8,12],3],
-    ['槓片腿推','quads','legpress',5,[10,12],3],['腿推機','quads','legpress',0,[10,12],3],
-    ['保加利亞蹲','quads','lunge',2,[8,12],3],['腿伸展','quads','legext',0,[12,15],3]]},
+    ['深蹲','quads','squat',5,[5,8],3],['哈克深蹲','quads','hack',5,[8,12],3],
+    ['槓片腿推','quads','platepress',5,[10,12],3],['腿推機','quads','legpress',0,[10,12],3],
+    ['保加利亞蹲','quads','bulgarian',2,[8,12],3],['腿伸展','quads','legext',0,[12,15],3]]},
   {key:'hams', label:'臀・腿後', items:[
     ['硬舉','hams','deadlift',5,[3,5],2],['羅馬尼亞硬舉','hams','rdl',5,[6,10],3],
     ['腿彎舉','hams','legcurl',0,[10,12],2],['臀推','hams','hipthrust',5,[8,12],3],
     ['腿外展','hams','abduct',0,[12,15],2]]},
   {key:'shoulder', label:'肩', items:[
-    ['側平舉','shoulder','lateral',2,[12,15],2],['啞鈴肩推','shoulder','press',2,[8,12],3],
-    ['槓鈴肩推','shoulder','press',2.5,[5,8],3],['機械肩推','shoulder','press',0,[8,12],3],
-    ['臉拉','shoulder','facepull',0,[12,15],2],['反向飛鳥','shoulder','fly',0,[12,15],2]]},
+    ['側平舉','shoulder','lateral',2,[12,15],2],['啞鈴肩推','shoulder','dbpress',2,[8,12],3],
+    ['槓鈴肩推','shoulder','bbpress',2.5,[5,8],3],['機械肩推','shoulder','machpress',0,[8,12],3],
+    ['臉拉','shoulder','facepull',0,[12,15],2],['反向飛鳥','shoulder','revfly',0,[12,15],2]]},
   {key:'arms', label:'手臂', items:[
-    ['二頭彎舉','biceps','curl',2.5,[10,12],2],['W槓彎舉','biceps','curl',2.5,[8,12],2],
-    ['錘式彎舉','biceps','curl',2,[10,12],2],['三頭下壓','triceps','pushdown',0,[10,12],2]]},
+    ['二頭彎舉','biceps','curl',2.5,[10,12],2],['W槓彎舉','biceps','ezcurl',2.5,[8,12],2],
+    ['錘式彎舉','biceps','hammer',2,[10,12],2],['三頭下壓','triceps','pushdown',0,[10,12],2]]},
   {key:'core', label:'核心・小腿', items:[
     ['捲腹','abs','crunch',0,[12,20],2,0],['懸垂舉腿','abs','legraise',0,[8,15],2,0],
     ['提踵','calves','calf',0,[10,15],2]]}
@@ -3684,53 +3682,324 @@ const EX_LIB_GROUPS = [
 const EX_LIB = {};
 EX_LIB_GROUPS.forEach(g=>g.items.forEach(it=>{ EX_LIB[it[0]] = {name:it[0], part:it[1], icon:it[2], inc:it[3], range:it[4], n:it[5], w0:it.length>6?it[6]:''}; }));
 // 名稱關鍵字 → 圖示（動作庫以外的名字，例如以前自己打的）
-const EXI_KEYWORDS = [['腿推','legpress'],['腿彎舉','legcurl'],['腿伸','legext'],['划船','row'],['下拉','pulldown'],['引體','pullup'],['肩推','press'],['平舉','lateral'],['飛鳥','fly'],['夾胸','fly'],['臉拉','facepull'],
-  ['二頭','curl'],['彎舉','curl'],['三頭','pushdown'],['羅馬尼亞','rdl'],['硬','deadlift'],['臀推','hipthrust'],['外展','abduct'],['保加利亞','lunge'],['弓箭','lunge'],['深蹲','squat'],['Squat','squat'],
-  ['小腿','calf'],['提踵','calf'],['舉腿','legraise'],['腹','crunch'],['上斜','incline'],['臥推','bench'],['胸推','bench'],['撐體','dip']];
+const EXI_KEYWORDS = [['槓片腿推','platepress'],['腿推','legpress'],['腿彎舉','legcurl'],['腿伸','legext'],['坐姿划船','cablerow'],['啞鈴划船','dbrow'],['槓鈴划船','bbrow'],['槓片划船','platerow'],['划船','machrow'],['下拉','pulldown'],['輔助引體','apullup'],['引體','pullup'],['槓鈴肩推','bbpress'],['啞鈴肩推','dbpress'],['肩推','machpress'],['平舉','lateral'],['反向飛鳥','revfly'],['飛鳥','pecdeck'],['夾胸','pecdeck'],['臉拉','facepull'],['錘式','hammer'],['W槓','ezcurl'],['二頭','curl'],['彎舉','curl'],['三頭','pushdown'],['羅馬尼亞','rdl'],['硬','deadlift'],['臀推','hipthrust'],['外展','abduct'],['保加利亞','bulgarian'],['弓箭','bulgarian'],['哈克','hack'],['深蹲','squat'],['Squat','squat'],['小腿','calf'],['提踵','calf'],['舉腿','legraise'],['腹','crunch'],['上斜啞鈴','dbincline'],['上斜槓片','plateincline'],['上斜','incline'],['啞鈴臥推','dbbench'],['臥推','bench'],['胸推','chestpress'],['撐體','dip']];
 function exIconKey(name){
   const n = canonEx(name);
   if(EX_LIB[n]) return EX_LIB[n].icon;
   const hit = EXI_KEYWORDS.find(([kw])=>n.indexOf(kw)>=0);
   return hit ? hit[1] : '';
 }
-function exiSVG(k, cls){
-  const d = EXI[k]; if(!d) return '';
-  const h = d.h;
-  return '<svg class="'+(cls||'exi')+'" viewBox="0 0 48 48"><path class="eq" d="'+d.e+'"/><path d="'+d.b+'M'+(h[0]-3)+' '+h[1]+'a3 3 0 1 0 6 0a3 3 0 1 0-6 0"/></svg>';
-}
+function exiSVG(k, cls){ return FIG.render(k, cls); }
 // 遊戲版：沿用像素圖，沒有的用部位小人
 function gbExIcon(name, part){
   const hit = EX_SPRITES[name] ? name : (SPRITE_KEYWORDS.find(([kw])=>name.indexOf(kw)>=0)||[])[1];
   return '<span class="ex-tile">'+(hit ? spriteSVG(EX_SPRITES[hit],2) : bodyIconSVG(part,2))+'</span>';
 }
-// 48 格線條圖：h＝頭中心，b＝人，e＝器材（金色）
-const EXI = {
-squat:{h:[24,9.5],b:'M24 13v13M24 26l-8 5 1 10M24 26l8 5-1 10M20 15.5l-3.5 4L15 15M28 15.5l3.5 4L33 15',e:'M8 15h32M9 11v8M11.5 12v6M39 11v8M36.5 12v6'},
-bench:{h:[9,25.5],b:'M13 28h15M28 28l6-3 1 14M16 28V18',e:'M7 32h26M11 32v8M29 32v8M16 13.5m-4.5 0a4.5 4.5 0 1 0 9 0a4.5 4.5 0 1 0-9 0'},
-incline:{h:[11,18],b:'M14 21.5l13.5 9M27.5 30.5l8-1.5 1 11M16.5 23V12',e:'M11 26l20 12M29 37v4.5M16.5 8.5m-4.5 0a4.5 4.5 0 1 0 9 0a4.5 4.5 0 1 0-9 0'},
-pulldown:{h:[24,17],b:'M24 20.5V32M19 22.5h10M19 22.5l-4-4.5-2-6M29 22.5l4-4.5 2-6M24 32l-6 3v7M24 32l6 3v7',e:'M24 3v9M11 12h26M16 34h16'},
-row:{h:[27,13],b:'M27 16.5l1 14.5M27.5 18.5l4.5 6-11 .5M28 31l-9-3-8 7',e:'M5 6v36M5 25h16M21 34h12M9 32v8'},
-deadlift:{h:[14,16],b:'M17.5 18l14.5 7M32 25l-6 7 3 9.5M19 19.5l3 14',e:'M23 36m-5 0a5 5 0 1 0 10 0a5 5 0 1 0-10 0M10 41.5h28'},
-rdl:{h:[16.5,13.5],b:'M20 15.5l16 6.5M36 22l-5 9 1 10.5M22 16.5l3 13',e:'M26 31.5m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0M10 41.5h28'},
-legpress:{h:[9,24],b:'M11.5 26.5L21 35M21 35l4-12 10-1',e:'M7 30.5l13 8M31 17l7.5 10M27 41l15-15'},
-legcurl:{h:[15,9.5],b:'M15 13l2 15M17 28h13M30 28l-4 11M16 16l5 7',e:'M10 30h20M12 12v18M26 24.5h6M24 39h5'},
-legext:{h:[15,9.5],b:'M15 13l2 15M17 28h13M30 28l10-6M16 16l5 7',e:'M10 30h20M12 12v18M37 25.5l3 4'},
-lateral:{h:[24,9],b:'M24 12.5v14M24 26.5l-4 15M24 26.5l4 15M24 15l-13 1M24 15l13 1',e:'M9 13v6M7 14v4M39 13v6M41 14v4'},
-press:{h:[24,14],b:'M24 17.5V30M24 30l-4 11.5M24 30l4 11.5M24 19l-8-1-2-10M24 19l8-1 2-10',e:'M10 6h8M34 6h-8M10 4.5v3M18 4.5v3M30 4.5v3M38 4.5v3'},
-curl:{h:[22,9],b:'M22 12.5l1 15M23 27.5l-3 14M23 27.5l3 14M22 15l1.5 8.5 7.5-6',e:'M30 14v6M32.5 15v4'},
-pushdown:{h:[27,10],b:'M27 13.5l-1 14.5M26 28l-3 13.5M26 28l3 13.5M26.5 15.5l-1 9-7.5 4',e:'M6 4v38M6 5h5M11 5l7 23'},
-calf:{h:[24,8],b:'M24 11.5V25M24 25l1 11M25 36l-4 3.5M24 13.5l-1.5 10M24 13.5l1.5 10',e:'M13 40h20v2.5H13z'},
-hipthrust:{h:[9,23.5],b:'M12.5 25L27 25M27 25l8 1 1 15',e:'M5 28h11v6H5zM27 20.5m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0'},
-lunge:{h:[19,9.5],b:'M19 13l1 12.5M20 25.5l-8 5 1 11M20 25.5l9 9 8-4',e:'M33 31h11M38 31v10'},
-crunch:{h:[12,27],b:'M15 30l9.5 8M24.5 38l8-10 6 11M14 29l-4-5',e:'M6 42h36'},
-facepull:{h:[27,13],b:'M27.5 16.5v13M27.5 29.5l-3 12M27.5 29.5l3 12M27.5 18.5l-6-2.5-2-4',e:'M6 4v38M7 11h12'},
-pullup:{h:[24,14],b:'M24 17.5V30M24 30l-3 10 3 2M24 30l3 10M19 19h10M19 19l-4-6-2-8M29 19l4-6 2-8',e:'M7 5h34M11 3v4M37 3v4'},
-fly:{h:[24,10],b:'M24 13.5V29M24 29l-4 12.5M24 29l4 12.5M24 17H13v-8M24 17h11v-8',e:'M10.5 7v13M37.5 7v13M18 29h12'},
-dip:{h:[24,9],b:'M24 12.5V27M24 27l-3 9 3 4M24 27l3 9M24 15l-7 4M24 15l7 4',e:'M17 19h-6M31 19h6M13 19v23M35 19v23'},
-abduct:{h:[24,9],b:'M24 12.5V27M24 27l-10 4-1 11M24 27l10 4 1 11M24 16l-6 8M24 16l6 8',e:'M10.5 27v9M37.5 27v9M16 28h16'},
-dbrow:{h:[9,13],b:'M12 15l18 4M30 19l-6 11h8M30 19l3 11v11.5M14 16l-1 14M19 17l1 9',e:'M8 30h24v3H8zM10 33v8.5M30 33v8.5M17 27h6M17 25.5v3M23 25.5v3'},
-legraise:{h:[24,14],b:'M24 17.5V30M24 30h14M19 19h10M19 19l-4-6-2-8M29 19l4-6 2-8',e:'M7 5h34'}
+// 寫實比例人體動作圖：每個動作自己的姿勢＋器材，練到的肌肉用金色
+const FIG = (()=>{
+const R = Math.PI/180;
+const dir = a => [Math.sin(a*R), Math.cos(a*R)];
+const add = (p,q,k=1) => [p[0]+q[0]*k, p[1]+q[1]*k];
+const f1 = n => Math.round(n*10)/10;
+const pt = p => f1(p[0])+' '+f1(p[1]);
+// 閉合／開放 Catmull-Rom 平滑曲線
+function spline(P, closed){
+  const n = P.length; let d = 'M'+pt(P[0]);
+  const g = i => closed ? P[(i+n)%n] : P[Math.max(0,Math.min(n-1,i))];
+  const last = closed ? n : n-1;
+  for(let i=0;i<last;i++){
+    const p0=g(i-1),p1=g(i),p2=g(i+1),p3=g(i+2);
+    const c1=[p1[0]+(p2[0]-p0[0])/6, p1[1]+(p2[1]-p0[1])/6];
+    const c2=[p2[0]-(p3[0]-p1[0])/6, p2[1]-(p3[1]-p1[1])/6];
+    d += 'C'+pt(c1)+' '+pt(c2)+' '+pt(p2);
+  }
+  return d + (closed?'Z':'');
+}
+// 有肌肉弧度的肢體：A→B，ra/rb 兩端半徑，mF/mB 前後側最粗處，m 最粗處位置
+function limb(A,B,ra,mF,mB,rb,m,flip){
+  const L = Math.hypot(B[0]-A[0],B[1]-A[1])||1;
+  const u = [(B[0]-A[0])/L,(B[1]-A[1])/L];
+  let n = [u[1],-u[0]]; if(flip) n=[-n[0],-n[1]];
+  const M = add(A,u,L*m);
+  const F = [add(A,n,ra*.92), add(M,n,mF), add(B,n,rb*.92)];
+  const K = [add(B,n,-rb*.92), add(M,n,-mB), add(A,n,-ra*.92)];
+  const capB = [add(add(B,n,rb*.6),u,rb*.85), add(B,u,rb), add(add(B,n,-rb*.6),u,rb*.85)];
+  const capA = [add(add(A,n,-ra*.6),u,-ra*.85), add(A,u,-ra), add(add(A,n,ra*.6),u,-ra*.85)];
+  return spline(F.concat(capB,K,capA), true);
+}
+// 肢體上的肌肉（金色）：側 s=1 前、-1 後、0 中間；f0~f1 段落；o 外緣比例
+function limbMus(A,B,ra,rm,rb,m,s,f0,f1,flip,o=.9){
+  const L = Math.hypot(B[0]-A[0],B[1]-A[1])||1;
+  const u = [(B[0]-A[0])/L,(B[1]-A[1])/L];
+  let n = [u[1],-u[0]]; if(flip) n=[-n[0],-n[1]];
+  const r = f => f<m ? ra+(rm-ra)*(f/m) : rm+(rb-rm)*((f-m)/(1-m));
+  const at = (f,k) => add(add(A,u,L*f), n, k);
+  const fm=(f0+f1)/2;
+  if(s===0) return spline([at(f0,0), at(fm,r(fm)*.62), at(f1,0), at(fm,-r(fm)*.62)], true);
+  return spline([at(f0,s*r(f0)*.35), at(fm,s*r(fm)*o), at(f1,s*r(f1)*.35), at(fm,s*r(fm)*.05)], true);
+}
+const LIMB = { // ra, mF, mB, rb, m
+  th:[5.7,5.9,5.4,3.7,.38], sh:[3.6,3.0,4.3,2.2,.3], ua:[3.9,3.7,3.9,2.6,.45], fa:[2.8,3.0,2.9,1.9,.3]
 };
+const TORSO = [[-.1,2.4],[.04,5.3],[.32,4.7],[.58,5.8],[.78,6.4],[.95,4.6],[1.04,2.0],[1.07,-2.2],[1.0,-4.9],[.8,-5.9],[.5,-4.4],[.22,-5.0],[.03,-6.4],[-.12,-4.0]];
+const TMUS = {
+  chest:[[.55,3.8],[.77,6.1],[.97,3.9],[.77,1.2]],
+  abs:[[.04,3.4],[.32,4.4],[.57,4.1],[.32,1.6]],
+  lat:[[.42,-3.5],[.72,-5.5],[.96,-4.1],[.72,-1.6]],
+  low:[[.12,-4.6],[.4,-4.1],[.62,-4.2],[.4,-2.2]],
+  glute:[[-.11,-3.7],[.02,-6.1],[.2,-4.7],[.05,-1.7]],
+  trap:[[.86,-4.6],[1.0,-4.6],[1.06,-1.8],[.94,-2.6]]
+};
+const C = {steel:'#9aa1a9', steelD:'#555b63', pad:'#2c2f34', padE:'#62686f', plate:'#202326', plateE:'#80878f', cable:'#b7bec5', stack:'#26292d'};
+// ── 器材 ──
+const E = {
+  plate:(x,y,r=10)=>`<circle cx="${f1(x)}" cy="${f1(y)}" r="${r}" fill="${C.plate}" stroke="${C.plateE}" stroke-width="1.3"/><circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r*.62)}" fill="none" stroke="#3d4248" stroke-width="1"/><circle cx="${f1(x)}" cy="${f1(y)}" r="1.7" fill="${C.steel}"/>`,
+  hex:(x,y,r=4.3)=>{let p=[];for(let i=0;i<6;i++){const a=(i*60+30)*R;p.push(pt([x+r*Math.cos(a),y+r*Math.sin(a)]));}return `<polygon points="${p.join(' ')}" fill="#2b2f33" stroke="${C.steel}" stroke-width="1.1"/><circle cx="${f1(x)}" cy="${f1(y)}" r="1.2" fill="${C.steel}"/>`;},
+  db:(x,y,a=0,s=1)=>`<g transform="translate(${f1(x)} ${f1(y)}) rotate(${a}) scale(${s})"><rect x="-4" y="-.9" width="8" height="1.8" fill="${C.steel}"/><rect x="-7.2" y="-3.8" width="3.6" height="7.6" rx="1" fill="${C.plate}" stroke="${C.plateE}" stroke-width="1"/><rect x="3.6" y="-3.8" width="3.6" height="7.6" rx="1" fill="${C.plate}" stroke="${C.plateE}" stroke-width="1"/></g>`,
+  bar:(a,b,w=2.2,c=C.steel)=>`<line x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`,
+  poly:(P,w=2.2,c=C.steel)=>`<polyline points="${P.map(pt).join(' ')}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`,
+  cable:(a,b)=>`<line x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}" stroke="${C.cable}" stroke-width=".9"/>`,
+  pad:(x,y,w,h,rot=0,rx=1.8)=>`<rect x="${f1(x)}" y="${f1(y)}" width="${f1(w)}" height="${f1(h)}" rx="${rx}" fill="${C.pad}" stroke="${C.padE}" stroke-width="1"${rot?` transform="rotate(${rot} ${f1(x)} ${f1(y)})"`:''}/>`,
+  stack:(x,y,w,h)=>{let s=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1" fill="${C.stack}" stroke="${C.padE}" stroke-width="1"/>`;for(let yy=y+3;yy<y+h-1;yy+=3)s+=`<line x1="${x+1}" y1="${yy}" x2="${x+w-1}" y2="${yy}" stroke="#41464c" stroke-width=".7"/>`;return s;},
+  pulley:(x,y)=>`<circle cx="${f1(x)}" cy="${f1(y)}" r="2.4" fill="${C.steelD}" stroke="${C.steel}" stroke-width="1"/>`,
+  floor:(y,x0=6,x1=94)=>`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="#3a3f3c" stroke-width="1.2" stroke-linecap="round"/>`
+};
+// 長凳（側面）：x0~x1，墊子頂 y，地板 fy
+const bench = (x0,x1,y,fy) => E.bar([x0+5,y+3],[x0+5,fy],2.4,C.steelD)+E.bar([x1-5,y+3],[x1-5,fy],2.4,C.steelD)+E.bar([x0+3,fy],[x0+8,fy],2.4,C.steelD)+E.bar([x1-8,fy],[x1-3,fy],2.4,C.steelD)+E.pad(x0,y,x1-x0,4.2);
+
+// ── 側面人體 ──
+function side(p){
+  const H=p.hip, T=26, u=dir(p.t), v=dir(p.t-90);
+  const loc = (f,k) => add(add(H,u,T*f),v,k);
+  const J = {hip:H, u, v, loc};
+  J.sh = loc(.93,-.6); J.neck = loc(1.03,0);
+  J.head = add(J.neck, dir(p.hd!=null?p.hd:p.t), 7.4);
+  const fo = p.fo||[0,0];
+  J.el=[];J.wr=[];J.hd=[];J.kn=[];J.an=[];J.toe=[];
+  (p.arms||[]).forEach((a,i)=>{ const S=i?add(J.sh,fo):J.sh; const e=add(S,dir(a[0]),15*(a[2]||1)); const w=add(e,dir(a[1]),13*(a[3]||1)); J.el[i]=e; J.wr[i]=w; J.hd[i]=add(w,dir(a[1]),2.6); J['S'+i]=S; });
+  (p.legs||[]).forEach((l,i)=>{ const Hh=i?add(H,fo):H; const k=add(Hh,dir(l[0]),20*(l[3]||1)); const an=add(k,dir(l[1]),19*(l[4]||1)); J.kn[i]=k; J.an[i]=an; const ft=l[2]!=null?l[2]:90; J.toe[i]=add(add(an,dir(ft),7.6),dir(ft-90),1.6); J['H'+i]=Hh; J.ft=J.ft||[]; J.ft[i]=ft; });
+  J.fl = Math.round(Math.max(...J.an.map(a=>a[1]),0)+3.4);
+  return J;
+}
+function sideParts(p,J,mus){
+  const out = {far:[],farM:[],torso:'',torsoM:[],near:[],nearM:[]};
+  const legChain=(i)=>{ const l=p.legs[i]; const ft=J.ft[i];
+    const heel=add(add(J.an[i],dir(ft),-1.4),dir(ft-90),1.2);
+    return [limb(J['H'+i],J.kn[i],...LIMB.th), limb(J.kn[i],J.an[i],...LIMB.sh), limb(heel,J.toe[i],2.3,2.1,1.9,1.3,.35)];
+  };
+  const armChain=(i)=>{ const a=p.arms[i]; return [limb(J['S'+i],J.el[i],...LIMB.ua), limb(J.el[i],J.wr[i],...LIMB.fa), limb(J.wr[i],add(J.wr[i],dir(a[4]!=null?a[4]:a[1]),4.4),1.9,2.1,1.8,1.4,.45)]; };
+  const legM=(i)=>{ const r=[]; const th=LIMB.th, sh=LIMB.sh;
+    if(mus.quad) r.push(limbMus(J['H'+i],J.kn[i],th[0],th[1],th[3],th[4],1,.08,.92));
+    if(mus.ham) r.push(limbMus(J['H'+i],J.kn[i],th[0],th[2],th[3],th[4],-1,.1,.9));
+    if(mus.calf) r.push(limbMus(J.kn[i],J.an[i],sh[0],sh[2],sh[3],sh[4],-1,.04,.68));
+    if(mus.abd) r.push(limbMus(J['H'+i],J.kn[i],th[0],th[1],th[3],th[4],0,-.05,.45));
+    return r; };
+  const armM=(i)=>{ const r=[]; const ua=LIMB.ua;
+    if(mus.bi) r.push(limbMus(J['S'+i],J.el[i],ua[0],ua[1],ua[3],ua[4],1,.2,.88));
+    if(mus.tri) r.push(limbMus(J['S'+i],J.el[i],ua[0],ua[2],ua[3],ua[4],-1,.12,.9));
+    if(mus.delt) r.push(limbMus(J['S'+i],J.el[i],ua[0],ua[1],ua[3],ua[4],0,-.18,.36));
+    if(mus.fdelt) r.push(limbMus(J['S'+i],J.el[i],ua[0],ua[1],ua[3],ua[4],1,-.15,.4));
+    if(mus.rdelt) r.push(limbMus(J['S'+i],J.el[i],ua[0],ua[2],ua[3],ua[4],-1,-.15,.4));
+    if(mus.fore) r.push(limbMus(J.el[i],J.wr[i],LIMB.fa[0],LIMB.fa[1],LIMB.fa[3],LIMB.fa[4],0,.05,.6));
+    return r; };
+  const far = p.farFirst || ['leg','arm'];
+  if(p.legs&&p.legs[1]){ out.far.push(legChain(1)); out.farM.push(...legM(1)); }
+  if(p.arms&&p.arms[1]){ out.far.push(armChain(1)); out.farM.push(...armM(1)); }
+  const tp = TORSO.map(([f,k])=>J.loc(f,k));
+  out.torso = spline(tp,true)+limb(J.neck,J.head,2.9,2.9,2.9,2.7,.5)+headPath(J.neck,J.head,p.hd!=null?p.hd:p.t);
+  ['chest','abs','lat','low','glute','trap'].forEach(k=>{ if(mus[k]) out.torsoM.push(spline(TMUS[k].map(([f,kk])=>J.loc(f,kk)),true)); });
+  if(p.legs&&p.legs[0]){ out.near.push(legChain(0)); out.nearM.push(...legM(0)); }
+  if(p.arms&&p.arms[0]){ out.near.push(armChain(0)); out.nearM.push(...armM(0)); }
+  return out;
+}
+// 頭：橢圓＋下巴＋鼻樑，朝向 a
+function headPath(N,Hc,a){
+  const up = dir(a), fw = dir(a-90);
+  const at=(k1,k2)=>add(add(Hc,up,k1),fw,k2);
+  return spline([at(6.2,.6),at(5.2,4.4),at(2,5.7),at(.2,5.9),at(-1.4,5.3),at(-3.6,4.4),at(-5.3,2.2),at(-5.2,-1.2),at(-3.2,-4.6),at(1.5,-5.6),at(5,-3.6)],true);
+}
+// ── 正面／背面人體 ──
+const FT = [[0,3.2],[7.0,2.2],[8.5,-3],[7.3,-8.5],[8.5,-14],[10.1,-18.6],[11.4,-22.3],[9.5,-25.4],[5.4,-26.6],[2.7,-28.2]];
+function front(p){
+  const H=p.hip, s=p.s||1; const J={hip:H};
+  const P=(x,y)=>[H[0]+x*s,H[1]+y*s];
+  J.P=P; J.neck=P(0,-27.8); J.head=P(0,-34.8);
+  J.S=[P(9.7,-22.6),P(-9.7,-22.6)]; J.Hh=[P(4.7,.4),P(-4.7,.4)];
+  J.el=[];J.wr=[];J.hd=[];J.kn=[];J.an=[];
+  [0,1].forEach(i=>{ const m=i?-1:1;
+    const a=p.arms[i]||p.arms[0]; const d1=dir(a[0]),d2=dir(a[1]);
+    J.el[i]=add(J.S[i],[d1[0]*m,d1[1]],15*s*(a[2]||1)); J.wr[i]=add(J.el[i],[d2[0]*m,d2[1]],13*s*(a[3]||1)); J.hd[i]=add(J.wr[i],[d2[0]*m,d2[1]],2.6*s);
+    const l=p.legs[i]||p.legs[0]; const e1=dir(l[0]),e2=dir(l[1]);
+    J.kn[i]=add(J.Hh[i],[e1[0]*m,e1[1]],20*s*(l[2]||1)); J.an[i]=add(J.kn[i],[e2[0]*m,e2[1]],19*s*(l[3]||1));
+  });
+  return J;
+}
+function frontParts(p,J,mus){
+  const s=p.s||1, out={far:[],farM:[],torso:'',torsoM:[],near:[],nearM:[],after:[]};
+  const sc=a=>a.map((x,i)=>i===4?x:x*s);
+  const th=sc(LIMB.th), shn=sc([3.7,3.6,3.6,2.3,.3]), ua=sc([4.3,3.7,3.7,2.6,.45]), fa=sc(LIMB.fa);
+  const tp=FT.concat(FT.slice(1,-1).reverse().map(([x,y])=>[-x,y])).map(([x,y])=>J.P(x,y));
+  // 腿在軀幹後面（髖部蓋住大腿根）
+  [0,1].forEach(i=>{ const fl=i===1;
+    const foot = `M${pt(add(J.an[i],[(i?-1:1)*-1.6*s,1.2*s]))}h0`;
+    const ftp = spline([add(J.an[i],[-2.6*s*(i?-1:1),.6*s]),add(J.an[i],[1.2*s*(i?-1:1),-.4*s]),add(J.an[i],[3.4*s*(i?-1:1),2.6*s]),add(J.an[i],[2.6*s*(i?-1:1),4.2*s]),add(J.an[i],[-2.4*s*(i?-1:1),3.4*s])],true);
+    out.far.push([limb(J.Hh[i],J.kn[i],...th,fl), limb(J.kn[i],J.an[i],...shn,fl), ftp]);
+    if(mus.quad) out.farM.push(limbMus(J.Hh[i],J.kn[i],th[0],th[1],th[3],th[4],0,.12,.9,fl));
+    if(mus.abd) out.farM.push(limbMus(J.Hh[i],J.kn[i],th[0],th[1],th[3],th[4],1,-.05,.5,fl,.95));
+    if(mus.calf&&p.back) out.farM.push(limbMus(J.kn[i],J.an[i],shn[0],shn[1],shn[3],shn[4],0,.05,.6,fl));
+  });
+  out.torso = spline(tp,true)+limb(J.neck,J.head,3*s,3*s,3*s,2.9*s,.5)+spline([[0,-41.2],[4.6,-39.4],[5.3,-34.6],[4.2,-30.3],[0,-28.4],[-4.2,-30.3],[-5.3,-34.6],[-4.6,-39.4]].map(([x,y])=>J.P(x,y)),true);
+  const E2=(x,y,rx,ry,r=0)=>{ const c=J.P(x,y); return `M${pt(add(c,[-rx*s,0]))}a${f1(rx*s)} ${f1(ry*s)} 0 1 0 ${f1(2*rx*s)} 0a${f1(rx*s)} ${f1(ry*s)} 0 1 0 ${f1(-2*rx*s)} 0`; };
+  if(mus.chest&&!p.back) out.torsoM.push(E2(4.6,-19.4,4.3,3.1)+E2(-4.6,-19.4,4.3,3.1));
+  if(mus.abs&&!p.back) out.torsoM.push(E2(0,-9.6,3.3,6.4));
+  if(mus.lat) out.torsoM.push(spline([[8.2,-19],[9.6,-15],[7.6,-8.6],[5.8,-13]].map(([x,y])=>J.P(x,y)),true)+spline([[-8.2,-19],[-9.6,-15],[-7.6,-8.6],[-5.8,-13]].map(([x,y])=>J.P(x,y)),true));
+  if(mus.trap) out.torsoM.push(spline([[2.6,-27.4],[8.6,-24.8],[4.5,-21.5],[0,-16.5],[-4.5,-21.5],[-8.6,-24.8],[-2.6,-27.4]].map(([x,y])=>J.P(x,y)),true));
+  if(mus.rhomb) out.torsoM.push(spline([[0,-23.5],[6.2,-21.4],[0,-13.5],[-6.2,-21.4]].map(([x,y])=>J.P(x,y)),true));
+  if(mus.glute&&p.back) out.torsoM.push(E2(4,-1.2,3.6,3.2)+E2(-4,-1.2,3.6,3.2));
+  [0,1].forEach(i=>{ const fl=i===1, m=i?-1:1;
+    const a=p.arms[i]||p.arms[0];
+    const hd=add(J.wr[i],[dir(a[1])[0]*m,dir(a[1])[1]],4.2*s);
+    out.near.push([limb(J.S[i],J.el[i],...ua,fl), limb(J.el[i],J.wr[i],...fa,fl), limb(J.wr[i],hd,1.9*s,2.1*s,2.1*s,1.4*s,.45)]);
+    if(mus.bi) out.nearM.push(limbMus(J.S[i],J.el[i],ua[0],ua[1],ua[3],ua[4],0,.25,.88,fl));
+    if(mus.delt) out.nearM.push(limbMus(J.S[i],J.el[i],ua[0],ua[1],ua[3],ua[4],0,-.18,.34,fl));
+    if(mus.sdelt) out.nearM.push(limbMus(J.S[i],J.el[i],ua[0],ua[1],ua[3],ua[4],1,-.2,.36,fl,.95));
+    if(mus.tri) out.nearM.push(limbMus(J.S[i],J.el[i],ua[0],ua[2],ua[3],ua[4],-1,.12,.9,fl));
+  });
+  return out;
+}
+let uid=0;
+function render(key, cls){
+  const d = POSES[key]; if(!d) return '';
+  const id='fg'+(++uid);
+  const J = d.view==='front' ? front(d) : side(d);
+  const mus = {}; (d.mus||'').split(' ').forEach(k=>{ if(k) mus[k]=1; });
+  const P = d.view==='front' ? frontParts(d,J,mus) : sideParts(d,J,mus);
+  const eq = d.eq ? d.eq(J,E) : {};
+  const chain=(paths,fill,ms)=>{ const dd=paths.join(''); return `<path d="${dd}" fill="none" stroke="#0e1311" stroke-width="2.2" stroke-linejoin="round"/><path d="${dd}" fill="${fill}"/>`+(ms&&ms.length?`<path d="${ms.join('')}" fill="url(#${id}g)" opacity=".92"/>`:''); };
+  let s = `<svg class="${cls||'exi'}" viewBox="0 0 100 100"><defs>`+
+    `<linearGradient id="${id}n" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#f6f1e8"/><stop offset="1" stop-color="#b9b1a4"/></linearGradient>`+
+    `<linearGradient id="${id}f" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#8b857b"/><stop offset="1" stop-color="#5f5a53"/></linearGradient>`+
+    `<linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3d590"/><stop offset="1" stop-color="#c08f3f"/></linearGradient></defs>`;
+  if(d.z) s += `<g transform="translate(50 ${d.zy||50}) scale(${d.z}) translate(-50 -50)">`;
+  s += eq.b||'';
+  P.far.forEach(c=>{ s+=chain(c,`url(#${id}${d.view==='front'?'n':'f'})`); });
+  if(P.farM.length) s += `<path d="${P.farM.join('')}" fill="url(#${id}g)" opacity="${d.view==='front'?.92:.55}"/>`;
+  s += eq.m||'';
+  s += chain([P.torso],`url(#${id}n)`,P.torsoM);
+  s += eq.m2||'';
+  P.near.forEach((c,i)=>{ s+=chain(c,`url(#${id}n)`); });
+  if(P.nearM.length) s += `<path d="${P.nearM.join('')}" fill="url(#${id}g)" opacity=".92"/>`;
+  s += eq.f||'';
+  if(d.z) s += '</g>';
+  return s+'</svg>';
+}
+// ── 40 個動作 ──
+// side: hip 髖、t 軀幹方向（180 直立、90 朝前、270 朝後）、arms [[上臂,前臂],...] 近側在前、legs [[大腿,小腿,腳],...]
+// 角度：0 向下、90 向前（右）、180 向上、270 向後（左）
+const POSES = {
+// 胸
+bench:{t:270,hip:[60,53],hd:272,arms:[[180,180],[183,180]],legs:[[55,5,95],[50,0,95]],mus:'chest fdelt tri',
+  eq:J=>({b:bench(14,66,58.5,90)+E.floor(90), m2:E.plate(J.hd[0][0],J.hd[0][1]-1,10.5)})},
+incline:{t:238,hip:[58,63],arms:[[175,175],[178,175]],legs:[[80,8,95],[75,2,95]],mus:'chest fdelt tri',
+  eq:J=>({b:E.pad(...add(J.hip,[-6,5]),30,4.2,-122)+E.pad(J.hip[0]-9,J.hip[1]+5.6,16,4.2)+E.bar([J.hip[0],J.hip[1]+10],[J.hip[0],90],2.4,C.steelD)+E.bar([J.hip[0]-22,90],[J.hip[0]+8,90],2.4,C.steelD)+E.floor(90), m2:E.plate(J.hd[0][0],J.hd[0][1]-1,10.5)})},
+dbbench:{t:270,hip:[60,53],hd:272,arms:[[172,186],[180,188]],legs:[[55,5,95],[50,0,95]],mus:'chest fdelt tri',
+  eq:J=>({b:bench(14,66,58.5,90)+E.floor(90), m:E.db(J.hd[1][0]+1.5,J.hd[1][1]-1.5,0,.95), f:E.db(J.hd[0][0],J.hd[0][1],0,1.05)})},
+dbincline:{t:238,hip:[58,63],arms:[[168,182],[176,184]],legs:[[80,8,95],[75,2,95]],mus:'chest fdelt tri',
+  eq:J=>({b:E.pad(...add(J.hip,[-6,5]),30,4.2,-122)+E.pad(J.hip[0]-9,J.hip[1]+5.6,16,4.2)+E.bar([J.hip[0],J.hip[1]+10],[J.hip[0],90],2.4,C.steelD)+E.bar([J.hip[0]-22,90],[J.hip[0]+8,90],2.4,C.steelD)+E.floor(90), m:E.db(J.hd[1][0]+1.5,J.hd[1][1]-1.5,-32,.95), f:E.db(J.hd[0][0],J.hd[0][1],-32,1.05)})},
+plateincline:{t:218,hip:[46,66],arms:[[150,148],[153,148]],legs:[[88,8,95],[84,3,95]],mus:'chest fdelt tri',
+  eq:J=>{const h=J.hd[0]; const pv=[14,30]; return {b:E.bar([12,90],[12,22],3,C.steelD)+E.bar(pv,[h[0]+2,h[1]-2],3.2,C.steel)+E.plate(h[0]-9,h[1]+3.5,7.5)+E.pad(...add(J.hip,[-5.5,4]),27,4.2,-128)+E.pad(J.hip[0]-8,J.hip[1]+5.6,16,4.2)+E.bar([J.hip[0],J.hip[1]+10],[J.hip[0],90],2.4,C.steelD)+E.bar([12,90],[J.hip[0]+10,90],2.4,C.steelD)+E.floor(90), f:E.bar([h[0]-1,h[1]-3],[h[0]+2,h[1]+3],2.6,C.steel)};}},
+chestpress:{t:180,hip:[42,64],arms:[[80,90],[84,90]],legs:[[90,0,95],[86,-4,95]],mus:'chest fdelt tri',
+  eq:J=>{const h=J.hd[0]; return {b:E.stack(8,24,9,40)+E.bar([12,90],[12,18],2.6,C.steelD)+E.bar([12,18],[30,18],2.6,C.steelD)+E.bar([30,18],[h[0]-3,h[1]-1],2.6,C.steel)+E.pad(J.hip[0]-10,J.hip[1]-32,4.5,34)+E.pad(J.hip[0]-9,J.hip[1]+5.5,22,4.4)+E.bar([J.hip[0]-2,J.hip[1]+10],[J.hip[0]-2,90],2.4,C.steelD)+E.bar([8,90],[60,90],2.4,C.steelD)+E.floor(90), f:E.bar([h[0],h[1]-4],[h[0],h[1]+4],2.6,C.steel)};}},
+pecdeck:{view:'front',hip:[50,64],arms:[[92,182],[92,182]],legs:[[25,4,.42],[25,4,.42]],mus:'chest fdelt',
+  eq:J=>({b:E.pad(J.hip[0]-9,J.hip[1]-36,18,34,0,3)+E.bar([18,92],[18,8],2.6,C.steelD)+E.bar([82,92],[82,8],2.6,C.steelD)+E.bar([18,10],[82,10],2.6,C.steelD)+E.pad(J.hip[0]-11,J.hip[1]-1,22,6,0,2)+E.floor(92,10,90),
+   f:E.pad(J.el[0][0]-2.5,J.wr[0][1]-1,5,15,0,2)+E.pad(J.el[1][0]-2.5,J.wr[1][1]-1,5,15,0,2)})},
+dip:{t:166,hip:[52,56],arms:[[302,22],[306,22]],legs:[[28,-62,40],[34,-56,40]],mus:'chest tri fdelt',
+  eq:J=>({b:E.bar([J.hd[1][0]-30,J.hd[1][1]+1.5],[J.hd[1][0]+30,J.hd[1][1]+1.5],2.8,C.steelD)+E.bar([J.hd[1][0]-24,J.hd[1][1]+1.5],[J.hd[1][0]-24,92],2.6,C.steelD)+E.bar([J.hd[1][0]+24,J.hd[1][1]+1.5],[J.hd[1][0]+24,92],2.6,C.steelD)+E.floor(92),
+   f:E.bar([J.hd[0][0]-28,J.hd[0][1]+1.5],[J.hd[0][0]+28,J.hd[0][1]+1.5],2.8,C.steel)+E.bar([J.hd[0][0]-22,J.hd[0][1]+1.5],[J.hd[0][0]-22,92],2.6,C.steel)+E.bar([J.hd[0][0]+22,J.hd[0][1]+1.5],[J.hd[0][0]+22,92],2.6,C.steel)})},
+// 背
+pulldown:{t:192,hip:[48,66],arms:[[18,172],[22,172]],legs:[[90,4,95],[86,0,95]],mus:'lat bi rdelt',
+  eq:J=>({b:E.bar([80,92],[80,5],2.8,C.steelD)+E.bar([80,5],[J.hd[0][0],5],2.6,C.steelD)+E.pulley(J.hd[0][0],6)+E.cable([J.hd[0][0],7],[J.hd[0][0],J.hd[0][1]])+E.pad(J.hip[0]-10,J.hip[1]+5.6,20,4.4)+E.bar([J.hip[0]-1,J.hip[1]+10],[J.hip[0]-1,92],2.4,C.steelD)+E.bar([J.hip[0]-12,92],[84,92],2.4,C.steelD)+E.bar([J.kn[0][0]-4,J.kn[0][1]-12],[80,J.kn[0][1]-12],2.2,C.steelD)+E.floor(92),
+   f:E.pad(J.kn[0][0]-7,J.kn[0][1]-9.5,10,4.2,0,2)+E.bar([J.hd[0][0]-5,J.hd[0][1]],[J.hd[0][0]+5,J.hd[0][1]],2.6,C.steel)})},
+pullup:{view:'front',z:.9,zy:46,hip:[50,62],arms:[[118,196],[118,196]],legs:[[3,2],[3,2]],mus:'lat bi',
+  eq:J=>({b:E.bar([10,J.hd[0][1]+.5],[90,J.hd[0][1]+.5],3,C.steel)+E.bar([12,J.hd[0][1]],[12,2],2.4,C.steelD)+E.bar([88,J.hd[0][1]],[88,2],2.4,C.steelD)})},
+apullup:{t:178,hip:[44,60],arms:[[160,182],[164,182]],legs:[[88,-90,180],[86,-90,180]],mus:'lat bi',
+  eq:J=>({b:E.bar([84,92],[84,4],2.8,C.steelD)+E.bar([84,J.hd[0][1]-1],[J.hd[0][0]-4,J.hd[0][1]-1],2.6,C.steelD)+E.stack(76,40,8,30)+E.bar([J.kn[0][0]-6,J.kn[0][1]+8],[J.kn[0][0]-6,92],2.4,C.steelD)+E.bar([J.kn[0][0]-6,J.kn[0][1]+8],[84,J.kn[0][1]+8],2.4,C.steelD)+E.floor(92),
+   m:E.pad(J.an[0][0]-3,J.kn[0][1]+3.5,30,4.4,0,2), f:E.bar([J.hd[0][0]-1,J.hd[0][1]-4],[J.hd[0][0]-1,J.hd[0][1]+3],2.6,C.steel)})},
+machrow:{t:172,hip:[38,64],arms:[[300,92],[304,92]],legs:[[86,2,95],[82,-2,95]],mus:'lat rdelt bi trap',
+  eq:J=>{const h=J.hd[0]; return {b:E.stack(84,30,9,40)+E.bar([80,90],[80,24],2.6,C.steelD)+E.bar([80,26],[h[0]+5,h[1]-2],2.6,C.steelD)+E.pad(J.hip[0]-9,J.hip[1]+5.5,20,4.4)+E.bar([J.hip[0],J.hip[1]+10],[J.hip[0],90],2.4,C.steelD)+E.bar([J.hip[0]-10,90],[94,90],2.4,C.steelD)+E.floor(90),
+   m2:E.pad(J.loc(.62,7.2)[0],J.loc(.62,7.2)[1]-9,5,17,0,2.2)+E.bar([J.loc(.62,9)[0]+3,J.loc(.62,9)[1]+4],[J.loc(.62,9)[0]+3,90],2.4,C.steelD), f:E.bar([h[0],h[1]-4],[h[0],h[1]+4],2.6,C.steel)};}},
+cablerow:{t:180,hip:[30,70],arms:[[330,88],[334,88]],legs:[[76,104,180],[72,100,180]],mus:'lat rdelt bi trap',
+  eq:J=>{const a=J.an[0]; return {b:E.pad(6,J.hip[1]+5.6,46,4.2)+E.bar([12,J.hip[1]+10],[12,92],2.4,C.steelD)+E.bar([44,J.hip[1]+10],[44,92],2.4,C.steelD)+E.bar([90,92],[90,40],2.8,C.steelD)+E.pulley(88,J.hd[0][1])+E.pad(a[0]+3,a[1]-9,3.5,14,0,1.4)+E.bar([a[0]+5,a[1]+5],[a[0]+5,92],2.4,C.steelD)+E.floor(92),
+   f:E.cable(J.hd[0],[88,J.hd[0][1]])+E.bar([J.hd[0][0],J.hd[0][1]-3.5],[J.hd[0][0]+2.5,J.hd[0][1]+3.5],2.6,C.steel)};}},
+platerow:{t:150,hip:[36,64],arms:[[292,70],[296,70]],legs:[[90,0,95],[86,-4,95]],mus:'lat rdelt bi trap',
+  eq:J=>{const h=J.hd[0]; const pv=[82,18]; return {b:E.bar([86,90],[86,14],3,C.steelD)+E.bar(pv,[h[0]+2,h[1]+1],3.2,C.steel)+E.plate((pv[0]+h[0])/2+4,(pv[1]+h[1])/2+9,8)+E.pad(J.hip[0]-9,J.hip[1]+5.5,20,4.4)+E.bar([J.hip[0],J.hip[1]+10],[J.hip[0],90],2.4,C.steelD)+E.bar([J.hip[0]-10,90],[92,90],2.4,C.steelD)+E.floor(90),
+   m2:E.pad(...J.loc(.92,7),17,4.6,108)+E.bar(J.loc(.75,12),[J.loc(.75,12)[0],90],2.4,C.steelD), f:E.bar([h[0]-1,h[1]-4],[h[0]+1,h[1]+4],2.6,C.steel)};}},
+dbrow:{t:100,hip:[36,55],hd:96,arms:[[222,2],[4,0]],legs:[[-8,6,95],[0,-90,270]],fo:[-1,0],mus:'lat rdelt bi',farFirst:1,
+  eq:J=>({b:bench(10,72,J.hd[1][1]+1.5,92)+E.floor(92), f:E.db(J.hd[0][0],J.hd[0][1]+1,0,1.05)})},
+bbrow:{t:110,hip:[36,49],hd:100,arms:[[258,2],[262,2]],legs:[[24,-10,95],[20,-14,95]],mus:'lat rdelt trap bi',
+  eq:J=>({b:E.floor(J.fl), m2:E.plate(J.hd[0][0],J.hd[0][1],10)})},
+// 腿
+squat:{t:140,hip:[34,62],hd:122,arms:[[320,150],[322,148]],legs:[[86,-18,95],[82,-22,95]],mus:'quad glute',
+  eq:J=>({b:E.floor(J.fl), m2:E.plate(J.loc(.9,-5.5)[0],J.loc(.9,-5.5)[1],11)})},
+hack:{t:212,hip:[48,62],arms:[[200,330],[204,330]],legs:[[118,40,72],[114,36,72]],mus:'quad glute',
+  eq:J=>({b:E.bar([18,92],[60,14],3,C.steelD)+E.pad(...J.loc(-.1,-11),34,4.4,-122.6)+E.bar([J.an[0][0]-8,J.an[0][1]+8],[J.an[0][0]+11,J.an[0][1]-4],3,C.steel)+E.bar([J.an[0][0]+2,J.an[0][1]+2],[J.an[0][0]+2,92],2.4,C.steelD)+E.bar([14,92],[J.an[0][0]+10,92],2.4,C.steelD)+E.floor(92),
+   f:E.pad(...J.loc(.98,-1),10,5,-32,2.4)})},
+platepress:{t:236,hip:[30,72],hd:200,arms:[[30,80],[34,80]],legs:[[138,98,190],[134,94,190]],mus:'quad glute',
+  eq:J=>{const a=J.an[0]; return {b:E.bar([22,92],[92,22],3,C.steelD)+E.pad(...J.loc(-.08,-10),30,4.4,-124)+E.pad(J.hip[0]-10,J.hip[1]+6,22,4.4,-14)+E.bar([J.hip[0]-4,J.hip[1]+10],[J.hip[0]-4,92],2.4,C.steelD)+E.bar([10,92],[94,92],2.4,C.steelD)+E.plate(a[0]+12,a[1]-4,8)+E.floor(92),
+   f:E.bar([a[0]+5,a[1]+9],[a[0]+11,a[1]-11],3.2,C.steel)};}},
+legpress:{t:206,hip:[36,64],arms:[[20,70],[24,70]],legs:[[118,58,180],[114,54,180]],mus:'quad glute',
+  eq:J=>{const a=J.an[0]; return {b:E.stack(88,26,8,40)+E.bar([92,92],[92,22],2.6,C.steelD)+E.pad(...J.loc(-.1,-10),32,4.4,-116)+E.pad(J.hip[0]-10,J.hip[1]+5.8,22,4.4)+E.bar([J.hip[0],J.hip[1]+10],[J.hip[0],92],2.4,C.steelD)+E.bar([J.hip[0]-12,92],[94,92],2.4,C.steelD)+E.bar([a[0]+4,a[1]],[88,a[1]],2.4,C.steelD)+E.floor(92),
+   f:E.pad(a[0]+1.5,a[1]-11,4.2,20,0,1.6)};}},
+bulgarian:{t:172,hip:[50,52],arms:[[2,0],[6,0]],legs:[[86,-6,95],[340,290,262]],mus:'quad glute',
+  eq:J=>({b:bench(4,30,J.toe[1][1]+.5,92)+E.floor(92), m:E.db(J.hd[1][0],J.hd[1][1]+1,0,.95), f:E.db(J.hd[0][0],J.hd[0][1]+1,0,1.05)})},
+legext:{t:186,hip:[36,62],arms:[[8,40],[12,40]],legs:[[92,96,170],[88,92,170]],mus:'quad',
+  eq:J=>({b:E.pad(J.hip[0]-10,J.hip[1]-33,4.5,32,-6)+E.pad(J.hip[0]-9,J.hip[1]+5.6,26,4.4)+E.bar([J.hip[0]+2,J.hip[1]+10],[J.hip[0]+2,92],2.4,C.steelD)+E.bar([J.hip[0]-12,92],[J.kn[0][0]+6,92],2.4,C.steelD)+E.bar([J.kn[0][0],J.kn[0][1]+2],[J.an[0][0],J.an[0][1]+5],2.4,C.steelD)+E.floor(92),
+   f:E.pad(J.an[0][0]-2.5,J.an[0][1]+2,5.5,5.5,0,2.6)})},
+// 臀・腿後
+deadlift:{t:128,hip:[36,48],hd:116,arms:[[2,0],[6,0]],legs:[[60,-16,95],[56,-20,95]],mus:'glute ham low quad',
+  eq:J=>({b:E.floor(J.fl), m2:E.plate(J.hd[0][0],J.hd[0][1],11)})},
+rdl:{t:108,hip:[34,48],hd:96,arms:[[-4,-4],[0,-4]],legs:[[14,-6,95],[10,-10,95]],mus:'ham glute low',
+  eq:J=>({b:E.floor(J.fl), m2:E.plate(J.hd[0][0]+1,J.hd[0][1]+1,10)})},
+legcurl:{t:90,hip:[38,52],hd:104,arms:[[28,72],[32,72]],legs:[[268,170,180],[270,172,180]],mus:'ham',
+  eq:J=>({b:E.pad(J.hip[0]-20,J.hip[1]+5,64,4.6,0,2)+E.bar([J.hip[0]-8,J.hip[1]+10],[J.hip[0]-8,92],2.4,C.steelD)+E.bar([J.hip[0]+30,J.hip[1]+10],[J.hip[0]+30,92],2.4,C.steelD)+E.bar([J.hip[0]-24,92],[J.hip[0]+40,92],2.4,C.steelD)+E.bar([J.kn[0][0],J.kn[0][1]+2],[J.an[0][0]-6,J.an[0][1]+2],2.4,C.steelD)+E.floor(92),
+   f:E.pad(J.an[0][0]-8,J.an[0][1]-.5,5.5,5.5,0,2.6)+E.bar([J.hd[0][0],J.hd[0][1]-3],[J.hd[0][0],J.hd[0][1]+4],2.4,C.steel)})},
+hipthrust:{t:268,hip:[58,54],hd:236,arms:[[100,60],[104,60]],legs:[[96,2,95],[92,-2,95]],mus:'glute ham',
+  eq:J=>({b:bench(8,34,J.sh[1]+2,92)+E.floor(92), m2:E.plate(J.hip[0]+1,J.hip[1]-12,9.5)})},
+abduct:{view:'front',hip:[50,62],arms:[[18,8],[18,8]],legs:[[64,10,.5],[64,10,.5]],mus:'abd glute',
+  eq:J=>({b:E.pad(J.hip[0]-9,J.hip[1]-36,18,34,0,3)+E.pad(J.hip[0]-13,J.hip[1]-1,26,6,0,2)+E.bar([J.hip[0],J.hip[1]+5],[J.hip[0],92],2.6,C.steelD)+E.bar([J.hip[0]-30,92],[J.hip[0]+30,92],2.4,C.steelD)+E.floor(92,10,90),
+   f:E.pad(J.kn[0][0]+2,J.kn[0][1]-6,5,13,0,2)+E.pad(J.kn[1][0]-7,J.kn[1][1]-6,5,13,0,2)})},
+// 肩
+lateral:{view:'front',hip:[50,58],arms:[[86,84],[86,84]],legs:[[3,0],[3,0]],mus:'sdelt delt',
+  eq:J=>({b:E.floor(96,20,80), f:E.db(J.hd[0][0]+.5,J.hd[0][1],90,.9)+E.db(J.hd[1][0]-.5,J.hd[1][1],90,.9)})},
+dbpress:{view:'front',hip:[50,66],arms:[[118,176],[118,176]],legs:[[34,4,.42],[34,4,.42]],mus:'delt sdelt tri',
+  eq:J=>({b:E.pad(J.hip[0]-9,J.hip[1]-37,18,34,0,3)+E.pad(J.hip[0]-12,J.hip[1]-1,24,6,0,2)+E.floor(94,14,86), f:E.db(J.hd[0][0],J.hd[0][1],0,1)+E.db(J.hd[1][0],J.hd[1][1],0,1)})},
+bbpress:{t:184,z:.86,zy:56,hip:[48,54],hd:180,arms:[[168,186],[171,186]],legs:[[2,0,95],[-2,0,95]],mus:'fdelt delt tri',
+  eq:J=>({b:E.floor(J.fl), m2:E.plate(J.hd[0][0],J.hd[0][1]-1,10)})},
+machpress:{t:182,hip:[44,66],arms:[[150,182],[154,182]],legs:[[90,0,95],[86,-4,95]],mus:'fdelt delt tri',
+  eq:J=>{const h=J.hd[0]; return {b:E.stack(8,30,9,40)+E.bar([14,92],[14,6],2.6,C.steelD)+E.bar([14,8],[h[0]-2,8],2.6,C.steelD)+E.bar([h[0]-2,8],[h[0],h[1]-3],2.6,C.steel)+E.pad(J.hip[0]-10,J.hip[1]-33,4.5,34)+E.pad(J.hip[0]-9,J.hip[1]+5.5,22,4.4)+E.bar([J.hip[0]-2,J.hip[1]+10],[J.hip[0]-2,92],2.4,C.steelD)+E.bar([8,92],[62,92],2.4,C.steelD)+E.floor(92), f:E.bar([h[0]-4,h[1]],[h[0]+4,h[1]],2.6,C.steel)};}},
+facepull:{t:186,hip:[40,54],hd:184,arms:[[104,206],[108,206]],legs:[[4,-2,95],[-6,4,95]],mus:'rdelt trap',
+  eq:J=>({b:E.bar([90,92],[90,4],3,C.steelD)+E.pulley(87,J.hd[0][1])+E.floor(J.fl), f:E.cable(J.hd[0],[87,J.hd[0][1]])+E.cable(J.hd[1],[87,J.hd[0][1]])})},
+revfly:{view:'front',back:1,hip:[50,64],arms:[[88,90],[88,90]],legs:[[22,4,.42],[22,4,.42]],mus:'delt rhomb trap',
+  eq:J=>({b:E.bar([50,92],[50,8],3,C.steelD)+E.pad(J.hip[0]-12,J.hip[1]-1,24,6,0,2)+E.floor(92,14,86), f:E.bar([J.hd[0][0],J.hd[0][1]-5],[J.hd[0][0],J.hd[0][1]+5],2.6,C.steel)+E.bar([J.hd[1][0],J.hd[1][1]-5],[J.hd[1][0],J.hd[1][1]+5],2.6,C.steel)})},
+// 手臂
+curl:{t:180,hip:[46,54],arms:[[-4,140],[2,2]],legs:[[2,0,95],[-2,0,95]],mus:'bi fore',
+  eq:J=>({b:E.floor(J.fl), m:E.hex(J.hd[1][0],J.hd[1][1]+1.5,4), f:E.hex(J.hd[0][0],J.hd[0][1],4.6)})},
+ezcurl:{view:'front',hip:[50,58],arms:[[6,176],[6,176]],legs:[[3,0],[3,0]],mus:'bi',
+  eq:J=>{const a=J.hd[0], b=J.hd[1]; const y=a[1]; return {b:E.floor(96,20,80), f:E.poly([[b[0]-9,y],[b[0]-1.5,y],[b[0]+2,y-2.4],[(a[0]+b[0])/2-3,y+1.6],[(a[0]+b[0])/2+3,y+1.6],[a[0]-2,y-2.4],[a[0]+1.5,y],[a[0]+9,y]],2.4)+E.plate(a[0]+10,y,4.4)+E.plate(b[0]-10,y,4.4)};}},
+hammer:{t:180,hip:[46,54],arms:[[-4,112],[2,2]],legs:[[2,0,95],[-2,0,95]],mus:'bi fore',
+  eq:J=>({b:E.floor(J.fl), m:E.db(J.hd[1][0],J.hd[1][1]+1,0,.95), f:E.db(J.hd[0][0],J.hd[0][1],90,1.05)})},
+pushdown:{t:168,hip:[40,54],arms:[[8,34],[12,34]],legs:[[4,-2,95],[-6,4,95]],mus:'tri',
+  eq:J=>({b:E.bar([86,92],[86,4],3,C.steelD)+E.bar([86,6],[74,6],2.6,C.steelD)+E.pulley(72,8)+E.floor(J.fl), f:E.cable([72,9],J.hd[0])+E.bar([J.hd[0][0]-5,J.hd[0][1]+1],[J.hd[0][0]+5,J.hd[0][1]+1],2.6,C.steel)})},
+// 核心・小腿
+crunch:{t:242,hip:[58,82],hd:226,arms:[[158,262],[162,262]],legs:[[140,28,95],[136,24,95]],mus:'abs',
+  eq:J=>({b:E.pad(8,88,84,3,0,1.5)})},
+legraise:{t:180,z:.9,zy:56,hip:[38,62],arms:[[180,180],[183,180]],legs:[[92,92,170],[88,88,170]],mus:'abs',
+  eq:J=>({b:E.bar([J.hd[0][0]-1,J.hd[0][1]],[J.hd[0][0]-1,2],2.4,C.steelD)+E.bar([J.hd[0][0]-14,4],[J.hd[0][0]+14,4],2.6,C.steelD), m2:`<circle cx="${f1(J.hd[0][0])}" cy="${f1(J.hd[0][1]-.5)}" r="2.2" fill="${C.steel}"/>`})},
+calf:{t:180,hip:[44,48],arms:[[24,70],[0,0]],legs:[[2,0,58],[-2,0,58]],mus:'calf',
+  eq:J=>({b:E.pad(J.toe[0][0]-7,J.toe[0][1]+.6,26,7,0,1.6)+E.bar([J.hd[0][0]+1,J.hd[0][1]-4],[J.hd[0][0]+1,94],2.6,C.steelD)+E.floor(94), m:E.db(J.hd[1][0],J.hd[1][1]+1,0,.95)})}
+};
+return {render, POSES};
+})();
 
 // 姿勢要點：課表裡的 12 個動作（名字用 canonEx 對，別名也找得到）
 const EX_TIPS = {
