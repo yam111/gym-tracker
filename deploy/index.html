@@ -195,6 +195,19 @@ body{font-family:'Cubic11','Noto Sans TC',sans-serif;background:#0a0a1a;color:#e
 .day-note{font-size:12px;color:#306230;margin-top:2px;}
 .ex-goal{font-size:12px;line-height:1.5;color:#306230;padding:0 0 8px;}
 .ex-goal.up{color:#0f380f;font-weight:700;}
+.ex-goal b{color:#0f380f;}
+.coach-card{background:#e0f8a0;border:3px solid #0f380f;border-radius:4px;box-shadow:4px 4px 0 #306230;padding:12px 14px;margin:0 0 16px;color:#0f380f;font-size:14px;line-height:1.6;}
+.coach-card h4{font-size:16px;margin:0 0 6px;display:flex;align-items:center;gap:6px;}
+.coach-card h5{font-size:12px;margin:12px 0 4px;color:#306230;border-bottom:2px dashed #306230;padding-bottom:2px;}
+.coach-row{display:flex;gap:8px;align-items:baseline;padding:2px 0;}
+.coach-row .nm{flex:0 0 5em;font-weight:700;}
+.coach-row .tg{flex:0 0 4.4em;font-weight:700;white-space:nowrap;}
+.coach-row .dt{flex:1;color:#306230;font-size:12px;}
+.coach-tip{padding:4px 0 4px 14px;position:relative;}
+.coach-tip::before{content:'▶';position:absolute;left:0;font-size:10px;top:8px;}
+.coach-top{background:#e0f8a0;border:3px solid #0f380f;padding:10px 12px;margin-bottom:12px;color:#0f380f;font-size:14px;line-height:1.6;font-weight:700;}
+.coach-tag{float:right;font-size:12px;padding:1px 8px;border:2px solid #0f380f;background:#e0f8a0;color:#0f380f;}
+.coach-tag.up{background:#0f380f;color:#9bbc0f;}
 .day-header strong{color:#fff;font-size:15px;}
 
 /* ─── Game Boy theme（四階綠：#0f380f / #306230 / #8bac0f / #9bbc0f）───
@@ -515,6 +528,8 @@ const GYM_TEMPLATES = 'gym_tpl';
 const GYM_PLAN      = 'gym_plan';
 const GYM_SESSION_DRAFT = 'gym_draft';
 const GYM_PROGRESS  = 'gym_progress';
+const GYM_LINK      = 'gym_link'; // link code from the diet app (食光); device setting, not in backups
+const GYM_DIET      = 'gym_diet'; // last synced diet summary {goal,tk,tp,days:{date:[kcal,p,c,f]},w:{date:kg}}
 const GYM_SFX       = 'gym_sfx'; // '0' = sound effects off (default on); device setting, not in backups
 
 const XP_PER_SET   = 3;
@@ -710,6 +725,7 @@ function init(){
   renderHeader();
   renderAll();
   resolveStaleDraft();
+  syncDiet(false);
 }
 
 function getTemplates(){
@@ -1578,6 +1594,12 @@ function exGoalHTML(ex){
   if(!ex.range) return '';
   const lo = ex.range[0], hi = ex.range[1];
   if(ex.up) return '<div class="ex-goal up">上次每組都到 '+hi+' 下'+(ex.inc ? '，這次已加到 '+escHtml(String(ex.sets[0].w))+'kg' : '，這次'+incText(ex))+'（目標 '+lo+'～'+hi+' 下）</div>';
+  if(ex.down) return '<div class="ex-goal up">連三次沒進步，'+(ex.inc ? '這次降到 '+escHtml(String(ex.sets[0].w))+'kg' : '這次降一格重量')+'，每組做到 '+hi+' 下再加回去</div>';
+  const log = exLog(ex.name), last = log[log.length-1], tw = parseFloat(ex.sets[0]&&ex.sets[0].w)||0;
+  if(last && tw>0 && last.top===tw){
+    const reps = last.sets.filter(s=>s.w===tw).map(s=>s.r);
+    return '<div class="ex-goal">上次 '+reps.join('／')+' 下 → 今天目標 <b>'+reps.map(r=>Math.min(hi,r+1)).join('／')+'</b> 下・每組都到 '+hi+' 下，下次'+incText(ex)+'</div>';
+  }
   return '<div class="ex-goal">目標 '+lo+'～'+hi+' 下・重量不要換，每組都到 '+hi+' 下，下次'+incText(ex)+'</div>';
 }
 
@@ -1779,11 +1801,22 @@ function finishWorkout(date){
       if(hit){
         const base = Math.min(...sets.map(s=>parseFloat(s.w)||0));
         t.sets = t.sets.slice(0, Math.max(planned,1)).map(()=>({w: t.inc ? base+t.inc : base, r: t.inc ? t.range[0] : t.range[1]}));
-      }
+        t.down = false;
+      } else if(coachStalled(t)){
+        // Three sessions in a row without progress → drop about 10% and build back up (machines: one plate down, by hand)
+        const cur = Math.max(...sets.map(s=>parseFloat(s.w)||0));
+        t.down = true; t.dl = date;
+        if(t.inc && cur>0){
+          const step = t.inc>=2.5 ? 2.5 : t.inc;
+          const nw = Math.max(0, Math.min(cur-step, Math.round(cur*0.9/step)*step));
+          t.sets = t.sets.slice(0, Math.max(planned,1)).map(()=>({w:nw, r:t.range[1]}));
+        }
+      } else t.down = false;
     }
   });
   localStorage.setItem(GYM_TEMPLATES, JSON.stringify(custom));
   templates = getTemplates();
+  const coachHTML = coachReportHTML(sessionData, currentDay);
 
   updateStreak(date);
   awardXP(XP_COMPLETE);
@@ -1802,6 +1835,7 @@ function finishWorkout(date){
   sfx('done');
   renderHeader();
   renderAll();
+  showCoach(coachHTML);
   return true;
 }
 
@@ -1842,6 +1876,250 @@ function awardXP(n){
 
 function closeCoach(){
   document.getElementById('coach-overlay').classList.remove('show');
+}
+
+// ─── Coach: reads the training log and says what to do next ───
+const COACH_WEEKLY = 3; // planned workouts per week
+// Same movement logged under different names → one history. Different machines stay apart (their weights can't be compared).
+const EX_ALIAS = {'槓鈴臥推':'臥推','滑輪下拉':'高位下拉','啞鈴側平舉':'側平舉','三頭下拉':'三頭下壓','三頭':'三頭下壓','二頭':'二頭彎舉','器械划船':'機械划船'};
+function canonEx(n){ n = String(n||'').trim(); return EX_ALIAS[n] || n; }
+function numStr(n){ return String(Math.round(n*10)/10); }
+function dayStr(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function daysAgoStr(n){ const d = new Date(); d.setDate(d.getDate()-n); return dayStr(d); }
+function weekStartStr(){ const d = new Date(); d.setDate(d.getDate()-((d.getDay()+6)%7)); return dayStr(d); } // Monday
+function trainDays(from){ return new Set(sessions.filter(s=>s.date>=from).map(s=>s.date)).size; }
+
+// One set as a strength number: estimated 1RM (Epley); no weight → reps
+function setScore(s){ return s.w>0 ? s.w*(1+s.r/30) : s.r; }
+// History of one exercise, one entry per day. planOnly = only workouts of the current full-body plan
+function exLog(name, planOnly){
+  const key = canonEx(name), byDate = {};
+  sessions.forEach(se=>{
+    if(planOnly && !/^full/.test(se.type||'')) return;
+    (se.exercises||[]).forEach(ex=>{
+      if(canonEx(ex.name)!==key) return;
+      const sets = (ex.sets||[]).map(s=>({w:parseFloat(s.w)||0, r:parseFloat(s.r)||0})).filter(s=>s.r>0);
+      if(!sets.length) return;
+      byDate[se.date] = (byDate[se.date]||[]).concat(sets);
+    });
+  });
+  return Object.keys(byDate).sort().map(d=>{
+    const sets = byDate[d], sc = sets.map(setScore).sort((a,b)=>b-a).slice(0,3);
+    return {date:d, sets, top:Math.max(...sets.map(s=>s.w)), sc:sc.reduce((a,b)=>a+b,0)/sc.length};
+  });
+}
+// 'up' / 'hold' / 'down' / 'new' — same weight: count reps; different weight: compare strength numbers
+function coachCompare(prev, now){
+  if(!prev) return 'new';
+  if(now.top===prev.top){
+    const a = prev.sets.filter(s=>s.w===prev.top).map(s=>s.r), b = now.sets.filter(s=>s.w===now.top).map(s=>s.r);
+    const n = Math.min(a.length,b.length), sum = x=>x.slice(0,n).reduce((p,c)=>p+c,0);
+    const d = sum(b)-sum(a);
+    return d>0 ? 'up' : d<0 ? 'down' : 'hold';
+  }
+  const d = now.sc/prev.sc-1;
+  if(now.top>prev.top && d>-0.05) return 'up'; // heavier with slightly fewer reps still counts
+  return d>0.02 ? 'up' : d<-0.02 ? 'down' : 'hold';
+}
+// Stalled = the last three workouts of this exercise (current plan, since the last weight drop) never beat the one before them
+function coachStalled(t){
+  let log = exLog(t.name, true);
+  if(t.dl) log = log.filter(x=>x.date>t.dl);
+  if(log.length<4) return false;
+  const base = log[log.length-4], last3 = log.slice(-3);
+  if(Math.max(...last3.map(x=>x.top)) > base.top) return false;
+  return Math.max(...last3.map(x=>x.sc)) <= base.sc*1.005;
+}
+function setsText(x){
+  const same = x.sets.every(s=>s.w===x.sets[0].w);
+  if(same) return (x.top>0 ? numStr(x.top)+'kg ' : '')+x.sets.map(s=>s.r).join('／')+' 下';
+  return x.sets.map(s=>numStr(s.w)+'×'+s.r).join('、');
+}
+function topText(x){
+  const r = Math.max(...x.sets.filter(s=>s.w===x.top).map(s=>s.r));
+  return (x.top>0 ? numStr(x.top)+'kg×' : '')+r+(x.top>0 ? '' : ' 下');
+}
+const COACH_LABEL = {up:'進步', hold:'持平', down:'退步', new:'第一次記'};
+function coachNext(t, now){
+  if(!t || !t.range) return '下次同重量，試著每組多做 1 下';
+  const lo = t.range[0], hi = t.range[1];
+  if(t.up) return '每組都到 '+hi+' 下了！'+(t.inc ? '下次加到 '+numStr(t.sets[0].w)+'kg，從 '+lo+' 下做起' : '下次加一格重量');
+  if(t.down) return '連三次沒進步：'+(t.inc ? '下次降到 '+numStr(t.sets[0].w)+'kg' : '下次降一格重量')+'，每組做到 '+hi+' 下再加回去';
+  const reps = now.sets.filter(s=>s.w===now.top).map(s=>s.r);
+  return '下次同重量'+(now.top>0 ? ' '+numStr(now.top)+'kg' : '')+'，目標 '+reps.map(r=>Math.min(hi,r+1)).join('／')+' 下';
+}
+
+// Shown right after 完成訓練: every exercise against last time + what to do next time
+function coachReportHTML(sd, day){
+  const tpl = templates[day] || [];
+  const cnt = {up:0, hold:0, down:0, new:0};
+  let cards = '';
+  sd.exercises.forEach((e,ei)=>{
+    if(!e.sets.length) return;
+    const log = exLog(e.name), i = log.findIndex(x=>x.date===sd.date);
+    if(i<0) return;
+    const now = log[i], prev = i>0 ? log[i-1] : null, v = coachCompare(prev, now);
+    cnt[v]++;
+    cards += '<div class="coach-ex">'+
+      '<div class="coach-ex-name">'+escHtml(e.name)+'<span class="coach-tag '+v+'">'+COACH_LABEL[v]+'</span></div>'+
+      '<div class="coach-sets">今天 '+escHtml(setsText(now))+(prev ? '<br>上次（'+prev.date.slice(5).replace('-','/')+'）'+escHtml(setsText(prev)) : '')+'</div>'+
+      '<div class="coach-advice '+(v==='up'?'advice-up':v==='down'?'advice-down':'advice-hold')+'">'+escHtml(coachNext(tpl[ei], now))+'</div>'+
+      '</div>';
+  });
+  const wk = trainDays(weekStartStr());
+  const parts = [];
+  if(cnt.up) parts.push(cnt.up+' 個進步');
+  if(cnt.hold) parts.push(cnt.hold+' 個持平');
+  if(cnt.down) parts.push(cnt.down+' 個退步');
+  if(cnt.new) parts.push(cnt.new+' 個第一次記');
+  let top = '今天：'+parts.join('、')+'<br>這週第 '+wk+' 次'+(wk>=COACH_WEEKLY ? '，這週達標了！' : '，目標 '+COACH_WEEKLY+' 次，還差 '+(COACH_WEEKLY-wk)+' 次');
+  const di = dietInfo();
+  if(di && di.n>=4 && di.d.tp && di.p < di.d.tp*0.85) top += '<br>蛋白質這七天平均 '+Math.round(di.p)+'g（目標 '+Math.round(di.d.tp)+'g），練完記得補';
+  return '<div class="coach-top">'+top+'</div>'+cards;
+}
+function showCoach(html){
+  if(!html) return;
+  document.getElementById('coach-body').innerHTML = html;
+  const ov = document.getElementById('coach-overlay');
+  ov.classList.add('show'); ov.scrollTop = 0;
+}
+
+// Four-week direction of one exercise
+function coachTrend(name){
+  const log = exLog(name), win = log.filter(x=>x.date>=daysAgoStr(27));
+  if(win.length<2) return {st:'na', n:win.length};
+  const a = win[0], b = win[win.length-1];
+  return {st:coachCompare(a,b), a, b, n:win.length};
+}
+
+// Diet summary synced from the diet app: averages of the last 7 full days + weekly weight averages
+function dietInfo(){
+  let d = null;
+  try{ d = JSON.parse(localStorage.getItem(GYM_DIET)||'null'); }catch(e){}
+  if(!d || !d.days) return null;
+  const keys = []; for(let i=1;i<=7;i++) keys.push(daysAgoStr(i));
+  const logged = keys.filter(k=>d.days[k] && d.days[k][0]>0);
+  const avg = i=>logged.length ? logged.reduce((s,k)=>s+(d.days[k][i]||0),0)/logged.length : 0;
+  const wk = (from,to)=>{ // average of weigh-ins from `to` days ago (exclusive) to `from` days ago
+    const v = Object.keys(d.w||{}).filter(k=>k>daysAgoStr(to) && k<=daysAgoStr(from)).map(k=>d.w[k]);
+    return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null;
+  };
+  const w0 = wk(0,7), w1 = wk(7,14), w2 = wk(14,21);
+  let rate = null, weeks = 0; // kg per week (negative = losing)
+  if(w0!=null && w2!=null){ rate = (w0-w2)/2; weeks = 2; }
+  else if(w0!=null && w1!=null){ rate = w0-w1; weeks = 1; }
+  return {d, n:logged.length, kcal:avg(0), p:avg(1), w0, rate, weeks};
+}
+function coachDietTips(downCount){
+  const di = dietInfo(), tips = [], facts = [];
+  if(!di) return {facts, tips};
+  const d = di.d, cut = d.goal==='cut';
+  if(di.n){
+    facts.push('吃的（近七天記了 '+di.n+' 天）：平均 '+Math.round(di.kcal)+' 大卡'+(d.tk ? '／目標 '+Math.round(d.tk) : '')+'，蛋白質 '+Math.round(di.p)+'g'+(d.tp ? '／目標 '+Math.round(d.tp)+'g' : ''));
+  } else facts.push('吃的：近七天沒有飲食紀錄');
+  if(di.w0!=null) facts.push('體重：這週平均 '+numStr(di.w0)+'kg'+(di.rate!=null ? '，一週 '+(di.rate>0?'+':'')+numStr(di.rate)+'kg' : ''));
+  else facts.push('體重：這七天沒有量');
+
+  const enough = di.n>=4;
+  if(!enough) tips.push('近七天只記了 '+di.n+' 天飲食，吃的部分我先不下判斷，先把每天記滿。');
+  if(enough && d.tk){
+    if(di.kcal > d.tk*1.1) tips.push('平均吃到 '+Math.round(di.kcal)+' 大卡，比目標多 '+Math.round(di.kcal-d.tk)+'：先照目標吃到，目標不用再降。');
+    else if(di.kcal < d.tk*0.85) tips.push('平均只吃 '+Math.round(di.kcal)+' 大卡，比目標少 '+Math.round(d.tk-di.kcal)+'：吃太少力量會掉，補回目標。');
+  }
+  if(enough && d.tp && di.p < d.tp*0.85) tips.push('蛋白質平均 '+Math.round(di.p)+'g，目標 '+Math.round(d.tp)+'g：不夠的話'+(cut?'減脂時肌肉會跟著掉':'長不了肌肉')+'，先補到。');
+  if(di.rate==null) tips.push('體重紀錄不夠：一週至少量兩三次（早上空腹），我才看得出走勢。');
+  else if(cut){
+    const fast = di.w0 ? -di.w0*0.01 : -0.8;
+    if(di.rate <= fast && downCount>=2) tips.push('體重一週掉 '+numStr(-di.rate)+'kg 太快，而且有 '+downCount+' 個動作在退步：每天多吃 150～200 大卡。');
+    else if(di.rate <= fast) tips.push('體重一週掉 '+numStr(-di.rate)+'kg，偏快。力量還撐得住就先維持，開始退步就每天加 150～200 大卡。');
+    else if(di.rate > -0.3 && di.weeks>=2){
+      if(enough && d.tk && di.kcal <= d.tk*1.05) tips.push('體重兩週幾乎沒動，吃的也有照目標：飲食 App 的目標熱量減 150～200 大卡。');
+      else tips.push('體重兩週幾乎沒動，但吃的超過目標或沒記滿：先照目標吃滿一週再看，不用急著降目標。');
+    }
+    else if(di.rate <= -0.3) tips.push('體重一週掉 '+numStr(-di.rate)+'kg，速度剛好，照現在這樣吃。');
+  }
+  return {facts, tips};
+}
+
+// Top of the progress page: attendance, direction of every exercise in the plan, what to change
+function coachSummaryHTML(){
+  if(!sessions.length) return '';
+  const wk = trainDays(weekStartStr()), avg4 = trainDays(daysAgoStr(27))/4;
+  const names = [];
+  Object.keys(templates).forEach(d=>(templates[d]||[]).forEach(t=>{ if(!names.includes(canonEx(t.name))) names.push(canonEx(t.name)); }));
+  const cnt = {up:0, hold:0, down:0};
+  let rows = '';
+  names.forEach(n=>{
+    const t = coachTrend(n);
+    if(t.st==='na'){ rows += '<div class="coach-row"><span class="nm">'+escHtml(n)+'</span><span class="tg">—</span><span class="dt">近四週只練 '+t.n+' 次，還看不出走勢</span></div>'; return; }
+    cnt[t.st]++;
+    rows += '<div class="coach-row"><span class="nm">'+escHtml(n)+'</span><span class="tg">'+(t.st==='up'?'▲ ':t.st==='down'?'▼ ':'')+COACH_LABEL[t.st]+'</span><span class="dt">'+escHtml(topText(t.a))+' → '+escHtml(topText(t.b))+'（'+t.n+' 次）</span></div>';
+  });
+  const judged = cnt.up+cnt.hold+cnt.down;
+  let head;
+  if(!judged) head = '紀錄還不夠判斷，先照課表練滿兩週';
+  else if(cnt.up>cnt.down && cnt.up*2>=judged) head = '整體在進步：'+cnt.up+' 個動作往上';
+  else if(cnt.down>cnt.up) head = '整體在退步：'+cnt.down+' 個動作往下';
+  else head = '整體卡住：大部分動作沒有往上';
+
+  const tips = [];
+  const all = [].concat(...Object.keys(templates).map(d=>templates[d]||[]));
+  const dropped = all.filter(t=>t.down).map(t=>t.name);
+  if(avg4<2) tips.push('近四週平均一週只練 '+numStr(avg4)+' 次。這套課表一週三次才推得動，現在最該調的是出席，不是課表。');
+  else if(avg4<COACH_WEEKLY-0.25) tips.push('近四週平均一週 '+numStr(avg4)+' 次，再補一點就到三次。');
+  if(dropped.length>=3 && avg4>=2.5) tips.push('有 '+dropped.length+' 個動作同時卡住，而且你有照表練：下週排減量週。三次都用現在重量的八成、每個動作少一組，再下一週回到原重量。');
+  else if(dropped.length) tips.push(dropped.map(escHtml).join('、')+' 連三次沒進步，已降重量重新往上做，照動作卡上的目標做就好。');
+  const diet = coachDietTips(cnt.down);
+  diet.tips.forEach(x=>tips.push(x));
+  if(!tips.length) tips.push(judged ? '照現在的做法繼續：重量不要換，每組都到上限就加重。' : '每次照動作卡上的目標做，兩週後這裡就會有走勢。');
+
+  let html = '<div class="coach-card"><h4>'+pxIcon('chart',1)+'教練總評</h4><div style="font-weight:700;">'+head+'</div>';
+  html += '<h5>出席</h5><div>這週 '+wk+'／'+COACH_WEEKLY+' 次・近四週平均一週 '+numStr(avg4)+' 次</div>';
+  html += '<h5>近四週走勢</h5>'+rows;
+  if(diet.facts.length) html += '<h5>飲食 App</h5>'+diet.facts.map(x=>'<div>'+escHtml(x)+'</div>').join('');
+  else html += '<h5>飲食 App</h5><div>還沒連結。到「設定 → 飲食 App 連結」輸入連結碼，我就能把吃的和體重一起看。</div>';
+  html += '<h5>現在該做的</h5>'+tips.map(x=>'<div class="coach-tip">'+x+'</div>').join('');
+  return html+'</div>';
+}
+
+// ─── Link to the diet app (reads the summary it uploads; nothing is written from here) ───
+const LINK_URL = 'https://firestore.googleapis.com/v1/projects/shiguang-d673f/databases/(default)/documents/link/';
+const LINK_KEY = 'AIzaSyAMGh5oV0HeFQ5OmwcScW7ChrQgo8AxTjc';
+async function syncDiet(manual){
+  const code = localStorage.getItem(GYM_LINK);
+  if(!code) return false;
+  try{
+    const res = await fetch(LINK_URL+encodeURIComponent(code)+'?key='+LINK_KEY, {cache:'no-store'});
+    if(res.status===404){ if(manual) showToast('找不到這組連結碼的資料'); return false; }
+    if(!res.ok) throw new Error(res.status);
+    const d = JSON.parse((await res.json()).fields.j.stringValue);
+    d.got = todayStr();
+    localStorage.setItem(GYM_DIET, JSON.stringify(d));
+    if(manual) showToast('已更新飲食資料');
+    if(currentSection==='progress') renderProgress();
+    if(currentSection==='settings') renderSettings();
+    return true;
+  }catch(e){ if(manual) showToast('連不上，等有網路再試'); return false; }
+}
+function linkStatusHTML(){
+  const code = localStorage.getItem(GYM_LINK);
+  if(!code) return '還沒連結<br><span style="font-size:12px;color:#7f8c8d;">在飲食 App「食光」的設定打開「連結健身 App」，把連結碼貼到這裡。教練就會把吃的、體重和訓練一起看。</span>';
+  let d = null; try{ d = JSON.parse(localStorage.getItem(GYM_DIET)||'null'); }catch(e){}
+  return '已連結：<strong style="color:#f39c12;">'+escHtml(code)+'</strong><br><span style="font-size:12px;color:#7f8c8d;">'+(d ? '上次更新 '+escHtml(d.got||'')+'，每次打開 App 會自動更新' : '還沒讀到資料')+'</span>';
+}
+async function linkDiet(){
+  const v = await pxPrompt('貼上飲食 App 給的連結碼', '');
+  if(v==null) return;
+  const code = String(v).trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(code.length!==10){ showToast('連結碼是 10 個英數字'); return; }
+  localStorage.setItem(GYM_LINK, code);
+  if(!await syncDiet(true)){ localStorage.removeItem(GYM_LINK); }
+  renderSettings();
+}
+async function unlinkDiet(){
+  if(!await pxConfirm('取消連結？這支手機上的飲食資料會清掉，訓練紀錄不動')) return;
+  localStorage.removeItem(GYM_LINK); localStorage.removeItem(GYM_DIET);
+  renderSettings();
 }
 
 function showLevelUp(lv){
@@ -2111,15 +2389,17 @@ function renderProgress(){
     (sess.exercises||[]).forEach(ex=>{
       if(!ex.sets||!ex.sets.length) return;
       const maxW = Math.max(...ex.sets.map(s=>parseFloat(s.w)||0));
-      if(!exHistory[ex.name]) exHistory[ex.name]=[];
+      const nm = canonEx(ex.name);
+      if(!exHistory[nm]) exHistory[nm]=[];
       // Only add if date not already recorded (take max of same day)
-      const existing = exHistory[ex.name].find(e=>e.date===sess.date);
+      const existing = exHistory[nm].find(e=>e.date===sess.date);
       if(existing){ existing.maxW = Math.max(existing.maxW, maxW); }
-      else { exHistory[ex.name].push({date:sess.date, maxW}); }
+      else { exHistory[nm].push({date:sess.date, maxW}); }
     });
   });
 
   let html = '<div style="padding:12px;">';
+  html += coachSummaryHTML();
   html += '<div style="font-family:\'PressStart\',monospace;font-size:12px;color:#f39c12;padding:8px 4px 16px;letter-spacing:1px;display:flex;align-items:center;gap:6px;">'+pxIcon('chart',1)+'重量進步紀錄</div>';
 
   Object.keys(exHistory).forEach(name=>{
@@ -2387,6 +2667,13 @@ function renderSettings(){
     '<span style="font-size:12px;color:#7f8c8d;">完成訓練後自動推進，不依賴日期</span>'+
     '</div>'+
     '<button class="save-btn" onclick="restartCycle()">從頭開始（重設進度）</button>'+
+    '</div>'+
+    '<div class="set-group">'+
+    '<h3>飲食 App 連結</h3>'+
+    '<div style="background:#0f0f2a;border-radius:8px;padding:12px;margin-bottom:12px;font-size:14px;color:#bdc3c7;">'+linkStatusHTML()+'</div>'+
+    (localStorage.getItem(GYM_LINK)
+      ? '<button class="save-btn" onclick="syncDiet(true)">立刻更新</button><button class="danger-btn" onclick="unlinkDiet()">取消連結</button>'
+      : '<button class="save-btn" onclick="linkDiet()">輸入連結碼</button>')+
     '</div>'+
     '<div class="set-group">'+
     '<h3>音效</h3>'+
