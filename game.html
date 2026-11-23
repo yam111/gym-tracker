@@ -192,6 +192,9 @@ body{font-family:'Cubic11','Noto Sans TC',sans-serif;background:#0a0a1a;color:#e
 
 /* Day header */
 .day-header{padding:10px 12px 4px;font-size:14px;color:#7f8c8d;}
+.day-note{font-size:12px;color:#306230;margin-top:2px;}
+.ex-goal{font-size:12px;line-height:1.5;color:#306230;padding:0 0 8px;}
+.ex-goal.up{color:#0f380f;font-weight:700;}
 .day-header strong{color:#fff;font-size:15px;}
 
 /* ─── Game Boy theme（四階綠：#0f380f / #306230 / #8bac0f / #9bbc0f）───
@@ -519,52 +522,31 @@ const XP_COMPLETE  = 50;
 const XP_DELOAD    = 80;
 const XP_PER_LEVEL = 800;
 const MAX_LEVEL    = 52;
-const STREAK_MAX_GAP = 2; // rest days allowed between workouts (4 days/week → weekend gap of 2)
+const STREAK_MAX_GAP = 3; // rest days allowed between workouts (2–3 days/week, e.g. Mon → Fri)
 
+// 一週三天全身，A／B 輪流。range = 目標次數範圍；inc = 全部達標後加多少 kg（0 = 機械，自己加一格）
 const DEFAULT_TEMPLATES = {
-  1:[ // Upper A
-    {name:'臥推',          sets:[{w:70,r:5},{w:70,r:5}]},
-    {name:'高位下拉',      sets:[{w:50,r:10},{w:50,r:10}]},
-    {name:'上斜啞鈴臥推',  sets:[{w:20,r:10},{w:20,r:10}]},
-    {name:'坐姿划船',      sets:[{w:39,r:10},{w:39,r:10}]},
-    {name:'側平舉',        sets:[{w:6,r:15},{w:6,r:15}]},
-    {name:'二頭彎舉',      sets:[{w:10,r:12},{w:10,r:12}]},
-    {name:'三頭下壓',      sets:[{w:18,r:12},{w:18,r:12}]},
+  1:[ // 全身 A
+    {name:'深蹲',      range:[5,8],   inc:5,   sets:[{w:60,r:5},{w:60,r:5},{w:60,r:5}]},
+    {name:'臥推',      range:[6,8],   inc:2.5, sets:[{w:60,r:6},{w:60,r:6},{w:60,r:6}]},
+    {name:'高位下拉',  range:[8,12],  inc:0,   sets:[{w:45,r:8},{w:45,r:8},{w:45,r:8}]},
+    {name:'腿彎舉',    range:[10,12], inc:0,   sets:[{w:32,r:10},{w:32,r:10}]},
+    {name:'側平舉',    range:[12,15], inc:2,   sets:[{w:8,r:12},{w:8,r:12}]},
+    {name:'三頭下壓',  range:[10,12], inc:0,   sets:[{w:18,r:10},{w:18,r:10}]},
   ],
-  2:[ // Lower A
-    {name:'深蹲',          sets:[{w:60,r:5},{w:60,r:5}]},
-    {name:'羅馬尼亞硬舉',  sets:[{w:60,r:8},{w:60,r:8}]},
-    {name:'腿推',          sets:[{w:100,r:10},{w:100,r:10}]},
-    {name:'腿彎舉',        sets:[{w:15,r:12},{w:15,r:12}]},
-    {name:'小腿',          sets:[{w:20,r:12},{w:20,r:12}]},
-    {name:'腹部',          sets:[{w:0,r:15},{w:0,r:15}]},
-  ],
-  3:[ // Upper B
-    {name:'上斜臥推',      sets:[{w:60,r:8},{w:60,r:8}]},
-    {name:'划船',          sets:[{w:39,r:10},{w:39,r:10}]},
-    {name:'肩推',          sets:[{w:12,r:10},{w:12,r:10}]},
-    {name:'高位下拉',      sets:[{w:50,r:10},{w:50,r:10}]},
-    {name:'側平舉',        sets:[{w:6,r:15},{w:6,r:15}]},
-    {name:'臉拉',           part:'shoulder', sets:[{w:'',r:15},{w:'',r:15}]},
-    {name:'二頭',          sets:[{w:10,r:12},{w:10,r:12}]},
-    {name:'三頭',          sets:[{w:18,r:12},{w:18,r:12}]},
-  ],
-  4:[ // Lower B
-    {name:'硬舉',          sets:[{w:90,r:5},{w:90,r:5}]},
-    {name:'哈克深蹲',      sets:[{w:60,r:9},{w:60,r:9}]},
-    {name:'臀推',          sets:[{w:60,r:10},{w:60,r:10}]},
-    {name:'腿伸展',        sets:[{w:30,r:12},{w:30,r:12}]},
-    {name:'腿彎舉',        sets:[{w:15,r:12},{w:15,r:12}]},
-    {name:'小腿',          sets:[{w:20,r:12},{w:20,r:12}]},
-    {name:'腹部',          sets:[{w:0,r:15},{w:0,r:15}]},
+  2:[ // 全身 B
+    {name:'硬舉',      range:[3,5],   inc:5,   sets:[{w:90,r:3},{w:90,r:3}]},
+    {name:'上斜臥推',  range:[8,10],  inc:2.5, sets:[{w:50,r:8},{w:50,r:8},{w:50,r:8}]},
+    {name:'機械划船',  range:[10,12], inc:0,   sets:[{w:23,r:10},{w:23,r:10},{w:23,r:10}]},
+    {name:'槓片腿推',  range:[10,12], inc:5,   sets:[{w:100,r:10},{w:100,r:10},{w:100,r:10}]},
+    {name:'二頭彎舉',  range:[10,12], inc:2.5, sets:[{w:17.5,r:10},{w:17.5,r:10}]},
+    {name:'臉拉',      part:'shoulder', range:[12,15], inc:0, sets:[{w:'',r:12},{w:'',r:12}]},
   ],
 };
 
 const WEEK_CYCLE = [
-  {type:'upperA', label:'Upper A 上肢A', short:'上A', day:1, color:'push'},
-  {type:'lowerA', label:'Lower A 下肢A', short:'下A', day:2, color:'legs'},
-  {type:'upperB', label:'Upper B 上肢B', short:'上B', day:3, color:'push'},
-  {type:'lowerB', label:'Lower B 下肢B', short:'下B', day:4, color:'legs'},
+  {type:'fullA', label:'全身 A', short:'全A', day:1, color:'push'},
+  {type:'fullB', label:'全身 B', short:'全B', day:2, color:'legs'},
 ];
 
 const ACHIEVEMENTS_DEF = [
@@ -652,8 +634,8 @@ let gameState      = {xp:0,level:1,streak:0,lastDate:'',achievements:[]};
 let sessions       = [];
 let templates      = {};
 let currentSection = 'workout';
-let currentDay     = 1;   // 1=上肢A, 2=下肢A, 3=上肢B, 4=下肢B
-let cycleProgress  = 0;   // 0-3, which step in WEEK_CYCLE we're on
+let currentDay     = 1;   // 1=全身A, 2=全身B
+let cycleProgress  = 0;   // which step in WEEK_CYCLE we're on
 let currentSession = {};
 let confirmedSets  = {};
 let doneEx         = {};   // day -> exercise indices marked done today, in the order they were done
@@ -718,6 +700,7 @@ function init(){
   // Load progress (which cycle step we're on)
   const prog = localStorage.getItem(GYM_PROGRESS);
   if(prog) try{ cycleProgress = parseInt(JSON.parse(prog).step)||0; }catch(e){}
+  if(!WEEK_CYCLE[cycleProgress]) cycleProgress = 0;
   const sched = getCurrentSchedule();
   currentDay = sched.day || 1;
 
@@ -733,7 +716,7 @@ function getTemplates(){
   const saved = localStorage.getItem(GYM_TEMPLATES);
   const custom = saved ? JSON.parse(saved) : {};
   const merged = {};
-  for(let d=1;d<=4;d++){
+  for(const d of Object.keys(DEFAULT_TEMPLATES)){
     merged[d] = custom[d]
       ? JSON.parse(JSON.stringify(custom[d]))
       : JSON.parse(JSON.stringify(DEFAULT_TEMPLATES[d]));
@@ -746,6 +729,8 @@ function getTemplates(){
 const TPL_UPDATES = [
   // 1: 上肢B 加臉拉 2×15 (rear delts), right after 側平舉
   ()=>({day:3, after:'側平舉', ex:{name:'臉拉', part:'shoulder', sets:[{w:'',r:15},{w:'',r:15}]}}),
+  // 2: 四天上下肢 → 三天全身 A／B。手機上存的舊課表整份換成新的（舊的留一份在 gym_tpl_old），訓練紀錄不動
+  ()=>({replaceAll:true}),
 ];
 function applyTemplateUpdates(){
   const rev = gameState.tplRev||0;
@@ -754,6 +739,14 @@ function applyTemplateUpdates(){
   const custom = saved ? JSON.parse(saved) : {};
   for(let i=rev;i<TPL_UPDATES.length;i++){
     const u = TPL_UPDATES[i]();
+    if(u.replaceAll){
+      if(saved && !localStorage.getItem('gym_tpl_old')) localStorage.setItem('gym_tpl_old', saved);
+      Object.keys(custom).forEach(k=>delete custom[k]);
+      Object.assign(custom, JSON.parse(JSON.stringify(DEFAULT_TEMPLATES)));
+      localStorage.removeItem(GYM_SESSION_DRAFT);
+      localStorage.setItem(GYM_PROGRESS, JSON.stringify({step:0}));
+      continue;
+    }
     const list = custom[u.day];
     if(!list || list.some(e=>e.name===u.ex.name)) continue; // default plan already has it
     const a = list.findIndex(e=>e.name===u.after);
@@ -1509,7 +1502,7 @@ function renderWorkout(){
   html += renderDayTabsHTML(sched);
 
   const dayInfo = WEEK_CYCLE.find(w=>w.day===currentDay) || WEEK_CYCLE[0];
-  html += '<div class="day-header"><strong>'+escHtml(dayInfo.label)+'</strong></div>';
+  html += '<div class="day-header"><strong>'+escHtml(dayInfo.label)+'</strong><div class="day-note">只記正式組，熱身組不用記</div></div>';
   html += '<div id="ex-list">'+renderExercisesHTML()+'</div>';
   html += '<div id="complete-btn-wrap"><button id="complete-btn" onclick="completeWorkout()">完成訓練 '+pxIcon('flag',1)+'</button></div>';
 
@@ -1559,6 +1552,8 @@ function renderExercisesHTML(){
       '<span style="font-size:12px;font-weight:400;color:#7f8c8d;margin-left:auto;">'+sess.length+' 組</span>'+
     '</div>';
 
+    html += exGoalHTML(ex);
+
     sess.forEach((set, si)=>{
       html += '<div class="set-row" id="setrow-'+ei+'-'+si+'">';
       html += '<div class="set-num">'+(si+1)+'</div>';
@@ -1575,6 +1570,15 @@ function renderExercisesHTML(){
   });
   html += '<button class="add-set-btn" onclick="addExercise()" style="width:calc(100% - 24px);margin:4px 12px 0;background:#8bac0f;border:3px dashed #0f380f;color:#0f380f;font-weight:700;">+ 新增動作</button>';
   return html;
+}
+
+// Target rep range + when to add weight (only for exercises that carry a range)
+function incText(ex){ return ex.inc ? '加 '+ex.inc+'kg' : '加一格重量'; }
+function exGoalHTML(ex){
+  if(!ex.range) return '';
+  const lo = ex.range[0], hi = ex.range[1];
+  if(ex.up) return '<div class="ex-goal up">上次每組都到 '+hi+' 下'+(ex.inc ? '，這次已加到 '+escHtml(String(ex.sets[0].w))+'kg' : '，這次'+incText(ex))+'（目標 '+lo+'～'+hi+' 下）</div>';
+  return '<div class="ex-goal">目標 '+lo+'～'+hi+' 下・重量不要換，每組都到 '+hi+' 下，下次'+incText(ex)+'</div>';
 }
 
 function setInputsHTML(ei,si,set,disabled){
@@ -1767,6 +1771,16 @@ function finishWorkout(date){
     while(plan.length < planned) plan.push(Object.assign({}, plan[plan.length-1]));
     custom[currentDay][ei].name = ex.name;
     custom[currentDay][ei].sets = plan;
+    // Every planned set reached the top of the range → next time start heavier at the bottom of the range
+    const t = custom[currentDay][ei];
+    if(t.range){
+      const hit = sets.length>=planned && sets.every(s=>parseFloat(s.r)>=t.range[1]);
+      t.up = hit;
+      if(hit){
+        const base = Math.min(...sets.map(s=>parseFloat(s.w)||0));
+        t.sets = t.sets.slice(0, Math.max(planned,1)).map(()=>({w: t.inc ? base+t.inc : base, r: t.inc ? t.range[0] : t.range[1]}));
+      }
+    }
   });
   localStorage.setItem(GYM_TEMPLATES, JSON.stringify(custom));
   templates = getTemplates();
@@ -1948,7 +1962,7 @@ function checkAchievements(sessionData, extraFlags){
   });
   const bench  = maxWeights['臥推']||0;
   const pullW  = maxWeights['高位下拉']||0;
-  const legW   = maxWeights['腿推']||0;
+  const legW   = Math.max(maxWeights['腿推']||0, maxWeights['槓片腿推']||0);
   const squatW = maxWeights['深蹲']||0;
   const deadW  = maxWeights['硬舉']||0;
   [{id:'bench_60',v:60},{id:'bench_80',v:80},{id:'bench_100',v:100},{id:'bench_120',v:120}]
@@ -1963,8 +1977,9 @@ function checkAchievements(sessionData, extraFlags){
     .forEach(({id,v})=>{ if(deadW>=v && !unlocked.has(id)) newOnes.push(id); });
 
   // 上肢/下肢日次數
-  const upperCount = sessions.filter(s=>(s.type||'').startsWith('upper')).length;
-  const lowerCount = sessions.filter(s=>(s.type||'').startsWith('lower')).length;
+  // 全身日上下肢都練到，兩邊都算
+  const upperCount = sessions.filter(s=>/^(upper|full)/.test(s.type||'')).length;
+  const lowerCount = sessions.filter(s=>/^(lower|full)/.test(s.type||'')).length;
   [{id:'upper_5',v:5},{id:'upper_15',v:15},{id:'upper_30',v:30},{id:'upper_60',v:60}]
     .forEach(({id,v})=>{ if(upperCount>=v && !unlocked.has(id)) newOnes.push(id); });
   [{id:'lower_5',v:5},{id:'lower_15',v:15},{id:'lower_30',v:30},{id:'lower_60',v:60}]
@@ -2160,7 +2175,7 @@ function showDayDetail(ds){
     html = '<div style="color:#7f8c8d;font-size:14px;padding:8px 0;">這天沒有訓練紀錄</div>';
   }
   list.forEach(sess=>{
-    const typeLabel = {upperA:'上肢A',lowerA:'下肢A',upperB:'上肢B',lowerB:'下肢B',push:'推',pull:'拉',legs:'腿'}[sess.type]||sess.type;
+    const typeLabel = {fullA:'全身A',fullB:'全身B',upper:'上肢',lower:'下肢',upperA:'上肢A',lowerA:'下肢A',upperB:'上肢B',lowerB:'下肢B',push:'推',pull:'拉',legs:'腿'}[sess.type]||sess.type;
     html += '<div style="font-size:14px;color:#f39c12;margin-bottom:12px;">'+typeLabel+'日</div>';
 
     (sess.exercises||[]).forEach((ex,ei)=>{
@@ -2277,7 +2292,7 @@ function renderMap(){
   const today = new Date(); today.setHours(0,0,0,0);
   const todayS = todayStr();
   const dayLabels = ['日','一','二','三','四','五','六'];
-  const typeLabel = {upperA:'上A',lowerA:'下A',upperB:'上B',lowerB:'下B'};
+  const typeLabel = {fullA:'全A',fullB:'全B',upper:'上',lower:'下',upperA:'上A',lowerA:'下A',upperB:'上B',lowerB:'下B',push:'推',pull:'拉',legs:'腿'};
 
   const year = mapViewYear, month = mapViewMonth;
   const monthName = year+'年'+(month+1)+'月';
