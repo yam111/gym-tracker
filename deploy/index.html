@@ -199,10 +199,20 @@ body{font-family:'Cubic11','Noto Sans TC',sans-serif;background:#0a0a1a;color:#e
 .coach-card{background:#e0f8a0;border:3px solid #0f380f;border-radius:4px;box-shadow:4px 4px 0 #306230;padding:12px 14px;margin:0 0 16px;color:#0f380f;font-size:14px;line-height:1.6;}
 .coach-card h4{font-size:16px;margin:0 0 6px;display:flex;align-items:center;gap:6px;}
 .coach-card h5{font-size:12px;margin:12px 0 4px;color:#306230;border-bottom:2px dashed #306230;padding-bottom:2px;}
-.coach-row{display:flex;gap:8px;align-items:baseline;padding:2px 0;}
-.coach-row .nm{flex:0 0 5em;font-weight:700;}
-.coach-row .tg{flex:0 0 4.4em;font-weight:700;white-space:nowrap;}
-.coach-row .dt{flex:1;color:#306230;font-size:12px;}
+.coach-grid{display:grid;grid-template-columns:auto auto auto auto auto 1fr;column-gap:6px;row-gap:5px;align-items:center;font-size:13px;line-height:1.3;}
+.coach-grid .nm{font-weight:700;white-space:nowrap;}
+.coach-grid .tg{font-weight:700;white-space:nowrap;}
+.coach-grid .v{color:#306230;white-space:nowrap;text-align:right;font-size:12px;}
+.coach-grid .ar{color:#306230;font-size:12px;}
+.coach-grid .n{color:#306230;white-space:nowrap;text-align:right;font-size:12px;}
+@media (max-width:345px){.coach-grid{grid-template-columns:auto auto auto auto 1fr;}.coach-grid .n{display:none;}.coach-grid .v:nth-of-type(5n){text-align:left;}}
+.coach-grid .na{grid-column:3 / -1;color:#306230;}
+.coach-kv{display:grid;grid-template-columns:auto auto 1fr;column-gap:12px;row-gap:4px;align-items:baseline;font-size:13px;line-height:1.3;}
+.coach-kv .k{font-weight:700;}
+.coach-kv .a,.coach-kv .b{white-space:nowrap;}
+.coach-kv .b{color:#306230;}
+.coach-kv .full{grid-column:2 / -1;color:#306230;}
+.coach-note{font-size:12px;color:#306230;margin-top:4px;}
 .coach-tip{padding:4px 0 4px 14px;position:relative;}
 .coach-tip::before{content:'▶';position:absolute;left:0;font-size:10px;top:8px;}
 .coach-top{background:#e0f8a0;border:3px solid #0f380f;padding:10px 12px;margin-bottom:12px;color:#0f380f;font-size:14px;line-height:1.6;font-weight:700;}
@@ -2012,13 +2022,16 @@ function dietInfo(){
 }
 function coachDietTips(downCount){
   const di = dietInfo(), tips = [], facts = [];
-  if(!di) return {facts, tips};
+  let note = '';
+  if(!di) return {facts, tips, note};
   const d = di.d, cut = d.goal==='cut';
   if(di.n){
-    facts.push('吃的（近七天記了 '+di.n+' 天）：平均 '+Math.round(di.kcal)+' 大卡'+(d.tk ? '／目標 '+Math.round(d.tk) : '')+'，蛋白質 '+Math.round(di.p)+'g'+(d.tp ? '／目標 '+Math.round(d.tp)+'g' : ''));
-  } else facts.push('吃的：近七天沒有飲食紀錄');
-  if(di.w0!=null) facts.push('體重：這週平均 '+numStr(di.w0)+'kg'+(di.rate!=null ? '，一週 '+(di.rate>0?'+':'')+numStr(di.rate)+'kg' : ''));
-  else facts.push('體重：這七天沒有量');
+    facts.push(['熱量', '平均 '+Math.round(di.kcal)+' 大卡', d.tk ? '目標 '+Math.round(d.tk) : '']);
+    facts.push(['蛋白質', '平均 '+Math.round(di.p)+'g', d.tp ? '目標 '+Math.round(d.tp)+'g' : '']);
+    note = '吃的是近七天有記的 '+di.n+' 天平均';
+  } else facts.push(['吃的', '近七天沒有飲食紀錄']);
+  if(di.w0!=null) facts.push(['體重', '這週平均 '+numStr(di.w0)+'kg', di.rate!=null ? '一週 '+(di.rate>0?'+':'')+numStr(di.rate)+'kg' : '']);
+  else facts.push(['體重', '這七天沒有量']);
 
   const enough = di.n>=4;
   if(!enough) tips.push('近七天只記了 '+di.n+' 天飲食，吃的部分我先不下判斷，先把每天記滿。');
@@ -2038,7 +2051,7 @@ function coachDietTips(downCount){
     }
     else if(di.rate <= -0.3) tips.push('體重一週掉 '+numStr(-di.rate)+'kg，速度剛好，照現在這樣吃。');
   }
-  return {facts, tips};
+  return {facts, tips, note};
 }
 
 // Top of the progress page: attendance, direction of every exercise in the plan, what to change
@@ -2051,9 +2064,9 @@ function coachSummaryHTML(){
   let rows = '';
   names.forEach(n=>{
     const t = coachTrend(n);
-    if(t.st==='na'){ rows += '<div class="coach-row"><span class="nm">'+escHtml(n)+'</span><span class="tg">—</span><span class="dt">近四週只練 '+t.n+' 次，還看不出走勢</span></div>'; return; }
+    if(t.st==='na'){ rows += '<span class="nm">'+escHtml(n)+'</span><span class="tg">－ 待定</span><span class="na">近四週只練 '+t.n+' 次</span>'; return; }
     cnt[t.st]++;
-    rows += '<div class="coach-row"><span class="nm">'+escHtml(n)+'</span><span class="tg">'+(t.st==='up'?'▲ ':t.st==='down'?'▼ ':'')+COACH_LABEL[t.st]+'</span><span class="dt">'+escHtml(topText(t.a))+' → '+escHtml(topText(t.b))+'（'+t.n+' 次）</span></div>';
+    rows += '<span class="nm">'+escHtml(n)+'</span><span class="tg">'+(t.st==='up'?'▲ ':t.st==='down'?'▼ ':'＝ ')+COACH_LABEL[t.st]+'</span><span class="v">'+escHtml(topText(t.a))+'</span><span class="ar">→</span><span class="v">'+escHtml(topText(t.b))+'</span><span class="n">'+t.n+' 次</span>';
   });
   const judged = cnt.up+cnt.hold+cnt.down;
   let head;
@@ -2074,9 +2087,9 @@ function coachSummaryHTML(){
   if(!tips.length) tips.push(judged ? '照現在的做法繼續：重量不要換，每組都到上限就加重。' : '每次照動作卡上的目標做，兩週後這裡就會有走勢。');
 
   let html = '<div class="coach-card"><h4>'+pxIcon('chart',1)+'教練總評</h4><div style="font-weight:700;">'+head+'</div>';
-  html += '<h5>出席</h5><div>這週 '+wk+'／'+COACH_WEEKLY+' 次・近四週平均一週 '+numStr(avg4)+' 次</div>';
-  html += '<h5>近四週走勢</h5>'+rows;
-  if(diet.facts.length) html += '<h5>飲食 App</h5>'+diet.facts.map(x=>'<div>'+escHtml(x)+'</div>').join('');
+  html += '<h5>出席</h5><div class="coach-kv"><span class="k">這週</span><span class="a">'+wk+'／'+COACH_WEEKLY+' 次</span><span class="b"></span><span class="k">近四週</span><span class="a">平均一週 '+numStr(avg4)+' 次</span><span class="b"></span></div>';
+  html += '<h5>近四週走勢（第一次 → 最近一次）</h5><div class="coach-grid">'+rows+'</div>';
+  if(diet.facts.length) html += '<h5>飲食 App</h5><div class="coach-kv">'+diet.facts.map(f=>'<span class="k">'+escHtml(f[0])+'</span>'+(f.length>2 ? '<span class="a">'+escHtml(f[1])+'</span><span class="b">'+escHtml(f[2])+'</span>' : '<span class="full">'+escHtml(f[1])+'</span>')).join('')+'</div>'+(diet.note ? '<div class="coach-note">'+escHtml(diet.note)+'</div>' : '');
   else html += '<h5>飲食 App</h5><div>還沒連結。到「設定 → 飲食 App 連結」輸入連結碼，我就能把吃的和體重一起看。</div>';
   html += '<h5>現在該做的</h5>'+tips.map(x=>'<div class="coach-tip">'+x+'</div>').join('');
   return html+'</div>';
