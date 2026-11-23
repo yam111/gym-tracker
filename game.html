@@ -991,7 +991,9 @@ function loadDraft(){
   try{
     const d = JSON.parse(raw);
     // Only restore if draft is from today
-    if(d.date === todayStr()){
+    // Still training past midnight (started yesterday, it is before 5am): same workout, keep going
+    const overnight = d.date === daysAgoStr(1) && new Date().getHours() < 5;
+    if(d.date === todayStr() || overnight){
       currentSession = d.session || {};
       confirmedSets  = d.confirmed || {};
       doneEx         = d.done || {};
@@ -3202,6 +3204,8 @@ async function resetTemplates(){
   if(!await pxConfirm('確定要重設課表？自訂課表將遺失。')) return;
   localStorage.removeItem(GYM_TEMPLATES);
   localStorage.removeItem(GYM_SESSION_DRAFT);
+  sessions.forEach(x=>{ delete x.tb; });
+  localStorage.setItem(GYM_SESSIONS, JSON.stringify(sessions));
   templates = getTemplates();
   currentSession = {};
   confirmedSets  = {};
