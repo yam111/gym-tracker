@@ -226,6 +226,46 @@ body{font-family:'Cubic11','Noto Sans TC',sans-serif;background:#0a0a1a;color:#e
 .coach-tag.up{background:#0f380f;color:#9bbc0f;}
 .day-header strong{color:#fff;font-size:15px;}
 </style>
+<style>
+#ex-picker,#tip-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:flex-end;justify-content:center;z-index:9996;}
+#ex-picker.show,#tip-modal.show{display:flex;}
+.pick-box{display:flex;flex-direction:column;max-height:88vh!important;overflow:hidden!important;}
+#pick-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;flex:none;scrollbar-width:none;}
+#pick-tabs::-webkit-scrollbar{display:none;}
+.pick-tab{flex:none;padding:7px 13px;border-radius:99px;border:1px solid #2a2a4e;background:#0f0f2a;color:#bdc3c7;font-size:13.5px;white-space:nowrap;cursor:pointer;font-family:inherit;}
+.pick-tab.on{background:#f39c12;color:#000;border-color:#f39c12;}
+#pick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;overflow-y:auto;flex:1;min-height:0;padding:2px 0 4px;}
+.pick-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px 8px;border-radius:12px;border:1px solid #2a2a4e;background:#0f0f2a;color:#e0e0e0;cursor:pointer;font-family:inherit;min-width:0;}
+.pick-item b{font-size:13px;font-weight:600;line-height:1.3;text-align:center;word-break:break-all;}
+.pick-item em{font-style:normal;font-size:10.5px;color:#7f8c8d;}
+.pick-item.has{opacity:.55;}
+.pick-item .ex-tile{margin-right:0;}
+.pick-txt{width:52px;height:52px;display:grid;place-items:center;font-size:16px;}
+.pick-foot{flex:none;}
+.pick-foot .day-modal-close{margin-top:8px;}
+.exi{width:52px;height:52px;fill:none;stroke:#efe9dc;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex:none;}
+.exi .eq{stroke:#d8b676;stroke-width:2;}
+#tip-title{display:flex;align-items:center;gap:10px;}
+.tip-ic{width:46px;height:46px;}
+.tip-list{padding-left:22px;margin:4px 0 0;}
+.tip-list li{font-size:14.5px;line-height:1.75;margin-bottom:8px;}
+.set-num{cursor:pointer;border:none;background:none;padding:0;font-family:inherit;}
+.set-num.ticked{color:#2ecc71;}
+.ex-tip-btn{flex:none;margin-left:6px;padding:2px 8px;border-radius:99px;border:1px solid #2a2a4e;background:none;color:#f39c12;font-size:11.5px;cursor:pointer;font-family:inherit;white-space:nowrap;}
+#rest-bar{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:76px;width:min(calc(100% - 20px),460px);z-index:150;background:#16213e;border:2px solid #f39c12;border-radius:14px;padding:10px 12px;overflow:hidden;}
+#rest-bar.show{display:block;animation:rest-in .3s both;}
+@keyframes rest-in{from{opacity:0;transform:translateX(-50%) translateY(30px)}}
+#rest-fill{position:absolute;left:0;top:0;bottom:0;background:rgba(243,156,18,.14);transition:width .25s linear;}
+.rest-main{position:relative;display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+#rest-name{font-size:13px;color:#bdc3c7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
+#rest-time{font-size:26px;color:#f39c12;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.rest-btns{position:relative;display:flex;gap:6px;margin-top:8px;}
+.rest-btns button{flex:1;padding:8px 0;border-radius:9px;border:1px solid #2a2a4e;background:#0f0f2a;color:#e0e0e0;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;}
+#rest-bar.show.done{animation:rest-flash .5s 6 alternate;}
+#rest-bar.done .rest-btns button:not(:last-child){visibility:hidden;}
+@keyframes rest-flash{to{background:#f39c12;}}
+body.resting #main{padding-bottom:200px;}
+</style>
 <style id="css-gb">
 /* ─── Game Boy theme（四階綠：#0f380f / #306230 / #8bac0f / #9bbc0f）───
    Overrides the base styles above; inline colors in render functions are
@@ -284,6 +324,20 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .ex-done-row b{font-size:15px;white-space:nowrap;}
 .ex-done-sum{font-size:12px;color:#306230;margin-left:auto;text-align:right;}
 #complete-btn{background:#0f380f;color:#9bbc0f;border-radius:0;box-shadow:4px 4px 0 #306230;font-size:17px;}
+.pick-tab{border-radius:0;background:#8bac0f;color:#0f380f;border:2px solid #0f380f;font-weight:700;}
+.pick-tab.on{background:#0f380f;color:#9bbc0f;border-color:#0f380f;}
+.pick-item{border-radius:0;background:#8bac0f;color:#0f380f;border:3px solid #0f380f;}
+.pick-item em{color:#306230;}
+.ex-tip-btn{border-radius:0;border:2px solid #0f380f;color:#0f380f;font-weight:700;}
+.set-row .set-num{width:24px;height:24px;background:none!important;color:#0f380f!important;border:2px solid #0f380f!important;}
+.set-row .set-num.ticked{background:#0f380f!important;color:#9bbc0f!important;}
+#rest-bar{background:#8bac0f;border:3px solid #0f380f;border-radius:0;box-shadow:4px 4px 0 #306230;bottom:72px;}
+#rest-fill{background:#9bbc0f;}
+#rest-name{color:#0f380f;font-weight:700;}
+#rest-time{color:#0f380f;font-family:'PressStart',monospace;font-size:18px;}
+.rest-btns button{border-radius:0;background:#0f380f;color:#9bbc0f;border:none;font-weight:700;}
+@keyframes rest-flash{to{background:#e0f8a0;}}
+.tip-list li{color:#0f380f;}
 
 #bottom-nav{background:#306230;border-top:3px solid #0f380f;}
 .nav-btn{color:#8bac0f;}
@@ -714,6 +768,34 @@ p.sub{color:var(--muted);font-size:13.5px;margin-bottom:18px;}
 #toast{top:auto;bottom:calc(var(--safe-b) + 92px);transform:translateX(-50%) translateY(200px);}
 #toast.show{transform:translateX(-50%) translateY(0);}
 .lx-part{background:var(--s3);color:var(--gold2);}
+.lx-part.lx-exi{padding:0;width:40px;height:40px;border-radius:12px;}
+.lx-part .exi{width:34px;height:34px;stroke-width:2.6;}
+.lx-part .exi .eq{stroke-width:2.4;}
+#ex-picker,#tip-modal{background:rgba(4,6,5,.62);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
+#ex-picker.show,#tip-modal.show{animation:lx-fade .25s both;}
+.pick-tab{background:var(--s1);border-color:var(--line2);color:var(--muted);font-size:13px;letter-spacing:.04em;}
+.pick-tab.on{background:rgba(216,182,118,.14);border-color:rgba(216,182,118,.5);color:var(--gold2);}
+.pick-item{background:var(--s1);border-color:var(--line);border-radius:18px;padding:12px 4px 10px;color:var(--text);}
+.pick-item:active{background:var(--s2);border-color:rgba(216,182,118,.4);}
+.pick-item b{font-weight:500;font-size:13px;letter-spacing:.02em;}
+.pick-item em{color:var(--dim);}
+.pick-item em.tipmark{color:var(--gold-d);}
+.pick-txt{color:var(--gold);font-family:var(--serif);}
+.pick-foot .day-modal-close{margin-top:10px;padding:12px;}
+.ex-tip-btn{border-color:rgba(216,182,118,.35);color:var(--gold);font-family:var(--sans);letter-spacing:.06em;padding:3px 9px;}
+.tip-list li{color:var(--text);}
+.tip-list li::marker{color:var(--gold);font-family:var(--num);}
+.set-num{width:22px;height:30px;border-radius:9px;flex:none;}
+.set-num.ticked{color:#17130a;background:linear-gradient(145deg,var(--gold2),var(--gold));display:grid;place-items:center;}
+.set-num.ticked .lx-ic{width:16px;height:16px;stroke-width:2.2;}
+#rest-bar{bottom:calc(var(--safe-b) + 86px);background:rgba(27,36,32,.96);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(216,182,118,.4);border-radius:22px;padding:12px 14px;box-shadow:0 14px 34px rgba(0,0,0,.55);}
+#rest-fill{background:linear-gradient(90deg,rgba(216,182,118,.05),rgba(216,182,118,.16));}
+#rest-name{color:var(--muted);letter-spacing:.06em;}
+#rest-time{font-family:var(--num);font-weight:400;font-size:30px;color:var(--gold2);line-height:1.1;}
+.rest-btns button{background:none;border-color:var(--line2);color:var(--text);border-radius:13px;font-size:13px;letter-spacing:.04em;}
+.rest-btns button:active{background:var(--s2);}
+@keyframes rest-flash{to{background:rgba(216,182,118,.32);}}
+body.resting #toast.show{bottom:calc(var(--safe-b) + 200px);}
 </style>
 <script>
 // 外觀：預設質感版（lux），設定頁可切回遊戲版（gb）。只開其中一塊樣式。
@@ -750,6 +832,39 @@ document.getElementById(t==='lux'?'css-gb':'css-lux').media='not all';})();
       <button class="day-modal-close px-dlg-no" onclick="pxDlgDone(false)">否</button>
       <button class="day-modal-close" onclick="pxDlgDone(true)">是</button>
     </div>
+  </div>
+</div>
+
+<!-- 新增動作：圖示清單 -->
+<div id="ex-picker" onclick="closeExPicker()">
+  <div class="day-modal-box pick-box" onclick="event.stopPropagation()">
+    <div class="day-modal-date">新增動作</div>
+    <div id="pick-tabs"></div>
+    <div id="pick-grid"></div>
+    <div class="pick-foot">
+      <button class="day-modal-close" onclick="addCustomExercise()">清單沒有・自己打名稱</button>
+      <button class="day-modal-close" onclick="closeExPicker()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 姿勢要點 -->
+<div id="tip-modal" onclick="closeTips()">
+  <div class="day-modal-box" onclick="event.stopPropagation()">
+    <div class="day-modal-date" id="tip-title"></div>
+    <div id="tip-body"></div>
+    <button class="day-modal-close" onclick="closeTips()">知道了</button>
+  </div>
+</div>
+
+<!-- 組間休息計時 -->
+<div id="rest-bar">
+  <div id="rest-fill"></div>
+  <div class="rest-main"><span id="rest-name"></span><b id="rest-time"></b></div>
+  <div class="rest-btns">
+    <button onclick="adjustRest(-30)">−30 秒</button>
+    <button onclick="adjustRest(30)">＋30 秒</button>
+    <button onclick="skipRest()">跳過</button>
   </div>
 </div>
 
@@ -980,6 +1095,7 @@ function saveDraft(){
     session: currentSession,
     confirmed: confirmedSets,
     done: doneEx,
+    tick: tickSets,
     day: currentDay,
     date: todayStr()
   }));
@@ -997,6 +1113,7 @@ function loadDraft(){
       currentSession = d.session || {};
       confirmedSets  = d.confirmed || {};
       doneEx         = d.done || {};
+      tickSets       = d.tick || {};
       if(d.day) currentDay = d.day;
     } else if(d.session && d.day && Object.values(d.session[d.day]||{}).some(sets=>sets.length)){
       staleDraft = d;
@@ -1020,7 +1137,7 @@ async function resolveStaleDraft(){
   }
   localStorage.removeItem(GYM_SESSION_DRAFT);
   currentSession = {};
-  doneEx = {}; openDoneEx = {};
+  doneEx = {}; openDoneEx = {}; tickSets = {};
   currentDay = getCurrentSchedule().day;
   renderAll();
 }
@@ -1051,6 +1168,9 @@ function init(){
   renderAll();
   resolveStaleDraft();
   syncDiet(false);
+  resumeRest();
+  const cc = cloudCfg();
+  if(cc && cc.sig !== strSig(cloudData())) scheduleCloud();
 }
 
 function getTemplates(){
@@ -1113,6 +1233,7 @@ function shiftDraftIndices(day, at){
       d.session[day] = shifted;
     }
     if(d.done && d.done[day]) d.done[day] = d.done[day].map(i=>i>=at?i+1:i);
+    if(d.tick && d.tick[day]){ const t = {}; Object.keys(d.tick[day]).forEach(k=>{ const i=parseInt(k); t[i>=at?i+1:i] = d.tick[day][k]; }); d.tick[day] = t; }
     localStorage.setItem(GYM_SESSION_DRAFT, JSON.stringify(d));
   }catch(e){}
 }
@@ -1786,7 +1907,10 @@ function spriteSVG(grid, scale){
 
 // Tile icon for an exercise card: exercise sprite, else body-part figure
 function exIconHTML(ex){
-  if(LUX) return '<span class="lx-part">'+(LX_PART[getExPart(ex)]||'練')+'</span>';
+  if(LUX){
+    const k = exIconKey(ex.name);
+    return k ? '<span class="lx-part lx-exi">'+exiSVG(k)+'</span>' : '<span class="lx-part">'+(LX_PART[getExPart(ex)]||'練')+'</span>';
+  }
   const hit = EX_SPRITES[ex.name] ? ex.name : (SPRITE_KEYWORDS.find(([kw])=>ex.name.indexOf(kw)>=0)||[])[1];
   const inner = hit ? spriteSVG(EX_SPRITES[hit],2) : bodyIconSVG(getExPart(ex),2);
   return '<span class="ex-tile">'+inner+'</span>';
@@ -1852,7 +1976,7 @@ function renderWorkout(){
 
   const dayInfo = WEEK_CYCLE.find(w=>w.day===currentDay) || WEEK_CYCLE[0];
   if(LUX) html += lxWorkoutHead();
-  else html += '<div class="day-header"><strong>'+escHtml(dayInfo.label)+'</strong><div class="day-note">只記正式組，熱身組不用記</div></div>';
+  else html += '<div class="day-header"><strong>'+escHtml(dayInfo.label)+'</strong><div class="day-note">只記正式組，熱身組不用記・做完一組點組號開始休息</div></div>';
   html += '<div id="ex-list">'+renderExercisesHTML()+'</div>';
   html += '<div id="complete-btn-wrap"><button id="complete-btn" onclick="completeWorkout()">完成訓練 '+pxIcon('flag',1)+'</button></div>';
 
@@ -1902,6 +2026,7 @@ function renderExercisesHTML(){
     html += '<div class="ex-name" style="display:flex;align-items:center;">'+
       exIconHTML(ex)+
       '<span id="exname-'+ei+'">'+escHtml(ex.name)+'</span>'+
+      (exTips(ex.name) ? '<button class="ex-tip-btn" onclick="showTips(templates[currentDay]['+ei+'].name)">要點</button>' : '')+
       '<button class="ex-ic-btn" onclick="editExName('+ei+')" style="background:none;border:none;color:#7f8c8d;font-size:12px;cursor:pointer;margin-left:6px;" title="改名">'+pxIcon('pencil',1)+'</button>'+
       '<button class="ex-ic-btn" onclick="removeExercise('+ei+')" style="background:none;border:none;color:#e74c3c;font-size:12px;cursor:pointer;margin-left:2px;" title="刪除動作">'+pxIcon('trash',1)+'</button>'+
       '<span class="ex-count" style="font-size:12px;font-weight:400;color:#7f8c8d;margin-left:auto;">'+sess.length+' 組</span>'+
@@ -1911,7 +2036,8 @@ function renderExercisesHTML(){
 
     sess.forEach((set, si)=>{
       html += '<div class="set-row" id="setrow-'+ei+'-'+si+'">';
-      html += '<div class="set-num">'+(si+1)+'</div>';
+      const ticked = ((tickSets[currentDay]||{})[ei]||[]).includes(si);
+      html += '<button class="set-num'+(ticked?' ticked':'')+'" onclick="tickSet('+ei+','+si+')" title="做完這組，開始休息">'+(ticked ? (LUX ? lxIcon('check') : '✓') : (si+1))+'</button>';
       html += setInputsHTML(ei,si,set,false);
       html += '<button class="set-del" onclick="removeSet('+ei+','+si+')" style="width:36px;height:36px;border-radius:50%;background:#2a1a1a;border:none;color:#e74c3c;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">'+pxIcon('x',1)+'</button>';
       html += '</div>';
@@ -1924,7 +2050,7 @@ function renderExercisesHTML(){
     html += '</div>';
   });
   html += skipped;
-  html += '<button class="add-set-btn add-ex-btn" onclick="addExercise()" style="width:calc(100% - 24px);margin:4px 12px 0;background:#8bac0f;border:3px dashed #0f380f;color:#0f380f;font-weight:700;">+ 新增動作</button>';
+  html += '<button class="add-set-btn add-ex-btn" onclick="openExPicker()" style="width:calc(100% - 24px);margin:4px 12px 0;background:#8bac0f;border:3px dashed #0f380f;color:#0f380f;font-weight:700;">+ 新增動作</button>';
   return html;
 }
 
@@ -1974,6 +2100,8 @@ function toggleExDone(ei){
     if(!sets.some(s=>s.w!==''&&s.w!=null&&s.r!==''&&s.r!=null)){ showToast('請先填重量和次數'); return; }
     list.push(ei);
     sfx('set');
+    const exList = templates[currentDay]||[];
+    if(restOn() && !rest && exList.some((_,i)=>!list.includes(i) && ((currentSession[currentDay]||{})[i]||[1]).length)) startRest(exList[ei].name, restSec(exList[ei]));
   }
   delete openDoneEx[ei];
   saveDraft();
@@ -1988,6 +2116,7 @@ function toggleDoneOpen(ei){
 // A card skipped today (every set removed) → put it back with the planned sets
 function restoreEx(ei){
   if(currentSession[currentDay]) delete currentSession[currentDay][ei];
+  if(tickSets[currentDay]) delete tickSets[currentDay][ei];
   if(doneEx[currentDay]) doneEx[currentDay] = doneEx[currentDay].filter(i=>i!==ei);
   saveDraft();
   renderWorkout();
@@ -2040,6 +2169,8 @@ function removeSet(ei, si){
   if(!currentSession[currentDay]||!currentSession[currentDay][ei]) return;
 
   currentSession[currentDay][ei].splice(si,1);
+  const tk = (tickSets[currentDay]||{})[ei];
+  if(tk) tickSets[currentDay][ei] = tk.filter(i=>i!==si).map(i=>i>si?i-1:i);
   saveDraft();
   renderWorkout();
 }
@@ -2096,6 +2227,7 @@ async function removeExercise(ei){
     store[currentDay] = shifted;
   });
   if(doneEx[currentDay]) doneEx[currentDay] = doneEx[currentDay].filter(i=>i!==ei).map(i=>i>ei?i-1:i);
+  shiftTicks(currentDay, i=>i===ei ? -1 : i>ei ? i-1 : i);
   openDoneEx = {};
   templates = getTemplates();
   saveDraft();
@@ -2199,7 +2331,7 @@ function finishWorkout(date, onlyDone){
   // Reset session data for this day
   currentSession[currentDay]={};
   confirmedSets[currentDay]={};
-  doneEx = {}; openDoneEx = {};
+  doneEx = {}; openDoneEx = {}; tickSets = {};
   localStorage.removeItem(GYM_SESSION_DRAFT);
 
   // Advance to next training day
@@ -2255,7 +2387,7 @@ function closeCoach(){
 // ─── Coach: reads the training log and says what to do next ───
 const COACH_WEEKLY = 3; // planned workouts per week
 // Same movement logged under different names → one history. Different machines stay apart (their weights can't be compared).
-const EX_ALIAS = {'槓鈴臥推':'臥推','滑輪下拉':'高位下拉','啞鈴側平舉':'側平舉','三頭下拉':'三頭下壓','三頭':'三頭下壓','二頭':'二頭彎舉','器械划船':'機械划船'};
+const EX_ALIAS = {'槓鈴臥推':'臥推','滑輪下拉':'高位下拉','啞鈴側平舉':'側平舉','三頭下拉':'三頭下壓','三頭':'三頭下壓','二頭':'二頭彎舉','器械划船':'機械划船','羅馬尼亞硬拉':'羅馬尼亞硬舉'};
 function canonEx(n){ n = String(n||'').trim(); return EX_ALIAS[n] || n; }
 function numStr(n){ return String(Math.round(n*10)/10); }
 function dayStr(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -2916,7 +3048,7 @@ function restorePlan(s){
 // Numbers pre-filled on the workout screen come from the plan: refresh them unless a workout is in progress
 function refreshPrefill(){
   if(localStorage.getItem(GYM_SESSION_DRAFT)) return;
-  currentSession = {}; doneEx = {}; openDoneEx = {};
+  currentSession = {}; doneEx = {}; openDoneEx = {}; tickSets = {};
 }
 function recalcStreak(){
   const days = [...new Set(sessions.map(s=>s.date))].sort();
@@ -2953,7 +3085,7 @@ async function deleteSession(idx){
     cycleProgress = step;
     localStorage.setItem(GYM_PROGRESS, JSON.stringify({step}));
     currentDay = WEEK_CYCLE[step].day;
-    currentSession = {}; doneEx = {}; openDoneEx = {};
+    currentSession = {}; doneEx = {}; openDoneEx = {}; tickSets = {};
   }
   if(s.xp){
     gameState.xp = Math.max(0, gameState.xp - s.xp);
@@ -3172,6 +3304,16 @@ function renderSettings(){
     '<div style="font-size:12px;color:#7f8c8d;margin-top:8px;">兩種外觀用的是同一份紀錄，隨時可以切回來</div>'+
     '</div>'+
     '<div class="set-group">'+
+    '<h3>組間休息計時</h3>'+
+    '<button class="save-btn" onclick="toggleRest()">休息計時：'+(restOn()?'開':'關')+'</button>'+
+    '<div style="font-size:12px;color:#7f8c8d;margin-top:8px;">做完一組點組號就開始倒數（大重量 3 分、其他 1.5～2 分，±30 秒調過會記住）。手機切到別的 App 時網頁沒辦法響，回來會提示</div>'+
+    '</div>'+
+    '<div class="set-group">'+
+    '<h3>雲端自動備份</h3>'+
+    '<div style="background:#0f0f2a;border-radius:8px;padding:12px;margin-bottom:12px;font-size:14px;color:#bdc3c7;">'+cloudStatusHTML()+'</div>'+
+    cloudButtonsHTML('save-btn','save-btn','danger-btn')+
+    '</div>'+
+    '<div class="set-group">'+
     '<h3>音效</h3>'+
     '<button class="save-btn" onclick="toggleSfx()">8-bit 音效：'+(sfxOn()?'開':'關')+'</button>'+
     '</div>'+
@@ -3180,7 +3322,7 @@ function renderSettings(){
     '<button class="save-btn" onclick="exportData()">匯出備份</button>'+
     '<button class="save-btn" onclick="document.getElementById(\'import-file\').click()">匯入備份</button>'+
     '<input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="importData(this)">'+
-    '<div style="font-size:12px;color:#7f8c8d;margin:4px 0 12px;">紀錄只存在這支手機的瀏覽器，換手機或清除瀏覽器資料前請先匯出</div>'+
+    '<div style="font-size:12px;color:#7f8c8d;margin:4px 0 12px;">'+(cloudCfg() ? '已開雲端自動備份；匯出檔可以另外留一份在電腦' : '紀錄只存在這支手機的瀏覽器；沒開雲端備份的話，換手機或清除瀏覽器資料前請先匯出')+'</div>'+
     '<button class="danger-btn" onclick="resetTemplates()">重設課表</button>'+
     '<button class="danger-btn" onclick="resetAll()">重設所有資料</button>'+
     '</div>'+
@@ -3194,7 +3336,7 @@ async function restartCycle(){
   currentDay = WEEK_CYCLE[0].day;
   currentSession = {};
   confirmedSets = {};
-  doneEx = {}; openDoneEx = {};
+  doneEx = {}; openDoneEx = {}; tickSets = {};
   localStorage.removeItem(GYM_SESSION_DRAFT);
   showToast('已從'+WEEK_CYCLE[0].label+'重新開始');
   renderAll();
@@ -3209,13 +3351,14 @@ async function resetTemplates(){
   templates = getTemplates();
   currentSession = {};
   confirmedSets  = {};
-  doneEx = {}; openDoneEx = {};
+  doneEx = {}; openDoneEx = {}; tickSets = {};
   showToast('課表已重設');
   renderAll();
 }
 
 async function resetAll(){
-  if(!await pxConfirm('確定要清除所有資料？此操作無法復原！')) return;
+  if(!await pxConfirm('確定要清除所有資料？此操作無法復原！'+(cloudCfg() ? '\n（雲端備份那一份會留著，這支手機的自動備份會關掉，之後要拿回來可以用備份碼還原）' : ''))) return;
+  localStorage.removeItem(GYM_CLOUD); clearTimeout(cloudTimer); cloudTimer = null;
   [GYM_SESSIONS,GYM_GAME,GYM_TEMPLATES,GYM_PLAN,GYM_SESSION_DRAFT,GYM_PROGRESS].forEach(k=>localStorage.removeItem(k));
   cycleProgress = 0;
   currentDay = WEEK_CYCLE[0].day;
@@ -3225,7 +3368,7 @@ async function resetAll(){
   templates     = getTemplates();
   currentSession= {};
   confirmedSets = {};
-  doneEx = {}; openDoneEx = {};
+  doneEx = {}; openDoneEx = {}; tickSets = {};
   renderHeader();
   showToast('所有資料已清除');
   renderAll();
@@ -3355,7 +3498,7 @@ function setTheme(t){
 function lxWorkoutHead(){
   const dayInfo = WEEK_CYCLE.find(w=>w.day===currentDay) || WEEK_CYCLE[0];
   const d = new Date();
-  return '<div><h1 class="page">'+escHtml(dayInfo.label)+'</h1><p class="sub">'+(d.getMonth()+1)+' 月 '+d.getDate()+' 日 週'+'日一二三四五六'[d.getDay()]+'・只記正式組，熱身組不用記</p></div>';
+  return '<div><h1 class="page">'+escHtml(dayInfo.label)+'</h1><p class="sub">'+(d.getMonth()+1)+' 月 '+d.getDate()+' 日 週'+'日一二三四五六'[d.getDay()]+'・只記正式組，點組號開始休息</p></div>';
 }
 
 function renderAchievementsLux(){
@@ -3482,11 +3625,17 @@ function renderSettingsLux(){
         ? '<button class="lx-btn ghost" onclick="syncDiet(true)">立刻更新</button><button class="lx-btn danger" onclick="unlinkDiet()">取消連結</button>'
         : '<button class="lx-btn" onclick="linkDiet()">輸入連結碼</button>')+
     '</div>'+
+    '<div class="card"><h3>雲端自動備份</h3>'+
+      '<div class="lx-box">'+cloudStatusHTML()+'</div>'+
+      cloudButtonsHTML('lx-btn','lx-btn ghost','lx-btn danger')+'</div>'+
+    '<div class="card"><h3>組間休息計時</h3>'+
+      '<div class="seg"><button class="'+(restOn()?'on':'')+'" onclick="'+(restOn()?'':'toggleRest()')+'">開</button><button class="'+(restOn()?'':'on')+'" onclick="'+(restOn()?'toggleRest()':'')+'">關</button></div>'+
+      '<div class="note">做完一組點組號就開始倒數（大重量 3 分、其他 1.5～2 分，±30 秒調過會記住）。手機切到別的 App 時網頁沒辦法響，回來會提示</div></div>'+
     '<div class="card"><h3>資料管理</h3>'+
       '<button class="lx-btn ghost" style="margin-top:0" onclick="exportData()">匯出備份</button>'+
       '<button class="lx-btn ghost" onclick="document.getElementById(\'import-file\').click()">匯入備份</button>'+
       '<input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="importData(this)">'+
-      '<div class="note">紀錄只存在這支手機的瀏覽器，換手機或清除瀏覽器資料前請先匯出</div>'+
+      '<div class="note">'+(cloudCfg() ? '已開雲端自動備份；匯出檔可以另外留一份在電腦' : '紀錄只存在這支手機的瀏覽器；沒開雲端備份的話，換手機或清除瀏覽器資料前請先匯出')+'</div>'+
       '<button class="lx-btn danger" onclick="resetTemplates()">重設課表</button>'+
       '<button class="lx-btn danger" onclick="resetAll()">重設所有資料</button></div>';
 }
@@ -3498,6 +3647,417 @@ function showToast(msg){
   t.classList.add('show');
   if(toastTimer) clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ─── 動作庫（新增動作用選的）＋姿勢要點 ─────────────────────────
+// [名稱, 部位, 圖示, 加重 kg（0＝機械自己加一格）, 次數範圍, 組數, 預設重量（徒手填 0）]
+const EX_LIB_GROUPS = [
+  {key:'chest', label:'胸', items:[
+    ['臥推','chest','bench',2.5,[6,8],3],['上斜臥推','chest','incline',2.5,[8,10],3],
+    ['啞鈴臥推','chest','bench',2,[8,12],3],['上斜啞鈴臥推','chest','incline',2,[8,12],3],
+    ['上斜槓片臥推','chest','incline',0,[8,12],3],['機械胸推','chest','bench',0,[8,12],3],
+    ['蝴蝶機夾胸','chest','fly',0,[10,15],3],['雙槓撐體','chest','dip',0,[6,12],3,0]]},
+  {key:'back', label:'背', items:[
+    ['高位下拉','back','pulldown',0,[8,12],3],['引體向上','back','pullup',0,[5,10],3,0],
+    ['輔助引體向上','back','pullup',0,[6,10],3],['機械划船','back','row',0,[10,12],3],
+    ['坐姿划船','back','row',0,[10,12],3],['槓片划船機','back','row',0,[8,12],3],
+    ['啞鈴划船','back','dbrow',2,[8,12],3],['槓鈴划船','back','rdl',2.5,[6,10],3]]},
+  {key:'quads', label:'腿', items:[
+    ['深蹲','quads','squat',5,[5,8],3],['哈克深蹲','quads','squat',5,[8,12],3],
+    ['槓片腿推','quads','legpress',5,[10,12],3],['腿推機','quads','legpress',0,[10,12],3],
+    ['保加利亞蹲','quads','lunge',2,[8,12],3],['腿伸展','quads','legext',0,[12,15],3]]},
+  {key:'hams', label:'臀・腿後', items:[
+    ['硬舉','hams','deadlift',5,[3,5],2],['羅馬尼亞硬舉','hams','rdl',5,[6,10],3],
+    ['腿彎舉','hams','legcurl',0,[10,12],2],['臀推','hams','hipthrust',5,[8,12],3],
+    ['腿外展','hams','abduct',0,[12,15],2]]},
+  {key:'shoulder', label:'肩', items:[
+    ['側平舉','shoulder','lateral',2,[12,15],2],['啞鈴肩推','shoulder','press',2,[8,12],3],
+    ['槓鈴肩推','shoulder','press',2.5,[5,8],3],['機械肩推','shoulder','press',0,[8,12],3],
+    ['臉拉','shoulder','facepull',0,[12,15],2],['反向飛鳥','shoulder','fly',0,[12,15],2]]},
+  {key:'arms', label:'手臂', items:[
+    ['二頭彎舉','biceps','curl',2.5,[10,12],2],['W槓彎舉','biceps','curl',2.5,[8,12],2],
+    ['錘式彎舉','biceps','curl',2,[10,12],2],['三頭下壓','triceps','pushdown',0,[10,12],2]]},
+  {key:'core', label:'核心・小腿', items:[
+    ['捲腹','abs','crunch',0,[12,20],2,0],['懸垂舉腿','abs','legraise',0,[8,15],2,0],
+    ['提踵','calves','calf',0,[10,15],2]]}
+];
+const EX_LIB = {};
+EX_LIB_GROUPS.forEach(g=>g.items.forEach(it=>{ EX_LIB[it[0]] = {name:it[0], part:it[1], icon:it[2], inc:it[3], range:it[4], n:it[5], w0:it.length>6?it[6]:''}; }));
+// 名稱關鍵字 → 圖示（動作庫以外的名字，例如以前自己打的）
+const EXI_KEYWORDS = [['腿推','legpress'],['腿彎舉','legcurl'],['腿伸','legext'],['划船','row'],['下拉','pulldown'],['引體','pullup'],['肩推','press'],['平舉','lateral'],['飛鳥','fly'],['夾胸','fly'],['臉拉','facepull'],
+  ['二頭','curl'],['彎舉','curl'],['三頭','pushdown'],['羅馬尼亞','rdl'],['硬','deadlift'],['臀推','hipthrust'],['外展','abduct'],['保加利亞','lunge'],['弓箭','lunge'],['深蹲','squat'],['Squat','squat'],
+  ['小腿','calf'],['提踵','calf'],['舉腿','legraise'],['腹','crunch'],['上斜','incline'],['臥推','bench'],['胸推','bench'],['撐體','dip']];
+function exIconKey(name){
+  const n = canonEx(name);
+  if(EX_LIB[n]) return EX_LIB[n].icon;
+  const hit = EXI_KEYWORDS.find(([kw])=>n.indexOf(kw)>=0);
+  return hit ? hit[1] : '';
+}
+function exiSVG(k, cls){
+  const d = EXI[k]; if(!d) return '';
+  const h = d.h;
+  return '<svg class="'+(cls||'exi')+'" viewBox="0 0 48 48"><path class="eq" d="'+d.e+'"/><path d="'+d.b+'M'+(h[0]-3)+' '+h[1]+'a3 3 0 1 0 6 0a3 3 0 1 0-6 0"/></svg>';
+}
+// 遊戲版：沿用像素圖，沒有的用部位小人
+function gbExIcon(name, part){
+  const hit = EX_SPRITES[name] ? name : (SPRITE_KEYWORDS.find(([kw])=>name.indexOf(kw)>=0)||[])[1];
+  return '<span class="ex-tile">'+(hit ? spriteSVG(EX_SPRITES[hit],2) : bodyIconSVG(part,2))+'</span>';
+}
+// 48 格線條圖：h＝頭中心，b＝人，e＝器材（金色）
+const EXI = {
+squat:{h:[24,9.5],b:'M24 13v13M24 26l-8 5 1 10M24 26l8 5-1 10M20 15.5l-3.5 4L15 15M28 15.5l3.5 4L33 15',e:'M8 15h32M9 11v8M11.5 12v6M39 11v8M36.5 12v6'},
+bench:{h:[9,25.5],b:'M13 28h15M28 28l6-3 1 14M16 28V18',e:'M7 32h26M11 32v8M29 32v8M16 13.5m-4.5 0a4.5 4.5 0 1 0 9 0a4.5 4.5 0 1 0-9 0'},
+incline:{h:[11,18],b:'M14 21.5l13.5 9M27.5 30.5l8-1.5 1 11M16.5 23V12',e:'M11 26l20 12M29 37v4.5M16.5 8.5m-4.5 0a4.5 4.5 0 1 0 9 0a4.5 4.5 0 1 0-9 0'},
+pulldown:{h:[24,17],b:'M24 20.5V32M19 22.5h10M19 22.5l-4-4.5-2-6M29 22.5l4-4.5 2-6M24 32l-6 3v7M24 32l6 3v7',e:'M24 3v9M11 12h26M16 34h16'},
+row:{h:[27,13],b:'M27 16.5l1 14.5M27.5 18.5l4.5 6-11 .5M28 31l-9-3-8 7',e:'M5 6v36M5 25h16M21 34h12M9 32v8'},
+deadlift:{h:[14,16],b:'M17.5 18l14.5 7M32 25l-6 7 3 9.5M19 19.5l3 14',e:'M23 36m-5 0a5 5 0 1 0 10 0a5 5 0 1 0-10 0M10 41.5h28'},
+rdl:{h:[16.5,13.5],b:'M20 15.5l16 6.5M36 22l-5 9 1 10.5M22 16.5l3 13',e:'M26 31.5m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0M10 41.5h28'},
+legpress:{h:[9,24],b:'M11.5 26.5L21 35M21 35l4-12 10-1',e:'M7 30.5l13 8M31 17l7.5 10M27 41l15-15'},
+legcurl:{h:[15,9.5],b:'M15 13l2 15M17 28h13M30 28l-4 11M16 16l5 7',e:'M10 30h20M12 12v18M26 24.5h6M24 39h5'},
+legext:{h:[15,9.5],b:'M15 13l2 15M17 28h13M30 28l10-6M16 16l5 7',e:'M10 30h20M12 12v18M37 25.5l3 4'},
+lateral:{h:[24,9],b:'M24 12.5v14M24 26.5l-4 15M24 26.5l4 15M24 15l-13 1M24 15l13 1',e:'M9 13v6M7 14v4M39 13v6M41 14v4'},
+press:{h:[24,14],b:'M24 17.5V30M24 30l-4 11.5M24 30l4 11.5M24 19l-8-1-2-10M24 19l8-1 2-10',e:'M10 6h8M34 6h-8M10 4.5v3M18 4.5v3M30 4.5v3M38 4.5v3'},
+curl:{h:[22,9],b:'M22 12.5l1 15M23 27.5l-3 14M23 27.5l3 14M22 15l1.5 8.5 7.5-6',e:'M30 14v6M32.5 15v4'},
+pushdown:{h:[27,10],b:'M27 13.5l-1 14.5M26 28l-3 13.5M26 28l3 13.5M26.5 15.5l-1 9-7.5 4',e:'M6 4v38M6 5h5M11 5l7 23'},
+calf:{h:[24,8],b:'M24 11.5V25M24 25l1 11M25 36l-4 3.5M24 13.5l-1.5 10M24 13.5l1.5 10',e:'M13 40h20v2.5H13z'},
+hipthrust:{h:[9,23.5],b:'M12.5 25L27 25M27 25l8 1 1 15',e:'M5 28h11v6H5zM27 20.5m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0'},
+lunge:{h:[19,9.5],b:'M19 13l1 12.5M20 25.5l-8 5 1 11M20 25.5l9 9 8-4',e:'M33 31h11M38 31v10'},
+crunch:{h:[12,27],b:'M15 30l9.5 8M24.5 38l8-10 6 11M14 29l-4-5',e:'M6 42h36'},
+facepull:{h:[27,13],b:'M27.5 16.5v13M27.5 29.5l-3 12M27.5 29.5l3 12M27.5 18.5l-6-2.5-2-4',e:'M6 4v38M7 11h12'},
+pullup:{h:[24,14],b:'M24 17.5V30M24 30l-3 10 3 2M24 30l3 10M19 19h10M19 19l-4-6-2-8M29 19l4-6 2-8',e:'M7 5h34M11 3v4M37 3v4'},
+fly:{h:[24,10],b:'M24 13.5V29M24 29l-4 12.5M24 29l4 12.5M24 17H13v-8M24 17h11v-8',e:'M10.5 7v13M37.5 7v13M18 29h12'},
+dip:{h:[24,9],b:'M24 12.5V27M24 27l-3 9 3 4M24 27l3 9M24 15l-7 4M24 15l7 4',e:'M17 19h-6M31 19h6M13 19v23M35 19v23'},
+abduct:{h:[24,9],b:'M24 12.5V27M24 27l-10 4-1 11M24 27l10 4 1 11M24 16l-6 8M24 16l6 8',e:'M10.5 27v9M37.5 27v9M16 28h16'},
+dbrow:{h:[9,13],b:'M12 15l18 4M30 19l-6 11h8M30 19l3 11v11.5M14 16l-1 14M19 17l1 9',e:'M8 30h24v3H8zM10 33v8.5M30 33v8.5M17 27h6M17 25.5v3M23 25.5v3'},
+legraise:{h:[24,14],b:'M24 17.5V30M24 30h14M19 19h10M19 19l-4-6-2-8M29 19l4-6 2-8',e:'M7 5h34'}
+};
+
+// 姿勢要點：課表裡的 12 個動作（名字用 canonEx 對，別名也找得到）
+const EX_TIPS = {
+  '深蹲':['槓放在上背肌肉上，不是壓在脖子的骨頭；手握緊、手肘往下壓，上背繃住。','吸一口氣、肚子撐住再往下蹲，起來過了最吃力那段再吐氣。','膝蓋順著腳尖方向推出去，不要往內夾；整個腳掌踩穩，重心在腳掌中間。','蹲到大腿至少跟地面平行；起來時胸口跟屁股一起上來，不要屁股先抬變成彎腰。'],
+  '臥推':['躺下後肩胛骨往後、往下夾緊，上背貼住椅子，雙腳踩穩地板。','握距比肩膀寬一點，手腕打直，槓壓在手掌根上方，不要往後折。','槓放到胸口中下段，手肘跟身體大約 45～70 度，不要張成一字。','屁股不離開椅子；重量重時找人保護，或在架上設好安全槓。'],
+  '高位下拉':['大腿卡緊護墊，握距比肩寬一點，身體稍微往後仰一點就好。','先把肩膀往下沉，再用手肘往下、往身體兩側拉，想像把手肘塞進褲子口袋。','槓拉到下巴到上胸之間，不要拉到脖子後面。','回去時慢慢放到手臂伸直，不要靠身體前後晃來借力。'],
+  '腿彎舉':['先調機器：膝蓋對齊機器的轉軸，腳踝上方的護墊靠在小腿後下方。','屁股和大腿貼住座椅（趴著做就是髖部貼住），不要抬屁股借力。','勾到底停一下，放回去比勾起來慢，大約 2～3 秒。','要用甩的才勾得起來，就是太重，降一格。'],
+  '側平舉':['啞鈴用輕的，手肘微彎、角度從頭到尾固定。','往兩側、稍微偏前方舉，舉到手臂跟地面差不多平行就好，不用更高。','想像用手肘把啞鈴往外推，不是甩手腕；肩膀不要聳起來。','放下比舉起慢，身體不要前後晃。'],
+  '三頭下壓':['站近滑輪，上臂貼住身體兩側，手肘固定，只有前臂在動。','往下壓到手臂完全打直，停一下。','回來時前臂大約回到跟地面平行就好，手肘不要往前飄。','身體可以微微前傾，但不要用身體的重量往下壓。'],
+  '硬舉':['腳跟髖同寬，槓在腳掌中間的正上方，小腿靠近槓，手握在小腿外側。','屁股往後、胸口挺起，背打直；手臂伸直，起拉前先把槓「拉緊」到槓片快離地。','吸氣撐住肚子，用腳推地站起來，槓一路貼著腿往上走。','站直就好，不要往後仰；放下時屁股先往後推，槓過了膝蓋再彎膝。'],
+  '上斜臥推':['椅背調 30～45 度就好，太高會變成練肩。','跟平板臥推一樣：肩胛骨夾緊下沉、上背貼椅、雙腳踩穩。','槓放到鎖骨下方的上胸，前臂大致跟地面垂直。','往上推時槓直直上去，不要往臉的方向推。'],
+  '機械划船':['調座椅，讓握把大約在胸口中間的高度，胸口貼住護墊。','先把肩胛骨往後夾，再用手肘往後拉，拉到手肘稍微超過身體。','拉到底停一下，再慢慢伸直，讓肩胛骨往前打開。','胸口全程不離開護墊，肩膀不要聳起來。'],
+  '槓片腿推':['背和屁股整片貼住椅背，腳踩在踏板中間、跟肩同寬。','打開安全卡榫後慢慢往下，膝蓋順著腳尖方向，不要往內夾。','往下到屁股快要離開椅墊前就停，下背不能捲起來。','推上去膝蓋不要完全鎖死；做完記得把安全卡榫轉回去。'],
+  '二頭彎舉':['站直，上臂貼住身體兩側，手肘固定不往前跑。','往上彎到二頭最緊的位置，停一下。','放下要放到手臂接近打直，放的速度比舉起慢。','身體不要往後仰借力；要晃才舉得起來，就是太重。'],
+  '臉拉':['滑輪調到大約眼睛的高度，用繩索握把，大拇指朝自己。','往臉的方向拉，同時把繩子往兩邊分開，手拉到耳朵兩旁。','拉到底時手在耳朵兩側、手肘跟肩差不多高，像擺出健美的雙手二頭姿勢。','重量用輕的，停一下再慢慢放，不要用身體往後倒來拉。']
+};
+function exTips(name){ return EX_TIPS[canonEx(name)] || null; }
+function showTips(name){
+  const tips = exTips(name); if(!tips) return;
+  const k = exIconKey(name);
+  document.getElementById('tip-title').innerHTML = (LUX && k ? exiSVG(k,'exi tip-ic') : '')+'<span>'+escHtml(name)+'</span>';
+  document.getElementById('tip-body').innerHTML = '<ol class="tip-list">'+tips.map(t=>'<li>'+escHtml(t)+'</li>').join('')+'</ol>';
+  document.getElementById('tip-modal').classList.add('show');
+}
+function closeTips(){ document.getElementById('tip-modal').classList.remove('show'); }
+
+// ─── 新增動作：圖示清單點選 ───
+let pickTab = 'chest';
+function usedNames(){
+  // 紀錄裡用過、但不在動作庫的名字（照次數排），選了跟以前同名，進度圖才接得起來
+  const cnt = {};
+  sessions.forEach(s=>(s.exercises||[]).forEach(e=>{ if(e.sets&&e.sets.length){ const n=canonEx(e.name); if(!EX_LIB[n]) cnt[n]=(cnt[n]||0)+1; } }));
+  Object.values(templates).forEach(l=>(l||[]).forEach(e=>{ const n=canonEx(e.name); if(!EX_LIB[n] && !cnt[n]) cnt[n]=1; }));
+  return Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]);
+}
+function openExPicker(){
+  if(!EX_LIB_GROUPS.some(g=>g.key===pickTab) && pickTab!=='used') pickTab = 'chest';
+  renderExPicker();
+  document.getElementById('ex-picker').classList.add('show');
+}
+function closeExPicker(){ document.getElementById('ex-picker').classList.remove('show'); }
+function setPickTab(k){ pickTab = k; renderExPicker(); document.getElementById('pick-grid').scrollTop = 0; }
+function renderExPicker(){
+  const today = (templates[currentDay]||[]).map(e=>canonEx(e.name));
+  const used = usedNames();
+  if(pickTab==='used' && !used.length) pickTab = 'chest';
+  const tabs = EX_LIB_GROUPS.map(g=>[g.key,g.label]).concat(used.length ? [['used','以前用過']] : []);
+  document.getElementById('pick-tabs').innerHTML = tabs.map(([k,l])=>'<button class="pick-tab'+(k===pickTab?' on':'')+'" onclick="setPickTab(\''+k+'\')">'+l+'</button>').join('');
+  let items;
+  if(pickTab==='used') items = used.map(n=>({name:n, part:getExPart({name:n}), icon:exIconKey(n)}));
+  else items = EX_LIB_GROUPS.find(g=>g.key===pickTab).items.map(it=>EX_LIB[it[0]]);
+  document.getElementById('pick-grid').innerHTML = items.map((it,i)=>{
+    const has = today.includes(canonEx(it.name));
+    const ic = LUX ? (it.icon ? exiSVG(it.icon) : '<span class="pick-txt">'+(LX_PART[it.part]||'練')+'</span>') : gbExIcon(it.name, it.part);
+    return '<button class="pick-item'+(has?' has':'')+'" onclick="pickExercise('+i+')">'+ic+'<b>'+escHtml(it.name)+'</b>'+(has?'<em>今天已有</em>':(exTips(it.name)?'<em class="tipmark">有要點</em>':''))+'</button>';
+  }).join('');
+  renderExPicker.items = items;
+}
+async function pickExercise(i){
+  const it = (renderExPicker.items||[])[i]; if(!it) return;
+  const today = (templates[currentDay]||[]).map(e=>canonEx(e.name));
+  if(today.includes(canonEx(it.name)) && !await pxConfirm('今天的課表已經有「'+it.name+'」，還要再加一個嗎？')) return;
+  closeExPicker();
+  addExerciseNamed(it.name, it.part || getExPart({name:it.name}) || 'chest');
+}
+function addExerciseNamed(name, part){
+  const lib = EX_LIB[canonEx(name)];
+  // 預填：以前做過就用上次最重那組的重量，沒做過就留空（徒手的填 0）
+  const log = exLog(name), last = log[log.length-1];
+  const w = last && last.top>0 ? last.top : (lib ? lib.w0 : '');
+  const ex = {name, part};
+  if(lib){ ex.range = lib.range.slice(); ex.inc = lib.inc; }
+  const r = lib ? lib.range[0] : 8;
+  ex.sets = Array.from({length: lib ? lib.n : 3}, ()=>({w, r}));
+  const saved = localStorage.getItem(GYM_TEMPLATES);
+  const custom = saved ? JSON.parse(saved) : {};
+  if(!custom[currentDay]) custom[currentDay] = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES[currentDay]));
+  custom[currentDay].push(ex);
+  localStorage.setItem(GYM_TEMPLATES, JSON.stringify(custom));
+  templates = getTemplates();
+  renderWorkout();
+  showToast('已加入「'+name+'」');
+}
+async function addCustomExercise(){
+  closeExPicker();
+  const name = await pxPrompt('動作名稱：', '');
+  if(!name||!name.trim()) return;
+  openPartPicker(part=>addExerciseNamed(name.trim(), part));
+}
+
+// ─── 組間休息計時 ─────────────────────────────────────────────
+const GYM_REST = 'gym_rest';           // {end, total, name} 正在倒數的那次；裝置設定，不進備份
+const GYM_REST_PREF = 'gym_rest_pref'; // {動作: 秒} 自己用 ±30 調過的休息時間
+const GYM_REST_OFF = 'gym_rest_off';   // '1' = 關掉計時
+let tickSets = {};   // day -> ei -> [做完的組號]（畫面上的勾；紀錄照舊以完成訓練為準）
+let rest = null, restTimer = null, restCtx = null, restEndTimer = null;
+function restOn(){ try{ return localStorage.getItem(GYM_REST_OFF)!=='1'; }catch(e){ return true; } }
+function toggleRest(){ localStorage.setItem(GYM_REST_OFF, restOn() ? '1' : '0'); if(!restOn()) skipRest(); renderSettings(); }
+// 預設休息：低次數的大重量 3 分、8～10 下 2 分、其他 1 分半；±30 調過就用調過的
+function restSec(ex){
+  let pref = {}; try{ pref = JSON.parse(localStorage.getItem(GYM_REST_PREF)||'{}'); }catch(e){}
+  const n = canonEx(ex.name);
+  if(pref[n]) return pref[n];
+  const range = ex.range || (EX_LIB[n]||{}).range;
+  const hi = range ? range[1] : 12;
+  return hi<=8 ? 180 : hi<=10 ? 120 : 90;
+}
+function tickSet(ei, si){
+  const day = tickSets[currentDay] = tickSets[currentDay] || {};
+  const list = day[ei] = day[ei] || [];
+  const at = list.indexOf(si);
+  if(at>=0){ list.splice(at,1); saveDraft(); renderWorkout(); return; }
+  const set = ((currentSession[currentDay]||{})[ei]||[])[si];
+  if(!set || set.w===''||set.w==null||set.r===''||set.r==null){ showToast('先填重量和次數'); return; }
+  list.push(si);
+  saveDraft();
+  const ex = (templates[currentDay]||[])[ei];
+  if(ex && restOn()) startRest(ex.name, restSec(ex));
+  renderWorkout();
+}
+function shiftTicks(day, fn){ // fn(ei) → 新的 ei，-1 = 拿掉
+  const d = tickSets[day]; if(!d) return;
+  const out = {};
+  Object.keys(d).forEach(k=>{ const n = fn(parseInt(k)); if(n>=0) out[n] = d[k]; });
+  tickSets[day] = out;
+}
+function unlockAudio(){
+  try{
+    if(!restCtx) restCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(restCtx.state==='suspended') restCtx.resume();
+    // iPhone：在點擊當下先放一個無聲的音，倒數結束時才響得出來
+    const o = restCtx.createOscillator(), g = restCtx.createGain();
+    g.gain.value = 0.0001; o.connect(g); g.connect(restCtx.destination); o.start(); o.stop(restCtx.currentTime+0.02);
+  }catch(e){}
+}
+function restBeep(){
+  try{
+    if(!restCtx) return;
+    if(restCtx.state==='suspended') restCtx.resume();
+    const t = restCtx.currentTime + 0.02;
+    [0,0.28,0.56].forEach((dt,i)=>{
+      const o = restCtx.createOscillator(), g = restCtx.createGain();
+      o.type = LUX ? 'sine' : 'square'; o.frequency.value = i===2 ? 1175 : 880;
+      g.gain.setValueAtTime(0.0001, t+dt); g.gain.exponentialRampToValueAtTime(LUX?0.35:0.12, t+dt+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t+dt+(i===2?0.45:0.2));
+      o.connect(g); g.connect(restCtx.destination); o.start(t+dt); o.stop(t+dt+0.5);
+    });
+  }catch(e){}
+}
+function startRest(name, sec){
+  unlockAudio();
+  rest = {end: Date.now()+sec*1000, total: sec, name};
+  localStorage.setItem(GYM_REST, JSON.stringify(rest));
+  runRest();
+}
+function runRest(){
+  clearInterval(restTimer); clearTimeout(restEndTimer);
+  document.body.classList.add('resting');
+  document.getElementById('rest-bar').className = 'show';
+  drawRest();
+  restTimer = setInterval(drawRest, 250);
+}
+function mmss(s){ s = Math.max(0, Math.round(s)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+// 剩幾秒都用「結束時間 − 現在」算，App 切到背景再回來也準
+function drawRest(){
+  if(!rest) return;
+  const left = (rest.end - Date.now())/1000;
+  if(left<=0){ finishRest(-left); return; }
+  document.getElementById('rest-time').textContent = mmss(Math.ceil(left));
+  document.getElementById('rest-name').textContent = '休息・'+rest.name;
+  document.getElementById('rest-fill').style.width = Math.min(100, 100*left/rest.total)+'%';
+}
+// over = 結束後過了幾秒才看到（切到別的 App 時網頁沒辦法響）
+function finishRest(over){
+  clearInterval(restTimer);
+  rest = null; localStorage.removeItem(GYM_REST);
+  document.getElementById('rest-bar').className = 'show done';
+  document.getElementById('rest-name').textContent = over>3 ? '休息時間到了（已經過了 '+mmss(over)+'）' : '休息結束';
+  document.getElementById('rest-time').textContent = '下一組';
+  document.getElementById('rest-fill').style.width = '0%';
+  if(over<=3 || document.visibilityState==='visible') restBeep();
+  try{ if(navigator.vibrate) navigator.vibrate([300,120,300,120,500]); }catch(e){}
+  restEndTimer = setTimeout(hideRest, 6000);
+}
+function hideRest(){
+  clearInterval(restTimer); clearTimeout(restEndTimer);
+  document.getElementById('rest-bar').className = '';
+  document.body.classList.remove('resting');
+}
+function skipRest(){ rest = null; localStorage.removeItem(GYM_REST); hideRest(); }
+function adjustRest(d){
+  if(!rest) return;
+  const left = (rest.end - Date.now())/1000;
+  if(left + d < 5) d = 5 - left;
+  rest.end += d*1000; rest.total = Math.max(30, rest.total + d);
+  localStorage.setItem(GYM_REST, JSON.stringify(rest));
+  // 記住這個動作調過的長度，下次直接用
+  let pref = {}; try{ pref = JSON.parse(localStorage.getItem(GYM_REST_PREF)||'{}'); }catch(e){}
+  pref[canonEx(rest.name)] = Math.round(rest.total/15)*15;
+  localStorage.setItem(GYM_REST_PREF, JSON.stringify(pref));
+  drawRest();
+}
+function resumeRest(){
+  try{ rest = JSON.parse(localStorage.getItem(GYM_REST)||'null'); }catch(e){ rest = null; }
+  if(!rest) return;
+  if(Date.now() - rest.end > 10*60*1000){ rest = null; localStorage.removeItem(GYM_REST); return; }
+  runRest();
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && rest) drawRest(); });
+
+// ─── 雲端自動備份（Firebase：gymbackup/<備份碼>，知道碼才讀得到、不能列出）──────
+const GYM_CLOUD = 'gym_cloud'; // {code, at, sig}；裝置設定，不進備份
+const CLOUD_BASE = 'projects/shiguang-d673f/databases/(default)/documents';
+const CLOUD_API = 'https://firestore.googleapis.com/v1/';
+const CLOUD_KEYS = [GYM_SESSIONS,GYM_GAME,GYM_TEMPLATES,GYM_PLAN,GYM_PROGRESS];
+let cloudTimer = null, cloudBusy = false;
+function cloudCfg(){ try{ return JSON.parse(localStorage.getItem(GYM_CLOUD)||'null'); }catch(e){ return null; } }
+function cloudData(){ const d = {}; CLOUD_KEYS.forEach(k=>{ const v = localStorage.getItem(k); if(v!==null) d[k] = v; }); return JSON.stringify(d); }
+function strSig(s){ let h = 0; for(let i=0;i<s.length;i++) h = (h*31 + s.charCodeAt(i))|0; return s.length+':'+h; }
+function fmtCode(c){ return c.replace(/(.{4})(?=.)/g,'$1-'); }
+function newCloudCode(){
+  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = new Uint8Array(12);
+  crypto.getRandomValues(r);
+  return Array.from(r, x=>A[x%32]).join('');
+}
+async function cloudUpload(opts){
+  const cfg = cloudCfg(); if(!cfg) return false;
+  const data = cloudData(), sig = strSig(data);
+  if(!(opts&&opts.force) && cfg.sig===sig) return true;
+  if(cloudBusy){ scheduleCloud(); return false; }
+  cloudBusy = true;
+  const body = JSON.stringify({writes:[{
+    update:{name:CLOUD_BASE+'/gymbackup/'+cfg.code, fields:{j:{stringValue:JSON.stringify({app:'gym-tracker', at:new Date().toISOString(), data:JSON.parse(data)})}}},
+    updateTransforms:[{fieldPath:'t', setToServerValue:'REQUEST_TIME'}]
+  }]});
+  try{
+    const res = await fetch(CLOUD_API+CLOUD_BASE+':commit?key='+LINK_KEY, {method:'POST', headers:{'Content-Type':'application/json'}, body, keepalive: body.length<60000});
+    if(!res.ok) throw new Error(res.status);
+    const now = cloudCfg();
+    if(now && now.code===cfg.code){ now.sig = sig; now.at = new Date().toISOString(); localStorage.setItem(GYM_CLOUD, JSON.stringify(now)); }
+    if(currentSection==='settings') renderSettings();
+    return true;
+  }catch(e){ return false; }
+  finally{ cloudBusy = false; }
+}
+function scheduleCloud(){
+  if(!cloudCfg()) return;
+  clearTimeout(cloudTimer);
+  cloudTimer = setTimeout(()=>{ cloudTimer = null; cloudUpload(); }, 4000);
+}
+// 備份範圍內的資料一有變動（練完、改紀錄、改課表…）就排一次上傳
+(function(){
+  const set = Storage.prototype.setItem, rm = Storage.prototype.removeItem;
+  Storage.prototype.setItem = function(k, v){ set.call(this, k, v); if(this===window.localStorage && CLOUD_KEYS.includes(k)) scheduleCloud(); };
+  Storage.prototype.removeItem = function(k){ rm.call(this, k); if(this===window.localStorage && CLOUD_KEYS.includes(k)) scheduleCloud(); };
+})();
+// 離開 App 前把還沒傳的先傳
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden' && cloudTimer){ clearTimeout(cloudTimer); cloudTimer = null; cloudUpload(); } });
+window.addEventListener('online', ()=>scheduleCloud());
+
+async function cloudEnable(){
+  const code = newCloudCode();
+  localStorage.setItem(GYM_CLOUD, JSON.stringify({code, at:'', sig:''}));
+  showToast('備份中…');
+  const ok = await cloudUpload({force:true});
+  if(!ok){ localStorage.removeItem(GYM_CLOUD); showToast('連不上，等有網路再開'); renderSettings(); return; }
+  renderSettings();
+  await pxAlert('雲端備份已開啟。\n\n你的備份碼：'+fmtCode(code)+'\n\n請截圖或抄下來。換手機或資料被清掉時，到設定按「用備份碼還原」輸入這組碼就能拿回來。之後每次練完、改紀錄都會自動備份。');
+}
+async function cloudNow(){
+  showToast('備份中…');
+  showToast(await cloudUpload({force:true}) ? '已備份到雲端' : '連不上，等有網路會自動再備份');
+}
+function cloudCopy(){
+  const cfg = cloudCfg(); if(!cfg) return;
+  const show = ()=>pxAlert('備份碼：'+fmtCode(cfg.code));
+  if(navigator.clipboard) navigator.clipboard.writeText(fmtCode(cfg.code)).then(()=>showToast('已複製備份碼'), show);
+  else show();
+}
+async function cloudDisable(){
+  const cfg = cloudCfg(); if(!cfg) return;
+  if(!await pxConfirm('關閉雲端備份？雲端那一份會刪掉，這支手機上的紀錄不動。')) return;
+  try{
+    const res = await fetch(CLOUD_API+CLOUD_BASE+'/gymbackup/'+cfg.code+'?key='+LINK_KEY, {method:'DELETE'});
+    if(!res.ok) throw new Error(res.status);
+  }catch(e){ showToast('連不上，等有網路再關'); return; }
+  clearTimeout(cloudTimer); cloudTimer = null;
+  localStorage.removeItem(GYM_CLOUD);
+  showToast('已關閉雲端備份');
+  renderSettings();
+}
+async function cloudRestore(){
+  const v = await pxPrompt('輸入備份碼（12 個英數字）', '');
+  if(v==null) return;
+  const code = String(v).toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(code.length!==12){ showToast('備份碼是 12 個英數字'); return; }
+  let b;
+  try{
+    const res = await fetch(CLOUD_API+CLOUD_BASE+'/gymbackup/'+code+'?key='+LINK_KEY, {cache:'no-store'});
+    if(res.status===404){ showToast('找不到這組備份碼'); return; }
+    if(!res.ok) throw new Error(res.status);
+    b = JSON.parse((await res.json()).fields.j.stringValue);
+  }catch(e){ showToast('連不上，等有網路再試'); return; }
+  if(!b || b.app!=='gym-tracker' || !b.data){ showToast('這份備份讀不出來'); return; }
+  let n = 0; try{ n = JSON.parse(b.data[GYM_SESSIONS]||'[]').length; }catch(e){}
+  if(!await pxConfirm('找到 '+cloudWhen(b.at)+' 的雲端備份，共 '+n+' 筆訓練。\n這支手機上的資料會換成這一份，確定還原？')) return;
+  CLOUD_KEYS.forEach(k=>{ if(k in b.data) localStorage.setItem(k, b.data[k]); else localStorage.removeItem(k); });
+  localStorage.removeItem(GYM_SESSION_DRAFT);
+  clearTimeout(cloudTimer); cloudTimer = null;
+  localStorage.setItem(GYM_CLOUD, JSON.stringify({code, at: b.at||'', sig: strSig(cloudData())}));
+  await pxAlert('還原完成，之後會繼續自動備份到同一組碼。將重新載入');
+  location.reload();
+}
+function cloudWhen(iso){
+  const at = iso ? new Date(iso) : null;
+  return at && !isNaN(at) ? (at.getMonth()+1)+'/'+at.getDate()+' '+String(at.getHours()).padStart(2,'0')+':'+String(at.getMinutes()).padStart(2,'0') : '';
+}
+function cloudStatusHTML(){
+  const cfg = cloudCfg();
+  if(!cfg) return '還沒開啟<br><span style="font-size:12px;color:#7f8c8d;">開了之後每次練完、改紀錄都會自動備份到雲端；換手機或瀏覽器資料被清掉，輸入備份碼就能拿回來。</span>';
+  const pending = cfg.sig !== strSig(cloudData());
+  return '備份碼：<strong style="color:#f39c12;">'+fmtCode(cfg.code)+'</strong><br><span style="font-size:12px;color:#7f8c8d;">上次備份 '+(cloudWhen(cfg.at)||'還沒成功')+(pending?'・有新的變動，等一下會自動備份':'')+'</span>';
+}
+function cloudButtonsHTML(btn, ghost, danger){
+  return cloudCfg()
+    ? '<button class="'+ghost+'" onclick="cloudNow()">立刻備份</button><button class="'+ghost+'" onclick="cloudCopy()">複製備份碼</button><button class="'+danger+'" onclick="cloudDisable()">關閉雲端備份</button>'
+    : '<button class="'+btn+'" onclick="cloudEnable()">開啟雲端自動備份</button><button class="'+ghost+'" onclick="cloudRestore()">用備份碼還原</button>';
 }
 
 // ─── Boot ────────────────────────────────────────────────────
